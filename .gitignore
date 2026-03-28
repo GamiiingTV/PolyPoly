@@ -1,0 +1,26 @@
+# Secrets
+.env
+*.pem
+*.key
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Data & Models
+data/
+logs/
+models/*.pkl
+models/*.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
