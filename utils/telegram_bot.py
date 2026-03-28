@@ -6,13 +6,21 @@ Envoie les opportunités, trades et rapports sur ton Telegram.
 import asyncio
 from datetime import datetime
 from typing import Optional
-
-from telegram import Bot
-from telegram.constants import ParseMode
-from telegram.error import TelegramError
 from loguru import logger
 
 from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+
+# Import lazy pour éviter crash si cryptography incompatible
+try:
+    from telegram import Bot
+    from telegram.constants import ParseMode
+    from telegram.error import TelegramError
+    TELEGRAM_AVAILABLE = True
+except BaseException:
+    TELEGRAM_AVAILABLE = False
+    Bot = None
+    ParseMode = type("ParseMode", (), {"MARKDOWN": "Markdown"})()
+    TelegramError = Exception
 
 
 class TelegramNotifier:
@@ -24,6 +32,10 @@ class TelegramNotifier:
         self._enabled = bool(TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID)
 
     async def start(self):
+        if not TELEGRAM_AVAILABLE:
+            logger.warning("Telegram non disponible (dépendance manquante)")
+            self._enabled = False
+            return
         if not self._enabled:
             logger.warning("Telegram non configuré — notifications désactivées")
             return

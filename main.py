@@ -15,11 +15,11 @@ import config
 from utils.database import Database
 from utils.polymarket_api import GammaAPI, CLOBClient
 from utils.telegram_bot import TelegramNotifier
-from agents.market_scanner import MarketScanner
-from agents.sentiment_agent import SentimentAgent
+from agents.market_scanner  import MarketScanner
+from agents.sentiment_agent  import SentimentAgent
 from agents.prediction_agent import PredictionAgent
-from agents.trading_agent import TradingAgent
-from agents.learning_agent import LearningAgent
+from agents.trading_agent    import TradingAgent
+from agents.learning_agent   import LearningAgent
 
 console = Console()
 

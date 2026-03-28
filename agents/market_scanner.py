@@ -17,7 +17,10 @@ from config import (
 )
 from utils.database import Database
 from utils.polymarket_api import GammaAPI, parse_market
-from utils.telegram_bot import TelegramNotifier
+try:
+    from utils.telegram_bot import TelegramNotifier
+except Exception:
+    TelegramNotifier = object  # type: ignore
 
 
 class MarketScanner:

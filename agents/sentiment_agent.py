@@ -5,11 +5,17 @@ Twitter, Reddit, RSS — analyse le sentiment et compare aux prix du marché.
 
 import asyncio
 import re
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
 from typing import Optional
-import feedparser
 import httpx
 from loguru import logger
+
+try:
+    import feedparser
+    FEEDPARSER_AVAILABLE = True
+except (ImportError, ModuleNotFoundError):
+    FEEDPARSER_AVAILABLE = False
 
 try:
     import tweepy
@@ -35,7 +41,10 @@ from config import (
     RSS_FEEDS, SENTIMENT_INTERVAL_SEC, MIN_EDGE_THRESHOLD,
 )
 from utils.database import Database
-from utils.telegram_bot import TelegramNotifier
+try:
+    from utils.telegram_bot import TelegramNotifier
+except Exception:
+    TelegramNotifier = object  # type: ignore
 
 
 class SentimentAgent:
@@ -211,15 +220,30 @@ class SentimentAgent:
         return texts
 
     async def _fetch_single_rss(self, url: str) -> list[str]:
-        """Fetch un seul flux RSS."""
+        """Fetch un seul flux RSS (feedparser si disponible, sinon xml.etree natif)."""
         texts = []
         try:
             resp = await self._http.get(url)
-            feed = feedparser.parse(resp.text)
-            for entry in feed.entries[:20]:
-                title = getattr(entry, "title", "")
-                summary = getattr(entry, "summary", "")
-                texts.append(f"{title} {summary[:200]}")
+            if FEEDPARSER_AVAILABLE:
+                feed = feedparser.parse(resp.text)
+                for entry in feed.entries[:20]:
+                    title = getattr(entry, "title", "")
+                    summary = getattr(entry, "summary", "")
+                    texts.append(f"{title} {summary[:200]}")
+            else:
+                # Fallback XML natif — compatible RSS 2.0 et Atom
+                root = ET.fromstring(resp.text)
+                ns = {"atom": "http://www.w3.org/2005/Atom"}
+                # RSS 2.0
+                for item in root.findall(".//item")[:20]:
+                    title = item.findtext("title") or ""
+                    desc = item.findtext("description") or ""
+                    texts.append(f"{title} {desc[:200]}")
+                # Atom
+                for entry in root.findall(".//atom:entry", ns)[:20]:
+                    title = entry.findtext("atom:title", namespaces=ns) or ""
+                    summary = entry.findtext("atom:summary", namespaces=ns) or ""
+                    texts.append(f"{title} {summary[:200]}")
         except Exception:
             pass
         return texts

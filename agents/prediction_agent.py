@@ -37,7 +37,10 @@ from config import (
     LLM_MAX_TOKENS, LLM_TEMPERATURE, PREDICTION_INTERVAL_SEC,
 )
 from utils.database import Database
-from utils.telegram_bot import TelegramNotifier
+try:
+    from utils.telegram_bot import TelegramNotifier
+except Exception:
+    TelegramNotifier = object  # type: ignore
 
 
 class PredictionAgent:
