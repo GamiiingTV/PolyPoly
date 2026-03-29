@@ -90,6 +90,7 @@ TELEGRAM_CHAT_ID: str = os.getenv("TELEGRAM_CHAT_ID", "")
 MAX_TRADE_SIZE_USD: float = float(os.getenv("MAX_TRADE_SIZE_USD", "5.0"))
 CAPITAL_USD: float = float(os.getenv("CAPITAL_USD", "100.0"))
 MAX_OPEN_POSITIONS: int = int(os.getenv("MAX_OPEN_POSITIONS", "10"))
+DAILY_LOSS_LIMIT_USD: float = float(os.getenv("DAILY_LOSS_LIMIT_USD", "15.0"))
 
 # Seuils de qualité
 MIN_CONFIDENCE_THRESHOLD: float = float(os.getenv("MIN_CONFIDENCE_THRESHOLD", "0.72"))

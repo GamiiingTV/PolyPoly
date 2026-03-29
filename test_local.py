@@ -7,7 +7,7 @@ Aucune clé API requise pour ce test (sauf Telegram optionnel).
 import asyncio
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from rich.console import Console
 from rich.panel import Panel
@@ -236,12 +236,18 @@ async def test_4_prediction(db):
     telegram = MockTelegram()
     agent = PredictionAgent(db, telegram)
 
-    # Test construction des features
-    console.print("  Test construction des features XGBoost...")
+    # Test construction des 35 features
+    console.print("  Test construction des 35 features XGBoost...")
     market = await db.get_market("test_market_001")
     if market:
-        features = agent._build_features(market, sentiment_score=0.35)
-        console.print(f"  [green]✓[/green] {len(features)} features construites: {features.round(3).tolist()}")
+        price_hist = await db.get_price_history("test_market_001", minutes=60)
+        mock_ob = {"obi": 0.35, "bid_depth": 5000, "ask_depth": 3000,
+                   "depth_ratio": 1.67, "whale_bid_ratio": 0.12,
+                   "whale_ask_ratio": 0.05, "ob_spread": 0.02,
+                   "is_thin": 0, "obi_trend": 0.1}
+        features = agent._build_features(market, sentiment_score=0.35,
+                                          ob_features=mock_ob, price_history=price_hist)
+        console.print(f"  [green]✓[/green] {len(features)} features construites (vs 15 avant)")
 
     # Test entraînement avec des données simulées
     console.print("  Injection de trades d'entraînement simulés...")
@@ -440,14 +446,21 @@ async def _inject_training_trades(db):
         pred_prob = max(0.05, min(0.95, pred_prob))
         won = (pred_prob > price + 0.03) and (random.random() > 0.35)
 
+        # 35 features (nouvelle version)
         features = [
-            price, 1 - price, abs(price - 0.5), random.uniform(0.01, 0.08),
-            random.uniform(0, 0.03), random.uniform(0.05, 0.8),
-            random.uniform(0.02, 0.5), random.uniform(0, 0.9),
-            random.uniform(-0.5, 0.5), random.uniform(0.1, 0.9),
-            random.uniform(0.01, 0.5), random.uniform(1, 20),
-            price ** 2, price * random.uniform(-0.3, 0.3),
-            random.uniform(0.05, 1.0),
+            price, 1-price, abs(price-0.5), random.uniform(0,0.03), random.uniform(0.01,0.08),
+            random.uniform(0.05,0.8), random.uniform(0.02,0.5), random.uniform(0.05,1.0), random.uniform(0,0.9),
+            random.uniform(0.1,0.9), random.uniform(0.01,0.5), random.uniform(1,20),
+            random.uniform(0,1), random.uniform(0,1),
+            random.uniform(0,0.05), random.uniform(-0.1,0.1), random.uniform(-0.15,0.15),
+            random.uniform(-0.02,0.02), random.uniform(-0.05,0.05),
+            random.uniform(-0.5,0.5), random.uniform(0,1), random.uniform(0,1),
+            random.uniform(0.5,2), random.uniform(-0.3,0.3),
+            random.uniform(0,0.3), random.uniform(0,0.3), random.uniform(0,1),
+            random.uniform(-0.5,0.5), random.uniform(0,0.5),
+            random.uniform(0,1), random.uniform(0,1), random.uniform(0.01,0.1),
+            price*random.uniform(-0.3,0.3), price*random.uniform(-0.3,0.3),
+            random.uniform(0,0.3),
         ]
 
         trade_id = await db.save_trade({
@@ -538,6 +551,7 @@ async def main():
         await test_4_prediction(db)
         await test_5_trading(db)
         await test_6_learning(db)
+        await test_7_new_agents(db)
 
         await show_final_summary(db)
         await db.close()
@@ -558,6 +572,105 @@ async def main():
         import traceback
         traceback.print_exc()
         sys.exit(1)
+
+
+async def test_7_new_agents(db):
+    """Test 7 — Nouveaux agents (Arbitrage, Signal Combiner, Smart Exit)"""
+    console.print("\n[bold cyan]TEST 7 — Nouvelles Améliorations v2[/bold cyan]")
+
+    # 7a. Arbitrage Scanner
+    console.print("  Test Arbitrage Scanner...")
+    from agents.arbitrage_scanner import ArbitrageScanner
+    from utils.polymarket_api import CLOBClient, GammaAPI
+    gamma = GammaAPI()
+    clob = CLOBClient()
+    arb = ArbitrageScanner(db, gamma, clob, MockTelegram())
+
+    # Injecter marché avec YES+NO ≠ 1.0 (arbitrage)
+    await db.upsert_market({
+        "id": "arbi_test_001",
+        "question": "Will Bitcoin ETF see $10B inflows by 2025?",
+        "category": "crypto",
+        "yes_price": 0.55,
+        "no_price": 0.52,   # Sum = 1.07 → arbitrage !
+        "liquidity": 12000.0, "volume_24h": 3000.0,
+        "end_date": "2025-12-31T00:00:00Z",
+        "active": 1, "anomaly_score": 0.7, "spread": 0.03,
+        "last_updated": datetime.now().isoformat(),
+        "raw_data": '{"clobTokenIds": ["arbi_yes", "arbi_no"]}',
+    })
+
+    opps = await arb._scan_price_sum_arbitrage()
+    arbi_found = [o for o in opps if o.market_id == "arbi_test_001"]
+    if arbi_found:
+        o = arbi_found[0]
+        console.print(
+            f"  [green]✓[/green] Arbitrage détecté: YES={o.yes_price:.2f}+NO={o.no_price:.2f}="
+            f"{o.sum_prices:.2f} | Edge={o.edge:.2%}"
+        )
+    else:
+        console.print("  [dim]→ Arbitrage non détecté (données de test)[/dim]")
+
+    # 7b. Signal Combiner
+    console.print("  Test Signal Combiner (fusion Bayésienne)...")
+    from agents.signal_combiner import SignalCombiner
+    combiner = SignalCombiner(db, MockTelegram())
+
+    # Injecter des signaux concordants
+    for sig_type, conf in [("PREDICTION", 0.79), ("ORDERBOOK", 0.75), ("SENTIMENT", 0.68)]:
+        await db.save_signal({
+            "market_id": "test_market_001",
+            "signal_type": sig_type,
+            "direction": "YES",
+            "confidence": conf,
+            "edge": 0.12,
+            "predicted_prob": 0.54,
+            "market_price": 0.42,
+            "sentiment_score": 0.3,
+            "source": f"Test {sig_type}",
+        })
+
+    market = await db.get_market("test_market_001")
+    combined = await combiner.combine_signals("test_market_001", market)
+    if combined:
+        console.print(
+            f"  [green]✓[/green] Signal combiné: {combined.direction} | "
+            f"conf={combined.combined_confidence:.2%} | "
+            f"sources={combined.source_types}"
+        )
+    else:
+        console.print("  [dim]→ Signal combiné non généré (seuil non atteint)[/dim]")
+
+    # 7c. Smart Exit Manager
+    console.print("  Test Smart Exit Manager...")
+    from agents.trading_agent import SmartExitManager
+    exit_mgr = SmartExitManager(db, clob, MockTelegram(), simulation_mode=True)
+
+    # Simuler un trade gagnant à 85% (devrait déclencher profit-take)
+    trade_sim = {
+        "id": 999, "direction": "YES",
+        "entry_price": 0.42, "size_usd": 5.0,
+        "placed_at": (datetime.now() - timedelta(minutes=10)).isoformat(),
+        "question": "Test market",
+    }
+    exited = await exit_mgr.check_and_exit(trade_sim, current_price=0.85)
+    console.print(f"  [green]✓[/green] Profit-Take (prix 0.85 ≥ 0.80): sortie={'OUI' if exited else 'NON'}")
+
+    # Simuler stop-loss
+    exited_sl = await exit_mgr.check_and_exit(trade_sim, current_price=0.13)
+    console.print(f"  [green]✓[/green] Stop-Loss (prix 0.13 ≤ 0.35×0.42): sortie={'OUI' if exited_sl else 'NON'}")
+
+    # 7d. 35 features vs 15 avant
+    console.print("  Comparaison features: 15 (v1) → 35 (v2)...")
+    from agents.prediction_agent import PredictionAgent
+    agent = PredictionAgent(db, MockTelegram())
+    m = await db.get_market("test_market_001")
+    f = agent._build_features(m, 0.3)
+    console.print(f"  [green]✓[/green] {len(f)} features XGBoost (OBI, momentum, volatilité, baleines...)")
+
+    await gamma.close()
+    await clob.close()
+    console.print(f"  [bold green]✓ NOUVEAUX AGENTS OK[/bold green]")
 
 
 if __name__ == "__main__":

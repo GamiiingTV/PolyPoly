@@ -1,11 +1,13 @@
 """
 PolyPoly — Agent 4 : Exécution de trades + Gestion du Risque
 Place les ordres sur Polymarket — max $5 par trade, gestion stricte du capital.
+AMÉLIORATIONS : Stop-loss dynamique, prise de profit, kill switch journalier,
+                anti-corrélation, Kelly adaptatif.
 """
 
 import asyncio
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Optional
 from loguru import logger
 
@@ -18,8 +20,18 @@ from utils.database import Database
 from utils.polymarket_api import CLOBClient, GammaAPI
 try:
     from utils.telegram_bot import TelegramNotifier
-except Exception:
+except BaseException:
     TelegramNotifier = object  # type: ignore
+
+# ------------------------------------------------------------------ #
+# NOUVEAUX PARAMÈTRES DE GESTION DES POSITIONS
+# ------------------------------------------------------------------ #
+PROFIT_TAKE_THRESHOLD = 0.80     # Sortir si le prix a bougé vers nous de 80%+ vers 1.0
+STOP_LOSS_THRESHOLD   = 0.35     # Couper si prix tombe à <=35% de l'entrée
+DAILY_LOSS_LIMIT_USD  = 15.0     # Kill switch : stop si perte journalière > $15
+TRAILING_STOP_PCT     = 0.30     # Trailing stop : 30% en dessous du pic
+MAX_CORRELATED_MARKETS = 3       # Max 3 marchés dans la même catégorie simultanément
+MIN_HOLD_TIME_MINUTES = 5        # Tenir au moins 5 min avant toute décision de sortie
 
 
 class RiskManager:
@@ -27,79 +39,245 @@ class RiskManager:
 
     def __init__(self, db: Database):
         self.db = db
+        self._daily_pnl_cache: Optional[float] = None
+        self._daily_pnl_date: Optional[str] = None
 
     async def can_trade(self, signal: dict) -> tuple[bool, str]:
-        """
-        Vérifie si on peut placer ce trade.
-        Retourne (True/False, raison).
-        """
-        # 1. Seuil de confiance
-        if signal.get("confidence", 0) < MIN_CONFIDENCE_THRESHOLD:
-            return False, f"Confiance insuffisante ({signal['confidence']:.2%} < {MIN_CONFIDENCE_THRESHOLD:.2%})"
+        """Vérifie si on peut placer ce trade. Retourne (True/False, raison)."""
 
-        # 2. Edge minimum
-        edge = abs(signal.get("edge", 0))
-        if edge < MIN_EDGE_THRESHOLD:
-            return False, f"Edge insuffisant ({edge:.2%} < {MIN_EDGE_THRESHOLD:.2%})"
-
-        # 3. Nombre de positions ouvertes
-        open_trades = await self.db.get_open_trades()
-        if len(open_trades) >= MAX_OPEN_POSITIONS:
-            return False, f"Trop de positions ouvertes ({len(open_trades)}/{MAX_OPEN_POSITIONS})"
-
-        # 4. Pas déjà une position ouverte sur ce marché
-        for t in open_trades:
-            if t["market_id"] == signal.get("market_id"):
-                return False, "Position déjà ouverte sur ce marché"
-
-        # 5. Capital disponible
-        # Récupérer les paramètres dynamiques (Agent 5 peut les modifier)
+        # 1. Seuil de confiance dynamique
         dynamic_confidence = await self.db.get_param(
             "min_confidence_threshold", MIN_CONFIDENCE_THRESHOLD
         )
         if signal.get("confidence", 0) < dynamic_confidence:
-            return False, f"Seuil dynamique non atteint ({dynamic_confidence:.2%})"
+            return False, f"Confiance insuffisante ({signal.get('confidence',0):.2%} < {dynamic_confidence:.2%})"
+
+        # 2. Edge minimum dynamique
+        dynamic_edge = await self.db.get_param(
+            "min_edge_threshold", MIN_EDGE_THRESHOLD
+        )
+        edge = abs(signal.get("edge", 0))
+        if edge < dynamic_edge:
+            return False, f"Edge insuffisant ({edge:.2%} < {dynamic_edge:.2%})"
+
+        # 3. Kill switch journalier
+        daily_pnl = await self._get_daily_pnl()
+        if daily_pnl <= -DAILY_LOSS_LIMIT_USD:
+            return False, f"Kill switch activé: perte journalière ${abs(daily_pnl):.2f} > ${DAILY_LOSS_LIMIT_USD}"
+
+        # 4. Nombre de positions ouvertes
+        open_trades = await self.db.get_open_trades()
+        if len(open_trades) >= MAX_OPEN_POSITIONS:
+            return False, f"Trop de positions ouvertes ({len(open_trades)}/{MAX_OPEN_POSITIONS})"
+
+        # 5. Pas déjà une position sur ce marché
+        for t in open_trades:
+            if t["market_id"] == signal.get("market_id"):
+                return False, "Position déjà ouverte sur ce marché"
+
+        # 6. Anti-corrélation : pas trop de positions dans la même catégorie
+        market = await self.db.get_market(signal.get("market_id", ""))
+        if market:
+            category = market.get("category", "")
+            if category:
+                same_cat = sum(1 for t in open_trades
+                               if self._get_trade_category(t) == category)
+                if same_cat >= MAX_CORRELATED_MARKETS:
+                    return False, f"Trop de positions corrélées en '{category}' ({same_cat}/{MAX_CORRELATED_MARKETS})"
+
+        # 7. Vérifier catégories blacklistées
+        blacklist = await self.db.get_param("blacklisted_categories", [])
+        if market and market.get("category", "") in blacklist:
+            return False, f"Catégorie blacklistée: {market.get('category')}"
 
         return True, "OK"
 
-    def compute_trade_size(self, signal: dict, available_capital: float) -> float:
+    def _get_trade_category(self, trade: dict) -> str:
+        """Récupère la catégorie d'un trade depuis son raw_data."""
+        try:
+            raw = json.loads(trade.get("raw_data", "{}"))
+            return raw.get("category", "")
+        except Exception:
+            return ""
+
+    async def _get_daily_pnl(self) -> float:
+        """Calcule le P&L du jour courant."""
+        today = datetime.now().date().isoformat()
+        if self._daily_pnl_date == today and self._daily_pnl_cache is not None:
+            return self._daily_pnl_cache
+
+        closed = await self.db.get_closed_trades(limit=500)
+        today_pnl = sum(
+            t.get("pnl", 0) or 0
+            for t in closed
+            if t.get("resolved_at", "").startswith(today)
+        )
+        self._daily_pnl_cache = today_pnl
+        self._daily_pnl_date = today
+        return today_pnl
+
+    def compute_trade_size(self, signal: dict, available_capital: float,
+                           win_rate: float = 0.55) -> float:
         """
-        Calcule la taille optimale du trade (Kelly partiel).
+        Calcule la taille optimale du trade avec Kelly adaptatif.
+        Le Kelly s'ajuste en fonction du win rate observé.
         JAMAIS plus de MAX_TRADE_SIZE_USD (5$).
         """
         confidence = signal.get("confidence", 0.5)
         edge = abs(signal.get("edge", 0))
         market_price = signal.get("market_price", 0.5)
 
-        # Kelly fraction = edge / (1-edge) adapté aux marchés binaires
-        if market_price > 0 and market_price < 1:
-            kelly = (confidence - (1 - confidence)) / (1 / market_price - 1)
+        # Kelly adaptatif : utilise le win rate réel si disponible
+        effective_win_prob = max(confidence * 0.9, win_rate)
+
+        if market_price > 0.01 and market_price < 0.99:
+            odds = 1 / market_price - 1
+            kelly = (effective_win_prob * odds - (1 - effective_win_prob)) / odds
         else:
             kelly = edge
 
-        # Kelly fractionnel (25% du Kelly pour réduire le risque)
-        fractional_kelly = max(kelly * 0.25, 0)
+        kelly = max(kelly, 0)
 
-        # Taille basée sur le capital
+        # Fraction Kelly plus conservatrice si win rate bas
+        if win_rate < 0.5:
+            fraction = 0.15   # Plus prudent si on perd souvent
+        elif win_rate > 0.65:
+            fraction = 0.30   # Plus agressif si on gagne bien
+        else:
+            fraction = 0.22
+
+        fractional_kelly = kelly * fraction
         kelly_size = available_capital * fractional_kelly
 
-        # Cap strict à MAX_TRADE_SIZE_USD
+        # Cap strict : jamais plus de 5$, jamais plus de 5% du capital
         trade_size = min(kelly_size, MAX_TRADE_SIZE_USD, available_capital * 0.05)
-        trade_size = max(trade_size, 1.0)  # Minimum 1$
+        trade_size = max(trade_size, 1.0)
 
         return round(trade_size, 2)
+
+
+class SmartExitManager:
+    """
+    Gère les sorties intelligentes :
+    - Prise de profit dès que le marché se déplace fortement en notre faveur
+    - Stop-loss pour couper les pertes avant résolution
+    - Trailing stop pour protéger les gains
+    """
+
+    def __init__(self, db: Database, clob: CLOBClient,
+                 telegram: TelegramNotifier, simulation_mode: bool):
+        self.db = db
+        self.clob = clob
+        self.telegram = telegram
+        self._simulation_mode = simulation_mode
+        # Suivi des prix pics par trade_id
+        self._peak_prices: dict[int, float] = {}
+
+    async def check_and_exit(self, trade: dict, current_price: float) -> bool:
+        """
+        Vérifie si on doit sortir de cette position.
+        Retourne True si on a fermé la position.
+        """
+        trade_id = trade["id"]
+        direction = trade.get("direction", "YES")
+        entry_price = trade.get("entry_price", 0.5)
+        placed_at_str = trade.get("placed_at", "")
+
+        # Respecter le temps de maintien minimum
+        if placed_at_str:
+            try:
+                placed_at = datetime.fromisoformat(
+                    placed_at_str.replace("Z", "+00:00")
+                ).replace(tzinfo=None)
+                if datetime.now() - placed_at < timedelta(minutes=MIN_HOLD_TIME_MINUTES):
+                    return False
+            except Exception:
+                pass
+
+        # Pour NO, inverser le prix (on trade le NO donc le prix du NO est ce qui compte)
+        if direction == "NO":
+            current_price = 1 - current_price
+
+        # Mettre à jour le prix pic
+        if trade_id not in self._peak_prices:
+            self._peak_prices[trade_id] = current_price
+        peak = max(self._peak_prices.get(trade_id, current_price), current_price)
+        self._peak_prices[trade_id] = peak
+
+        # 1. PRISE DE PROFIT : prix très proche de 1.0
+        if current_price >= PROFIT_TAKE_THRESHOLD:
+            await self._close_position(trade, current_price, "PROFIT_TAKE")
+            return True
+
+        # 2. STOP-LOSS : prix trop bas par rapport à l'entrée
+        if current_price <= entry_price * STOP_LOSS_THRESHOLD:
+            await self._close_position(trade, current_price, "STOP_LOSS")
+            return True
+
+        # 3. TRAILING STOP : si on a eu un pic et le prix redescend de >30%
+        if peak > entry_price * 1.20:  # On avait au moins 20% de profit
+            trailing_floor = peak * (1 - TRAILING_STOP_PCT)
+            if current_price < trailing_floor:
+                await self._close_position(trade, current_price, "TRAILING_STOP")
+                return True
+
+        return False
+
+    async def _close_position(self, trade: dict, exit_price: float, reason: str) -> None:
+        """Ferme une position — simulation ou live."""
+        trade_id = trade["id"]
+        direction = trade.get("direction", "YES")
+        entry_price = trade.get("entry_price", 0.5)
+        size_usd = trade.get("size_usd", 5.0)
+
+        # Calculer P&L
+        if direction == "YES":
+            pnl = size_usd * (exit_price / entry_price - 1)
+        else:
+            pnl = size_usd * ((1 - exit_price) / entry_price - 1)
+
+        status = "WON" if pnl > 0 else "LOST"
+
+        if not self._simulation_mode:
+            # En live : annuler la position ou vendre
+            order_id = trade.get("order_id")
+            if order_id:
+                try:
+                    await self.clob.cancel_order(order_id)
+                except Exception as e:
+                    logger.warning(f"Cancel ordre {order_id[:8]}: {e}")
+
+        await self.db.update_trade(trade_id, {
+            "status": status,
+            "exit_price": exit_price,
+            "pnl": round(pnl, 4),
+            "resolved_at": datetime.now(timezone.utc).isoformat(),
+            "error_analysis": f"Sortie automatique: {reason}",
+        })
+
+        pnl_str = f"+${pnl:.2f}" if pnl >= 0 else f"-${abs(pnl):.2f}"
+        emoji = "✅" if pnl > 0 else "⛔"
+        logger.info(
+            f"{emoji} [{reason}] Trade #{trade_id}: {pnl_str} | "
+            f"exit={exit_price:.3f} (entry={entry_price:.3f})"
+        )
+
+        await self.telegram.notify_trade_result({
+            **trade,
+            "status": status,
+            "exit_price": exit_price,
+            "pnl": pnl,
+            "question": trade.get("question", ""),
+        })
+
+        # Nettoyer le suivi peak
+        self._peak_prices.pop(trade_id, None)
 
 
 class TradingAgent:
     """
     Agent 4 — Exécution et gestion du risque.
-
-    Responsabilités :
-    - Reçoit les signaux des agents 1/2/3
-    - Vérifie le risque avant chaque trade
-    - Place les ordres sur Polymarket (max 5$ par trade)
-    - Surveille les positions ouvertes
-    - Met à jour le statut des trades résolus
+    AMÉLIORÉ : Smart exits, Kelly adaptatif, anti-corrélation, kill switch.
     """
 
     def __init__(
@@ -115,11 +293,13 @@ class TradingAgent:
         self.telegram = telegram
         self.risk = RiskManager(db)
         self._running = False
-        self._simulation_mode = True  # Activé par défaut — désactiver avec clé privée
+        self._simulation_mode = True
+        self._exit_manager: Optional[SmartExitManager] = None
+        self._win_rate_cache: float = 0.55
+        self._daily_loss_warned = False
 
     async def run_forever(self) -> None:
         """Boucle principale."""
-        # Vérifier si on a une clé privée configurée
         from config import POLYMARKET_PRIVATE_KEY
         if POLYMARKET_PRIVATE_KEY and POLYMARKET_PRIVATE_KEY != "0xTON_PRIVATE_KEY_POLYGON_WALLET":
             self._simulation_mode = False
@@ -127,8 +307,12 @@ class TradingAgent:
         else:
             logger.warning("Agent 4 (Trading) en mode SIMULATION (pas de clé privée)")
 
+        self._exit_manager = SmartExitManager(
+            self.db, self.clob, self.telegram, self._simulation_mode
+        )
+
         self._running = True
-        logger.info("Agent 4 (Trading) démarré")
+        logger.info("Agent 4 (Trading) démarré — Smart exits activés")
 
         while self._running:
             try:
@@ -139,21 +323,51 @@ class TradingAgent:
             await asyncio.sleep(TRADE_CHECK_INTERVAL_SEC)
 
     async def trading_cycle(self) -> None:
-        """
-        Cycle de trading:
-        1. Traiter les nouveaux signaux
-        2. Vérifier les positions ouvertes (résolution)
-        """
-        await self._process_pending_signals()
+        """Cycle complet de trading."""
+        # Mettre à jour le win rate en cache
+        stats = await self.db.get_trade_stats()
+        if stats.get("total", 0) >= 10:
+            self._win_rate_cache = stats.get("win_rate", 55) / 100
+
+        # Vérifier kill switch
+        daily_pnl = await self.risk._get_daily_pnl()
+        if daily_pnl <= -DAILY_LOSS_LIMIT_USD:
+            if not self._daily_loss_warned:
+                self._daily_loss_warned = True
+                msg = (
+                    f"🚨 *KILL SWITCH ACTIVÉ*\n"
+                    f"Perte journalière: ${abs(daily_pnl):.2f} > ${DAILY_LOSS_LIMIT_USD}\n"
+                    f"Aucun nouveau trade jusqu'à demain."
+                )
+                await self.telegram.send_message(msg)
+                logger.warning(f"Kill switch: perte journalière ${abs(daily_pnl):.2f}")
+        else:
+            self._daily_loss_warned = False
+            await self._process_pending_signals()
+
+        # Toujours vérifier les positions ouvertes (smart exits)
         await self._check_open_positions()
 
     async def _process_pending_signals(self) -> None:
-        """Traite les signaux récents non encore exploités."""
-        signals = await self.db.get_recent_signals(limit=30)
+        """Traite les signaux récents — priorité aux signaux combinés et arbitrage."""
+        signals = await self.db.get_recent_signals(limit=50)
+        # Trier par confiance décroissante
+        signals.sort(key=lambda x: x.get("confidence", 0), reverse=True)
+
+        # Priorité : ARBITRAGE > COMBINED > PREDICTION > ORDERBOOK > SENTIMENT
+        priority_order = ["ARBITRAGE", "COMBINED", "PREDICTION", "ORDERBOOK", "SENTIMENT", "ANOMALY"]
+        signals.sort(
+            key=lambda x: priority_order.index(x.get("signal_type", "SENTIMENT"))
+            if x.get("signal_type") in priority_order else 99
+        )
+
         for signal in signals:
             if signal.get("acted_on"):
                 continue
-            if signal.get("signal_type") != "PREDICTION":
+            # Accepter PREDICTION, ORDERBOOK, ARBITRAGE, COMBINED
+            if signal.get("signal_type") not in (
+                "PREDICTION", "ORDERBOOK", "ARBITRAGE", "COMBINED"
+            ):
                 continue
 
             can, reason = await self.risk.can_trade(signal)
@@ -169,9 +383,7 @@ class TradingAgent:
         direction = signal["direction"]
         confidence = signal["confidence"]
         edge = signal["edge"]
-        market_price = signal.get("market_price", 0.5)
 
-        # Récupérer le marché pour avoir le token_id
         market = await self.db.get_market(market_id)
         if not market:
             return None
@@ -183,7 +395,7 @@ class TradingAgent:
         if clob_token_ids and len(clob_token_ids) >= 2:
             token_id = clob_token_ids[0] if direction == "YES" else clob_token_ids[1]
 
-        # Calculer le capital disponible (simulé ou réel)
+        # Capital disponible
         if self._simulation_mode:
             available_capital = CAPITAL_USD
         else:
@@ -192,21 +404,20 @@ class TradingAgent:
             except Exception:
                 available_capital = CAPITAL_USD
 
-        trade_size = self.risk.compute_trade_size(signal, available_capital)
+        # Kelly adaptatif avec win rate réel
+        trade_size = self.risk.compute_trade_size(
+            signal, available_capital, self._win_rate_cache
+        )
 
-        # Prix du token selon la direction
-        if direction == "YES":
-            price = market.get("yes_price", 0.5)
-        else:
-            price = market.get("no_price", 0.5)
+        # Prix selon la direction
+        price = market.get("yes_price" if direction == "YES" else "no_price", 0.5)
 
         order_id = None
-
         if self._simulation_mode:
             order_id = f"SIM_{market_id[:8]}_{int(datetime.now().timestamp())}"
             logger.info(
-                f"[SIMULATION] Trade: {direction} ${trade_size} @ {price:.3f} "
-                f"sur {market['question'][:50]}"
+                f"[SIM] {direction} ${trade_size} @ {price:.3f} "
+                f"| conf={confidence:.2%} | {market['question'][:50]}"
             )
         else:
             if not token_id:
@@ -225,7 +436,6 @@ class TradingAgent:
                 await self.telegram.notify_error(str(e), "Place Order")
                 return None
 
-        # Enregistrer dans la DB
         trade = {
             "market_id": market_id,
             "order_id": order_id,
@@ -241,18 +451,15 @@ class TradingAgent:
         }
 
         trade_id = await self.db.save_trade(trade)
-        logger.info(f"Trade #{trade_id} ouvert: {direction} ${trade_size} sur {market_id[:8]}")
+        logger.info(f"Trade #{trade_id}: {direction} ${trade_size} | {market_id[:8]}")
 
-        # Notifier Telegram
         await self.telegram.notify_trade_placed({
-            **trade,
-            "question": market.get("question", ""),
+            **trade, "question": market.get("question", ""),
         })
-
         return trade_id
 
     async def _check_open_positions(self) -> None:
-        """Vérifie et met à jour les positions ouvertes."""
+        """Vérifie les positions ouvertes pour smart exits ET résolution."""
         open_trades = await self.db.get_open_trades()
         if not open_trades:
             return
@@ -262,60 +469,55 @@ class TradingAgent:
             if not market:
                 continue
 
-            # Vérifier si le marché est résolu
-            end_date_str = market.get("end_date")
-            if not end_date_str:
-                continue
+            current_price = market.get("yes_price", 0.5)
 
-            try:
-                if "Z" in str(end_date_str):
-                    end_date_str = str(end_date_str).replace("Z", "+00:00")
-                end_date = datetime.fromisoformat(str(end_date_str))
-                if end_date.tzinfo is None:
-                    end_date = end_date.replace(tzinfo=timezone.utc)
+            # 1. Smart exits (stop-loss / profit taking)
+            if self._exit_manager:
+                exited = await self._exit_manager.check_and_exit(trade, current_price)
+                if exited:
+                    continue
 
-                now = datetime.now(timezone.utc)
-                if now < end_date:
-                    continue  # Pas encore résolu
+            # 2. Résolution du marché
+            await self._check_resolution(trade, market)
 
-                # Marché expiré — récupérer le résultat
-                await self._resolve_trade(trade, market)
+    async def _check_resolution(self, trade: dict, market: dict) -> None:
+        """Vérifie si le marché est résolu."""
+        end_date_str = market.get("end_date")
+        if not end_date_str:
+            return
 
-            except Exception as e:
-                logger.debug(f"Check position {trade['id']}: {e}")
+        try:
+            if "Z" in str(end_date_str):
+                end_date_str = str(end_date_str).replace("Z", "+00:00")
+            end_date = datetime.fromisoformat(str(end_date_str))
+            if end_date.tzinfo is None:
+                end_date = end_date.replace(tzinfo=timezone.utc)
+
+            if datetime.now(timezone.utc) < end_date:
+                return
+
+            await self._resolve_trade(trade, market)
+        except Exception as e:
+            logger.debug(f"Check résolution {trade['id']}: {e}")
 
     async def _resolve_trade(self, trade: dict, market: dict) -> None:
         """Résout un trade après expiration du marché."""
-        if self._simulation_mode:
-            # En simulation : résolution basée sur le prix actuel
-            current_price = market.get("yes_price", 0.5)
-            direction = trade.get("direction", "YES")
-            entry_price = trade.get("entry_price", 0.5)
-            size_usd = trade.get("size_usd", 5.0)
+        current_price = market.get("yes_price", 0.5)
+        direction = trade.get("direction", "YES")
+        entry_price = trade.get("entry_price", 0.5)
+        size_usd = trade.get("size_usd", 5.0)
 
-            # Simulation de résolution (WON si prix > 0.95 pour YES, < 0.05 pour NO)
+        if self._simulation_mode:
             if direction == "YES":
                 won = current_price >= 0.95
                 exit_price = 1.0 if won else 0.0
             else:
                 won = current_price <= 0.05
                 exit_price = 1.0 if won else 0.0
-
-            if won:
-                pnl = size_usd * (1 / entry_price - 1)
-            else:
-                pnl = -size_usd
-
-            status = "WON" if won else "LOST"
+            pnl = size_usd * (1 / entry_price - 1) if won else -size_usd
         else:
-            # En mode live — récupérer les vraies données de résolution
             raw = json.loads(market.get("raw_data", "{}"))
             resolution = raw.get("resolution")
-
-            direction = trade.get("direction", "YES")
-            entry_price = trade.get("entry_price", 0.5)
-            size_usd = trade.get("size_usd", 5.0)
-
             if resolution == "YES" and direction == "YES":
                 status, exit_price = "WON", 1.0
                 pnl = size_usd * (1 / entry_price - 1)
@@ -325,26 +527,22 @@ class TradingAgent:
             else:
                 status, exit_price = "LOST", 0.0
                 pnl = -size_usd
+            won = status == "WON"
 
+        status = "WON" if won else "LOST"
         updates = {
             "status": status,
             "exit_price": exit_price,
-            "pnl": pnl,
+            "pnl": round(pnl, 4),
             "resolved_at": datetime.now(timezone.utc).isoformat(),
         }
         await self.db.update_trade(trade["id"], updates)
-
-        emoji = "WON" if status == "WON" else "LOST"
-        logger.info(
-            f"Trade #{trade['id']} {emoji}: P&L={pnl:+.2f}$ "
-            f"({market['question'][:50]})"
-        )
+        logger.info(f"Trade #{trade['id']} {status}: {pnl:+.2f}$")
 
         await self.telegram.notify_trade_result({
-            **trade, **updates,
-            "question": market.get("question", ""),
+            **trade, **updates, "question": market.get("question", ""),
         })
 
-    def stop(self):
+    def stop(self) -> None:
         self._running = False
         logger.info("Agent 4 (Trading) arrêté")

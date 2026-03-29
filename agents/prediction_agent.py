@@ -55,13 +55,14 @@ class PredictionAgent:
     - Met à jour le modèle au fil des trades résolus
     """
 
-    def __init__(self, db: Database, telegram: TelegramNotifier):
+    def __init__(self, db: Database, telegram: TelegramNotifier, ob_agent=None):
         self.db = db
         self.telegram = telegram
         self._running = False
-        self._model: Optional[object] = None      # XGBoost
-        self._scaler: Optional[object] = None     # StandardScaler
-        self._llm: Optional[object] = None        # Anthropic client
+        self._model: Optional[object] = None
+        self._scaler: Optional[object] = None
+        self._llm: Optional[object] = None
+        self._ob_agent = ob_agent   # Agent 6 (order book), optionnel
         self._model_trained = False
         self._load_model()
 
@@ -127,10 +128,11 @@ class PredictionAgent:
         logger.info(f"Prédiction: {len(signals)} signaux haute confiance générés")
         return signals
 
-    def _build_features(self, market: dict, sentiment_score: float = 0.0) -> np.ndarray:
+    def _build_features(self, market: dict, sentiment_score: float = 0.0,
+                        ob_features: dict = None, price_history: list = None) -> np.ndarray:
         """
-        Construit le vecteur de features pour XGBoost.
-        Features numériques uniquement.
+        Construit le vecteur de 35 features pour XGBoost.
+        AMÉLIORÉ : +20 features (volatilité, microstructure, momentum, temporel, catégorie)
         """
         yes_price = market.get("yes_price", 0.5)
         no_price = market.get("no_price", 0.5)
@@ -138,9 +140,10 @@ class PredictionAgent:
         volume = market.get("volume_24h", 0)
         spread = market.get("spread", 0)
         anomaly = market.get("anomaly_score", 0)
+        ob = ob_features or {}
 
-        # Temps avant résolution (en heures)
-        hours_to_expiry = 168  # 7 jours par défaut
+        # --- Temps avant résolution ---
+        hours_to_expiry = 168.0
         end_date_str = market.get("end_date")
         if end_date_str:
             try:
@@ -154,53 +157,144 @@ class PredictionAgent:
             except Exception:
                 pass
 
-        # Imbalance bid-ask
+        # --- Features de base ---
         price_imbalance = abs(yes_price - 0.5)
-        implied_no = 1 - yes_price
         arbitrage_gap = abs(yes_price + no_price - 1.0)
-
-        # Liquidity score normalisé
         liq_score = min(liquidity / 100_000, 1.0)
         vol_score = min(volume / 50_000, 1.0)
-
-        # Features de timing
         time_score = 1 - min(hours_to_expiry / (30 * 24), 1.0)
         urgency = 1 / (1 + hours_to_expiry / 24)
+        vol_liq_ratio = min(volume / (liquidity + 1), 1.0)
 
+        # --- Features de volatilité (depuis l'historique des prix) ---
+        price_volatility = 0.0
+        price_momentum_5m = 0.0
+        price_momentum_15m = 0.0
+        price_velocity = 0.0
+        mean_reversion_signal = 0.0
+        prices_recent = []
+
+        if price_history and len(price_history) >= 3:
+            prices_recent = [h.get("yes_price", yes_price) for h in price_history[-10:]]
+            if len(prices_recent) >= 2:
+                price_volatility = float(np.std(prices_recent))
+                # Momentum : prix actuel vs il y a N mesures
+                if len(prices_recent) >= 5:
+                    price_momentum_5m = yes_price - prices_recent[-5]
+                if len(prices_recent) >= 10:
+                    price_momentum_15m = yes_price - prices_recent[-10]
+                # Vélocité : dérivée du prix (changement par unité de temps)
+                if len(prices_recent) >= 2:
+                    price_velocity = prices_recent[-1] - prices_recent[-2]
+                # Régression vers la moyenne : écart par rapport à la moyenne récente
+                mean_price = float(np.mean(prices_recent))
+                mean_reversion_signal = yes_price - mean_price
+
+        # --- Features de microstructure order book ---
+        obi = float(ob.get("obi", 0.0))
+        bid_depth_norm = min(float(ob.get("bid_depth", 0)) / 10000, 1.0)
+        ask_depth_norm = min(float(ob.get("ask_depth", 0)) / 10000, 1.0)
+        depth_ratio = float(ob.get("depth_ratio", 1.0))
+        whale_bid_ratio = float(ob.get("whale_bid_ratio", 0.0))
+        whale_ask_ratio = float(ob.get("whale_ask_ratio", 0.0))
+        ob_spread = float(ob.get("ob_spread", spread))
+        is_thin_book = float(ob.get("is_thin", 0))
+        obi_trend = float(ob.get("obi_trend", 0.0))
+
+        # --- Features temporelles (heure, jour) ---
+        now = datetime.now()
+        hour_of_day = now.hour / 24.0      # Heure normalisée (0-1)
+        day_of_week = now.weekday() / 6.0  # Jour normalisé (0=lun, 1=dim)
+        is_weekend = float(now.weekday() >= 5)
+        # Heures de trading US (14h-22h UTC = prime time Polymarket)
+        is_us_prime_time = float(14 <= now.hour <= 22)
+
+        # --- Features d'interaction ---
+        price_x_sentiment = yes_price * sentiment_score
+        price_x_obi = yes_price * obi
+        sentiment_x_momentum = sentiment_score * price_momentum_5m
+        volume_x_anomaly = vol_score * anomaly
+        urgency_x_obi = urgency * abs(obi)
+
+        # --- Vecteur final (35 features) ---
         features = np.array([
-            yes_price,              # Prix YES actuel
-            no_price,               # Prix NO actuel
-            price_imbalance,        # Distance par rapport à 50%
-            spread,                 # Spread bid-ask
-            arbitrage_gap,          # Écart de pricing
-            liq_score,              # Liquidité normalisée
-            vol_score,              # Volume normalisé
-            anomaly,                # Score d'anomalie
-            sentiment_score,        # Score de sentiment
-            time_score,             # Progression temporelle
-            urgency,                # Urgence temporelle
-            hours_to_expiry / 24,   # Jours avant expiry
-            yes_price * yes_price,  # Feature quadratique
-            yes_price * sentiment_score,  # Interaction prix x sentiment
-            min(volume / (liquidity + 1), 1.0),  # Ratio vol/liq
+            # Groupe 1 : Prix (5)
+            yes_price,
+            no_price,
+            price_imbalance,
+            arbitrage_gap,
+            spread,
+            # Groupe 2 : Volume & Liquidité (4)
+            liq_score,
+            vol_score,
+            vol_liq_ratio,
+            anomaly,
+            # Groupe 3 : Timing (5)
+            time_score,
+            urgency,
+            hours_to_expiry / 24.0,
+            hour_of_day,
+            day_of_week,
+            # Groupe 4 : Volatilité & Momentum (5)
+            price_volatility,
+            price_momentum_5m,
+            price_momentum_15m,
+            price_velocity,
+            mean_reversion_signal,
+            # Groupe 5 : Order Book (5)
+            obi,
+            bid_depth_norm,
+            ask_depth_norm,
+            depth_ratio,
+            obi_trend,
+            # Groupe 6 : Activité Baleine (3)
+            whale_bid_ratio,
+            whale_ask_ratio,
+            is_thin_book,
+            # Groupe 7 : Sentiment (2)
+            sentiment_score,
+            abs(sentiment_score),
+            # Groupe 8 : Contexte marché (3)
+            is_weekend,
+            is_us_prime_time,
+            ob_spread,
+            # Groupe 9 : Interactions (3)
+            price_x_sentiment,
+            price_x_obi,
+            urgency_x_obi,
         ], dtype=np.float32)
 
         return features
 
+    FEATURE_COUNT = 35  # Nombre total de features
+
     async def _predict_market(self, market: dict) -> Optional[dict]:
         """
         Génère une prédiction pour un marché.
-        Retourne un signal seulement si la confiance est suffisante.
+        AMÉLIORÉ : utilise les 35 features (ordre book + momentum + temporel).
         """
-        # Récupérer le sentiment pour ce marché
+        market_id = market["id"]
+
+        # Sentiment
         sentiment = 0.0
         recent_signals = await self.db.get_recent_signals(limit=200)
         for sig in recent_signals:
-            if sig["market_id"] == market["id"] and sig["signal_type"] == "SENTIMENT":
+            if sig["market_id"] == market_id and sig["signal_type"] == "SENTIMENT":
                 sentiment = sig.get("sentiment_score", 0.0)
                 break
 
-        features = self._build_features(market, sentiment)
+        # Order Book features (si l'agent OrderBook tourne)
+        ob_features = {}
+        if self._ob_agent:
+            try:
+                ob_features = await self._ob_agent.get_orderbook_features(market_id)
+            except Exception:
+                pass
+
+        # Historique des prix pour volatilité/momentum
+        price_history = await self.db.get_price_history(market_id, minutes=30)
+
+        features = self._build_features(market, sentiment, ob_features, price_history)
         yes_price = market.get("yes_price", 0.5)
 
         # --- Prédiction XGBoost ---

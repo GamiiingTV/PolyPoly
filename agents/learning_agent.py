@@ -97,7 +97,7 @@ class LearningAgent:
                 await self.db.set_param(key, value, "Initialisation")
 
     async def learning_cycle(self) -> None:
-        """Cycle complet d'apprentissage."""
+        """Cycle complet d'apprentissage — AMÉLIORÉ."""
         logger.info("Agent 5: cycle d'apprentissage...")
 
         stats = await self.db.get_trade_stats()
@@ -107,20 +107,30 @@ class LearningAgent:
             logger.info("Agent 5: pas assez de trades pour apprendre (minimum 5)")
             return
 
-        # 1. Analyser les trades perdants
         losing_trades = await self.db.get_losing_trades(limit=100)
+        closed_trades = await self.db.get_closed_trades(limit=500)
+
+        # 1. Analyser les patterns d'erreurs
         if losing_trades:
             patterns = await self._analyze_losing_patterns(losing_trades)
             await self._update_parameters(patterns, stats)
 
-        # 2. Générer le rapport de performance
+        # 2. Analyse par catégorie de marché
+        if total >= 15:
+            await self._analyze_by_category(closed_trades)
+
+        # 3. Importance des features XGBoost
+        if total >= 50:
+            await self._analyze_feature_importance(closed_trades)
+
+        # 4. Rapport de performance
         await self._generate_performance_report(stats)
 
-        # 3. Analyse LLM approfondie si disponible
+        # 5. Analyse LLM approfondie
         if self._llm and total >= 20:
             await self._llm_deep_analysis(stats, losing_trades[:20])
 
-        # 4. Sauvegarder snapshot
+        # 6. Snapshot
         await self._save_snapshot(stats)
 
         logger.info(f"Agent 5: {self._improvements_made} améliorations appliquées")
@@ -354,8 +364,125 @@ Réponds en JSON:
         except Exception as e:
             logger.warning(f"LLM deep analysis erreur: {e}")
 
+    async def _analyze_by_category(self, closed_trades: list[dict]) -> None:
+        """
+        Analyse les performances par catégorie de marché.
+        Blackliste automatiquement les catégories avec win rate < 35%.
+        """
+        from collections import defaultdict
+        cat_stats: dict = defaultdict(lambda: {"wins": 0, "total": 0, "pnl": 0.0})
+
+        for trade in closed_trades:
+            # Récupérer la catégorie depuis le marché en DB
+            market = await self.db.get_market(trade.get("market_id", ""))
+            category = market.get("category", "unknown") if market else "unknown"
+            if not category:
+                category = "unknown"
+
+            cat_stats[category]["total"] += 1
+            if trade.get("status") == "WON":
+                cat_stats[category]["wins"] += 1
+            cat_stats[category]["pnl"] += trade.get("pnl", 0) or 0
+
+        best_cat = ""
+        best_wr = 0.0
+        auto_blacklisted = []
+
+        for cat, s in cat_stats.items():
+            if s["total"] < 5:
+                continue
+            wr = s["wins"] / s["total"]
+            if wr > best_wr:
+                best_wr, best_cat = wr, cat
+
+            # Blacklister si très mauvaises performances
+            if wr < 0.35 and s["total"] >= 8:
+                current_bl = await self.db.get_param("blacklisted_categories", [])
+                if cat not in current_bl:
+                    new_bl = current_bl + [cat]
+                    await self.db.set_param(
+                        "blacklisted_categories", new_bl,
+                        f"Win rate {wr:.0%} < 35% sur {s['total']} trades"
+                    )
+                    auto_blacklisted.append(cat)
+                    self._improvements_made += 1
+                    logger.warning(f"Catégorie blacklistée auto: '{cat}' (win rate {wr:.0%})")
+                    await self.telegram.notify_learning_update(
+                        "CATEGORY_BIAS",
+                        f"Catégorie '{cat}' blacklistée: win rate {wr:.0%} < 35%"
+                    )
+
+        if best_cat:
+            await self.db.set_param("best_category", best_cat, f"Win rate {best_wr:.0%}")
+            logger.info(f"Meilleure catégorie: '{best_cat}' ({best_wr:.0%} win rate)")
+
+    async def _analyze_feature_importance(self, closed_trades: list[dict]) -> None:
+        """
+        Analyse l'importance des features XGBoost pour identifier les features
+        les plus prédictives et celles qui introduisent du bruit.
+        """
+        try:
+            import os, pickle
+            from config import XGBOOST_MODEL_PATH
+            if not os.path.exists(XGBOOST_MODEL_PATH):
+                return
+
+            with open(XGBOOST_MODEL_PATH, "rb") as f:
+                model = pickle.load(f)
+
+            importances = model.feature_importances_
+            feature_names = [
+                # Groupe 1: Prix
+                "yes_price", "no_price", "price_imbalance", "arb_gap", "spread",
+                # Groupe 2: Volume
+                "liq_score", "vol_score", "vol_liq_ratio", "anomaly",
+                # Groupe 3: Timing
+                "time_score", "urgency", "days_to_expiry", "hour_of_day", "day_of_week",
+                # Groupe 4: Volatilité
+                "volatility", "momentum_5m", "momentum_15m", "velocity", "mean_rev",
+                # Groupe 5: Order Book
+                "obi", "bid_depth", "ask_depth", "depth_ratio", "obi_trend",
+                # Groupe 6: Baleines
+                "whale_bid", "whale_ask", "is_thin",
+                # Groupe 7: Sentiment
+                "sentiment", "abs_sentiment",
+                # Groupe 8: Contexte
+                "is_weekend", "is_us_prime", "ob_spread",
+                # Groupe 9: Interactions
+                "price_x_sent", "price_x_obi", "urgency_x_obi",
+            ]
+
+            # Trier par importance
+            sorted_pairs = sorted(
+                zip(feature_names[:len(importances)], importances),
+                key=lambda x: -x[1]
+            )
+
+            top5 = sorted_pairs[:5]
+            bottom5 = sorted_pairs[-5:]
+
+            top_str = ", ".join(f"{n}={v:.3f}" for n, v in top5)
+            bottom_str = ", ".join(f"{n}={v:.3f}" for n, v in bottom5)
+
+            logger.info(f"Features importantes: {top_str}")
+            logger.info(f"Features faibles: {bottom_str}")
+
+            # Sauvegarder pour les rapports
+            await self.db.set_param(
+                "top_features", {n: float(v) for n, v in top5},
+                "XGBoost feature importance"
+            )
+            await self.db.set_param(
+                "weak_features", {n: float(v) for n, v in bottom5},
+                "XGBoost feature importance"
+            )
+
+        except Exception as e:
+            logger.debug(f"Feature importance erreur: {e}")
+
     async def _save_snapshot(self, stats: dict) -> None:
         """Sauvegarde un snapshot de performance."""
+        best_cat = await self.db.get_param("best_category", "N/A")
         snap = {
             "total_trades": stats.get("total", 0),
             "winning_trades": stats.get("wins", 0),
@@ -363,7 +490,7 @@ Réponds en JSON:
             "total_pnl": stats.get("total_pnl", 0),
             "avg_edge": stats.get("avg_edge", 0),
             "avg_confidence": stats.get("avg_confidence", 0),
-            "best_category": "N/A",
+            "best_category": best_cat or "N/A",
             "worst_pattern": "N/A",
         }
 
