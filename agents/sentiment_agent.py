@@ -4,6 +4,7 @@ Twitter, Reddit, RSS — analyse le sentiment et compare aux prix du marché.
 """
 
 import asyncio
+import json
 import re
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
@@ -378,7 +379,7 @@ class SentimentAgent:
             "sentiment_score": round(sentiment_score, 4),
             "source": f"Sentiment ({len(relevant_texts)} textes)",
             "texts_count": len(relevant_texts),
-            "market_url": market.get("market_url", ""),
+            "market_url": self._get_market_url(market),
         }
 
         # Sauvegarder le signal
@@ -393,6 +394,31 @@ class SentimentAgent:
             await self.telegram.notify_opportunity(signal)
 
         return signal
+
+    @staticmethod
+    def _get_market_url(market: dict) -> str:
+        """Extrait l'URL Polymarket depuis market_url ou raw_data."""
+        url = market.get("market_url", "")
+        if url:
+            return url
+        # Fallback: chercher dans raw_data JSON
+        raw = market.get("raw_data", "")
+        if raw:
+            try:
+                data = json.loads(raw) if isinstance(raw, str) else raw
+                url = data.get("market_url", "")
+                if url:
+                    return url
+                # Construire depuis slug si disponible
+                group_slug = data.get("groupSlug") or data.get("group_slug", "")
+                slug = data.get("slug", "")
+                if group_slug:
+                    return f"https://polymarket.com/event/{group_slug}"
+                if slug:
+                    return f"https://polymarket.com/market/{slug}"
+            except Exception:
+                pass
+        return ""
 
     async def get_sentiment_for_market(self, market_id: str) -> Optional[float]:
         """Retourne le dernier score de sentiment pour un marché."""
