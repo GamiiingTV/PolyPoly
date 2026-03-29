@@ -404,15 +404,19 @@ class SentimentAgent:
     def _deduplicate_signals(signals: list[dict]) -> list[dict]:
         """
         Garde un seul signal par topic (pour éviter BTC $60k + BTC $65k + BTC $68k).
-        Topic = 3 premiers mots significatifs de la question.
+        Topic = 3 premiers mots NON-numériques et significatifs de la question.
         Garde le signal avec le plus grand |edge|.
         """
         stop = {"will", "the", "a", "an", "in", "on", "at", "to", "for",
                 "of", "and", "or", "is", "be", "by", "as", "it", "hit",
-                "dip", "price", "above", "below", "reach", "end"}
+                "dip", "price", "above", "below", "reach", "end", "high",
+                "low", "march", "april", "may", "june", "2026", "2025"}
 
         def topic_key(signal: dict) -> str:
-            words = re.findall(r'\b\w{3,}\b', signal.get("question", "").lower())
+            # Supprimer les chiffres et symboles monétaires pour grouper
+            # "BTC $60k", "BTC $65k", "Crude Oil $100", "Crude Oil $120" ensemble
+            question = re.sub(r'[\$\£\€]?\d[\d,\.]*[kmbt]?', '', signal.get("question", "").lower())
+            words = re.findall(r'\b[a-z]{3,}\b', question)
             keywords = [w for w in words if w not in stop][:3]
             return " ".join(keywords)
 
