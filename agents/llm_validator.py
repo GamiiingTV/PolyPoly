@@ -52,22 +52,37 @@ class LLMValidator:
     def __init__(self):
         self._client = None
         self._enabled = bool(ANTHROPIC_AVAILABLE and ANTHROPIC_API_KEY)
-        self._calls_today = 0
-        self._max_calls_per_hour = 30  # Rate limit self-imposé
+        self._calls_this_hour = 0
+        self._max_calls_per_hour = 50  # Rate limit self-imposé
+        self._hour_reset_task: Optional[asyncio.Task] = None
 
     async def start(self):
         if not self._enabled:
             logger.warning("LLM Validator désactivé (clé Anthropic manquante)")
             return
         self._client = anthropic.AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
+        self._hour_reset_task = asyncio.create_task(self._reset_counter_loop())
         logger.info("Agent 8 (LLM Validator) connecté")
+
+    async def _reset_counter_loop(self):
+        """Réinitialise le compteur d'appels toutes les heures."""
+        while True:
+            await asyncio.sleep(3600)
+            self._calls_this_hour = 0
+            logger.debug("LLM Validator: compteur horaire réinitialisé")
 
     async def validate(self, signal: dict, relevant_texts: list[str]) -> dict:
         """
         Valide un signal avec Claude.
         Retourne le signal enrichi (llm_valid, llm_reasoning, confiance ajustée).
         """
-        if not self._client or self._calls_today >= self._max_calls_per_hour:
+        if not self._client:
+            logger.debug("LLM Validator ignoré: client non initialisé")
+            signal["llm_valid"] = True
+            signal["llm_reasoning"] = ""
+            return signal
+        if self._calls_this_hour >= self._max_calls_per_hour:
+            logger.warning(f"LLM Validator: limite horaire atteinte ({self._max_calls_per_hour} appels)")
             signal["llm_valid"] = True
             signal["llm_reasoning"] = ""
             return signal
@@ -93,7 +108,7 @@ class LLMValidator:
                 max_tokens=400,
                 messages=[{"role": "user", "content": prompt}],
             )
-            self._calls_today += 1
+            self._calls_this_hour += 1
 
             text = response.content[0].text.strip()
             # Extraire le JSON
@@ -133,7 +148,9 @@ class LLMValidator:
         return signal
 
     def reset_daily_counter(self):
-        self._calls_today = 0
+        self._calls_this_hour = 0
 
     def stop(self):
+        if self._hour_reset_task:
+            self._hour_reset_task.cancel()
         logger.info("Agent 8 (LLM Validator) arrêté")

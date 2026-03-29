@@ -123,8 +123,12 @@ class SentimentAgent:
         """Cycle complet d'analyse de sentiment."""
         logger.info("Sentiment: démarrage analyse...")
 
-        # Récupérer les marchés actifs
-        markets = await self.db.get_active_markets(limit=50)
+        # Récupérer les marchés actifs — filtrer les prix extrêmes ici aussi
+        all_markets = await self.db.get_active_markets(limit=100)
+        markets = [
+            m for m in all_markets
+            if 0.05 <= m.get("yes_price", 0.5) <= 0.85
+        ]
         if not markets:
             return []
 
@@ -397,6 +401,8 @@ class SentimentAgent:
             "source": f"Sentiment ({len(relevant_texts)} textes)",
             "texts_count": len(relevant_texts),
             "market_url": self._get_market_url(market),
+            "urgency_bonus": market.get("urgency_bonus", 0),
+            "category": market.get("category", "other"),
         }
 
         # ── Validation LLM (Claude) ──────────────────────────────────────
