@@ -46,6 +46,14 @@ try:
     from utils.telegram_bot import TelegramNotifier
 except Exception:
     TelegramNotifier = object  # type: ignore
+try:
+    from agents.llm_validator import LLMValidator
+except Exception:
+    LLMValidator = None  # type: ignore
+try:
+    from agents.metaculus_agent import MetaculusAgent
+except Exception:
+    MetaculusAgent = None  # type: ignore
 
 
 class SentimentAgent:
@@ -57,12 +65,16 @@ class SentimentAgent:
     - Analyse de sentiment (VADER + heuristiques)
     - Compare le narratif populaire aux prix Polymarket
     - Détecte les décalages (arbitrage de sentiment)
+    - Validation LLM + consensus Metaculus avant alerte
     - Génère des signaux sur les marchés concernés
     """
 
-    def __init__(self, db: Database, telegram: TelegramNotifier):
+    def __init__(self, db: Database, telegram: TelegramNotifier,
+                 llm_validator=None, metaculus=None):
         self.db = db
         self.telegram = telegram
+        self._llm = llm_validator
+        self._metaculus = metaculus
         self._running = False
         self._vader = SentimentIntensityAnalyzer() if VADER_AVAILABLE else None
         self._twitter_client = None
@@ -387,15 +399,41 @@ class SentimentAgent:
             "market_url": self._get_market_url(market),
         }
 
+        # ── Validation LLM (Claude) ──────────────────────────────────────
+        if self._llm:
+            signal = await self._llm.validate(signal, relevant_texts)
+            if not signal.get("llm_valid", True):
+                logger.info(f"Signal rejeté par LLM: {market['question'][:50]}")
+                return None  # LLM a détecté un faux positif
+
+        # ── Cross-validation Metaculus ───────────────────────────────────
+        if self._metaculus:
+            consensus = await self._metaculus.get_expert_consensus(market)
+            if consensus:
+                expert_prob = consensus["expert_prob"]
+                meta_edge = expert_prob - yes_price
+                # Ajuster la confiance selon l'accord Metaculus
+                if abs(meta_edge - edge) < 0.15:  # Metaculus confirme
+                    signal["confidence"] = min(signal["confidence"] + 0.05, 0.92)
+                    signal["metaculus_prob"] = expert_prob
+                    signal["metaculus_source"] = consensus["source"]
+                    signal["metaculus_url"] = consensus.get("url", "")
+                elif meta_edge * edge < 0:  # Metaculus contredit
+                    signal["confidence"] = max(signal["confidence"] - 0.10, 0.0)
+                    logger.info(
+                        f"Metaculus contredit signal: poly={yes_price:.0%} "
+                        f"meta={expert_prob:.0%} | {market['question'][:50]}"
+                    )
+
         # Sauvegarder le signal
         await self.db.save_signal(signal)
         logger.info(
             f"Signal sentiment: {direction} {market['question'][:50]} "
-            f"| edge={edge:.2%} | conf={confidence:.2%}"
+            f"| edge={edge:.2%} | conf={signal['confidence']:.2%}"
         )
 
         # Notifier Telegram si signal fort
-        if confidence >= 0.70:
+        if signal["confidence"] >= 0.70:
             await self.telegram.notify_opportunity(signal)
 
         return signal

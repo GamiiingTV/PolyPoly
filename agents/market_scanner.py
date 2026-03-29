@@ -83,7 +83,10 @@ class MarketScanner:
 
             # Calculer le score d'anomalie
             anomaly_score = await self._compute_anomaly_score(market)
-            market["anomaly_score"] = anomaly_score
+            # Bonus d'urgence : marché se résolvant dans <48h
+            urgency_bonus = self._compute_urgency_bonus(market)
+            market["anomaly_score"] = min(anomaly_score + urgency_bonus, 1.0)
+            market["urgency_bonus"] = urgency_bonus
 
             # Sauvegarder dans la DB
             await self.db.upsert_market(market)
@@ -207,6 +210,40 @@ class MarketScanner:
                 return min(volatility / 0.15, 1.0) * 0.5
 
         return 0.0
+
+    @staticmethod
+    def _compute_urgency_bonus(market: dict) -> float:
+        """
+        Bonus de score pour les marchés se résolvant bientôt.
+        Résolution <6h   → +0.40 (urgence maximale)
+        Résolution <24h  → +0.25
+        Résolution <48h  → +0.15
+        Résolution <7j   → +0.05
+        """
+        from datetime import datetime, timezone
+        end_str = market.get("end_date")
+        if not end_str:
+            return 0.0
+        try:
+            if "Z" in str(end_str):
+                end_str = str(end_str).replace("Z", "+00:00")
+            end = datetime.fromisoformat(str(end_str))
+            if end.tzinfo is None:
+                end = end.replace(tzinfo=timezone.utc)
+            hours = (end - datetime.now(timezone.utc)).total_seconds() / 3600
+            if hours <= 0:
+                return 0.0
+            if hours <= 6:
+                return 0.40
+            if hours <= 24:
+                return 0.25
+            if hours <= 48:
+                return 0.15
+            if hours <= 168:
+                return 0.05
+            return 0.0
+        except Exception:
+            return 0.0
 
     @staticmethod
     def _detect_category(market: dict) -> str:

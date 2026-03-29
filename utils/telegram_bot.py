@@ -81,6 +81,26 @@ class TelegramNotifier:
         predicted_prob = signal.get("predicted_prob", 0) * 100
         market_url = signal.get("market_url", "")
 
+        # Ligne LLM reasoning
+        llm_line = ""
+        if signal.get("llm_reasoning"):
+            llm_line = f"\n🤖 <b>IA:</b> <i>{signal['llm_reasoning'][:160]}</i>"
+
+        # Ligne Metaculus consensus
+        meta_line = ""
+        if signal.get("metaculus_prob") is not None:
+            meta_prob = signal["metaculus_prob"] * 100
+            meta_src = signal.get("metaculus_source", "Experts")
+            meta_line = f"\n📐 <b>{meta_src}:</b> {meta_prob:.0f}% de probabilité"
+
+        # Urgence si marché se résout bientôt
+        urgency_line = ""
+        urgency = signal.get("urgency_bonus", 0)
+        if urgency >= 0.25:
+            urgency_line = "\n⚡ <b>URGENT</b> — résolution dans <24h"
+        elif urgency >= 0.15:
+            urgency_line = "\n⏳ Résolution dans <48h"
+
         url_line = f'\n🔗 <a href="{market_url}">Voir sur Polymarket</a>' if market_url else ""
 
         msg = (
@@ -92,7 +112,7 @@ class TelegramNotifier:
             f"📈 <b>Edge:</b> {edge:+.1f}%\n"
             f"🎲 <b>Confiance:</b> {confidence:.1f}%\n"
             f"📡 <b>Source:</b> {signal.get('source', 'N/A')}"
-            f"{url_line}\n"
+            f"{meta_line}{llm_line}{urgency_line}{url_line}\n"
             f"⏰ {datetime.now().strftime('%H:%M:%S')}"
         )
         await self.send_message(msg)

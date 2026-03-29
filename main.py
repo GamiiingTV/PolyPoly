@@ -26,6 +26,9 @@ from agents.learning_agent   import LearningAgent
 from agents.orderbook_agent  import OrderBookAgent
 from agents.arbitrage_scanner import ArbitrageScanner
 from agents.signal_combiner  import SignalCombiner
+from agents.llm_validator    import LLMValidator
+from agents.metaculus_agent  import MetaculusAgent
+from agents.whale_tracker    import WhaleTracker
 
 console = Console()
 
@@ -209,16 +212,25 @@ async def main() -> None:
         telegram = _NoOpTelegram()
         logger.warning("Telegram désactivé (dépendance indisponible)")
 
-    # --- 7 Agents ---
+    # --- Agents 8, 9 (pas de boucle infinie, utilisés par d'autres agents) ---
+    llm_validator = LLMValidator()
+    await llm_validator.start()
+
+    metaculus = MetaculusAgent()
+
+    # --- 7 Agents principaux ---
     # Agent 6 doit être instancié avant Agent 3 (qui en dépend)
     ob_agent  = OrderBookAgent(db, clob, gamma, telegram)
     scanner   = MarketScanner(db, gamma, telegram)
-    sentiment = SentimentAgent(db, telegram)
-    predictor = PredictionAgent(db, telegram, ob_agent=ob_agent)   # ← ob_agent injecté
+    sentiment = SentimentAgent(db, telegram,
+                               llm_validator=llm_validator,
+                               metaculus=metaculus)
+    predictor = PredictionAgent(db, telegram, ob_agent=ob_agent)
     combiner  = SignalCombiner(db, telegram)
     trader    = TradingAgent(db, clob, gamma, telegram)
     learner   = LearningAgent(db, telegram)
     arb       = ArbitrageScanner(db, gamma, clob, telegram)
+    whale     = WhaleTracker(db, gamma, clob)
 
     # --- Feed temps réel ---
     try:
@@ -255,8 +267,9 @@ async def main() -> None:
         asyncio.create_task(learner.run_forever(),    name="Agent5-Learning"),
         asyncio.create_task(ob_agent.run_forever(),   name="Agent6-OrderBook"),
         asyncio.create_task(arb.run_forever(),        name="Agent7-Arbitrage"),
-        asyncio.create_task(feed.run_forever(),             name="RealtimeFeed"),
-        asyncio.create_task(health_check(db),               name="HealthCheck"),
+        asyncio.create_task(feed.run_forever(),              name="RealtimeFeed"),
+        asyncio.create_task(whale.run_forever(),             name="Agent10-Whale"),
+        asyncio.create_task(health_check(db),                name="HealthCheck"),
         asyncio.create_task(daily_report_task(db, telegram), name="DailyReport"),
     ]
 
@@ -271,7 +284,8 @@ async def main() -> None:
         logger.info("Arrêt en cours...")
         for task in tasks:
             task.cancel()
-        for agent in [scanner, sentiment, predictor, trader, learner, ob_agent, arb, feed]:
+        for agent in [scanner, sentiment, predictor, trader, learner,
+                      ob_agent, arb, feed, whale, llm_validator, metaculus]:
             try:
                 agent.stop()
             except Exception:
