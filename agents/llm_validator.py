@@ -27,12 +27,12 @@ Direction: {direction} | Edge: {edge:+.0%} | Confidence: {confidence:.0%}
 Recent news ({n_texts} sources):
 {news_summary}
 
-Answer in JSON only:
+Answer in JSON only (reason must be in French):
 {{
   "valid": true or false,
   "adj": float between -0.15 and +0.15 (confidence adjustment),
   "prob": float 0.0-1.0 (your probability estimate for YES),
-  "reason": "1-2 sentences explaining the key insight or red flag",
+  "reason": "1-2 phrases en français expliquant l'opportunité ou le problème",
   "flags": ["list any red flags, empty if none"]
 }}
 
