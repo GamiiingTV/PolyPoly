@@ -378,6 +378,7 @@ class SentimentAgent:
             "sentiment_score": round(sentiment_score, 4),
             "source": f"Sentiment ({len(relevant_texts)} textes)",
             "texts_count": len(relevant_texts),
+            "market_url": market.get("market_url", ""),
         }
 
         # Sauvegarder le signal

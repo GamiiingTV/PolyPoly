@@ -242,6 +242,16 @@ def parse_market(raw: dict) -> dict:
 
     end_date = raw.get("endDate") or raw.get("endDateIso")
 
+    # Construction de l'URL Polymarket
+    group_slug = raw.get("groupSlug", "") or raw.get("group_slug", "")
+    slug = raw.get("slug", "")
+    if group_slug:
+        market_url = f"https://polymarket.com/event/{group_slug}"
+    elif slug:
+        market_url = f"https://polymarket.com/market/{slug}"
+    else:
+        market_url = ""
+
     return {
         "id": raw.get("id", ""),
         "question": raw.get("question", "Unknown"),
@@ -255,6 +265,7 @@ def parse_market(raw: dict) -> dict:
         "anomaly_score": 0.0,
         "spread": spread,
         "last_updated": datetime.now(timezone.utc).isoformat(),
+        "market_url": market_url,
         "token_id_yes": raw.get("clobTokenIds", [None])[0] if raw.get("clobTokenIds") else None,
         "token_id_no": raw.get("clobTokenIds", [None, None])[1] if raw.get("clobTokenIds") and len(raw.get("clobTokenIds", [])) > 1 else None,
     }

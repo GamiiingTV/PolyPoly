@@ -79,16 +79,20 @@ class TelegramNotifier:
         edge = signal.get("edge", 0) * 100
         market_price = signal.get("market_price", 0) * 100
         predicted_prob = signal.get("predicted_prob", 0) * 100
+        market_url = signal.get("market_url", "")
+
+        url_line = f'\n🔗 <a href="{market_url}">Voir sur Polymarket</a>' if market_url else ""
 
         msg = (
             f"🎯 <b>OPPORTUNITÉ DÉTECTÉE</b>\n\n"
-            f"📊 <b>Marché:</b> {signal.get('question', 'N/A')[:80]}\n\n"
+            f"📊 <b>Marché:</b> {signal.get('question', 'N/A')[:80]}\n"
             f"{direction_emoji} <b>Direction:</b> {signal.get('direction', 'N/A')}\n"
             f"💰 <b>Prix marché:</b> {market_price:.1f}¢\n"
             f"🧠 <b>Prob. prédite:</b> {predicted_prob:.1f}¢\n"
-            f"📈 <b>Edge:</b> +{edge:.1f}%\n"
-            f"🎲 <b>Confiance:</b> {confidence:.1f}%\n\n"
-            f"📡 <b>Source:</b> {signal.get('source', 'N/A')}\n"
+            f"📈 <b>Edge:</b> {edge:+.1f}%\n"
+            f"🎲 <b>Confiance:</b> {confidence:.1f}%\n"
+            f"📡 <b>Source:</b> {signal.get('source', 'N/A')}"
+            f"{url_line}\n"
             f"⏰ {datetime.now().strftime('%H:%M:%S')}"
         )
         await self.send_message(msg)
