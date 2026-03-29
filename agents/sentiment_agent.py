@@ -208,20 +208,61 @@ class SentimentAgent:
         return texts
 
     async def _fetch_rss_data(self) -> list[str]:
-        """Récupère les actualités via RSS."""
-        texts = []
+        """
+        Récupère les actualités via RSS avec pondération temporelle.
+        Les articles récents sont répétés plus souvent (poids exponentiel).
+        """
         tasks = [self._fetch_single_rss(url) for url in RSS_FEEDS]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
+        weighted_texts: list[str] = []
         for r in results:
-            if isinstance(r, list):
-                texts.extend(r)
+            if not isinstance(r, list):
+                continue
+            for text, age_hours in r:
+                if not text.strip():
+                    continue
+                # Pondération : article de 0h = 5x, 1h = 3x, 6h = 2x, 24h = 1x
+                if age_hours < 1:
+                    weight = 5
+                elif age_hours < 6:
+                    weight = 3
+                elif age_hours < 24:
+                    weight = 2
+                else:
+                    weight = 1
+                weighted_texts.extend([text] * weight)
 
-        return texts
+        return weighted_texts
 
-    async def _fetch_single_rss(self, url: str) -> list[str]:
-        """Fetch un seul flux RSS (feedparser si disponible, sinon xml.etree natif)."""
-        texts = []
+    @staticmethod
+    def _parse_rss_date(date_str: str) -> float:
+        """Parse une date RSS et retourne l'âge en heures (0 = maintenant)."""
+        if not date_str:
+            return 24.0
+        import email.utils
+        try:
+            parsed = email.utils.parsedate_to_datetime(date_str)
+            age = (datetime.now(timezone.utc) - parsed).total_seconds() / 3600
+            return max(0.0, age)
+        except Exception:
+            pass
+        # Essai format ISO
+        try:
+            parsed = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=timezone.utc)
+            age = (datetime.now(timezone.utc) - parsed).total_seconds() / 3600
+            return max(0.0, age)
+        except Exception:
+            return 24.0
+
+    async def _fetch_single_rss(self, url: str) -> list[tuple[str, float]]:
+        """
+        Fetch un seul flux RSS.
+        Retourne une liste de (texte, age_heures) pour pondération temporelle.
+        """
+        items: list[tuple[str, float]] = []
         try:
             resp = await self._http.get(url)
             if FEEDPARSER_AVAILABLE:
@@ -229,24 +270,27 @@ class SentimentAgent:
                 for entry in feed.entries[:20]:
                     title = getattr(entry, "title", "")
                     summary = getattr(entry, "summary", "")
-                    texts.append(f"{title} {summary[:200]}")
+                    pub = getattr(entry, "published", "") or getattr(entry, "updated", "")
+                    age = self._parse_rss_date(pub)
+                    items.append((f"{title} {summary[:200]}", age))
             else:
-                # Fallback XML natif — compatible RSS 2.0 et Atom
                 root = ET.fromstring(resp.text)
                 ns = {"atom": "http://www.w3.org/2005/Atom"}
-                # RSS 2.0
                 for item in root.findall(".//item")[:20]:
                     title = item.findtext("title") or ""
                     desc = item.findtext("description") or ""
-                    texts.append(f"{title} {desc[:200]}")
-                # Atom
+                    pub = item.findtext("pubDate") or ""
+                    age = self._parse_rss_date(pub)
+                    items.append((f"{title} {desc[:200]}", age))
                 for entry in root.findall(".//atom:entry", ns)[:20]:
                     title = entry.findtext("atom:title", namespaces=ns) or ""
                     summary = entry.findtext("atom:summary", namespaces=ns) or ""
-                    texts.append(f"{title} {summary[:200]}")
+                    pub = entry.findtext("atom:updated", namespaces=ns) or ""
+                    age = self._parse_rss_date(pub)
+                    items.append((f"{title} {summary[:200]}", age))
         except Exception:
             pass
-        return texts
+        return items
 
     def _compute_sentiment(self, texts: list[str]) -> float:
         """

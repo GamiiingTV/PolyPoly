@@ -79,6 +79,64 @@ def print_banner() -> None:
     console.print()
 
 
+async def daily_report_task(db: Database, telegram) -> None:
+    """Rapport quotidien envoyé chaque matin à 8h UTC."""
+    while True:
+        now = datetime.utcnow()
+        # Prochaine occurrence de 8h UTC
+        next_run = now.replace(hour=8, minute=0, second=0, microsecond=0)
+        if now >= next_run:
+            next_run = next_run.replace(day=next_run.day + 1)
+        await asyncio.sleep((next_run - now).total_seconds())
+
+        try:
+            stats = await db.get_trade_stats()
+            signals = await db.get_recent_signals(limit=200)
+            open_trades = await db.get_open_trades()
+
+            # Top 5 opportunités par edge
+            top_signals = sorted(
+                [s for s in signals if abs(s.get("edge", 0)) > 0.05],
+                key=lambda x: abs(x.get("edge", 0)),
+                reverse=True,
+            )[:5]
+
+            total = stats.get("total", 0)
+            wins = stats.get("wins", 0)
+            win_rate = stats.get("win_rate", 0)
+            total_pnl = stats.get("total_pnl", 0)
+            pnl_str = f"+${total_pnl:.2f}" if total_pnl >= 0 else f"-${abs(total_pnl):.2f}"
+
+            lines = [
+                "📊 <b>RAPPORT QUOTIDIEN — PolyPoly</b>",
+                f"📅 {datetime.utcnow().strftime('%d/%m/%Y')}",
+                "═══════════════════",
+                f"🏆 Win rate: <b>{win_rate:.1f}%</b>  ({wins}W / {total - wins}L)",
+                f"💵 P&amp;L total: <code>{pnl_str}</code>",
+                f"📈 Trades: {total} total | {len(open_trades)} ouverts",
+                "",
+                "🎯 <b>Top 5 opportunités (24h)</b>",
+            ]
+
+            if top_signals:
+                for i, sig in enumerate(top_signals, 1):
+                    direction = sig.get("direction", "?")
+                    edge = sig.get("edge", 0) * 100
+                    conf = sig.get("confidence", 0) * 100
+                    q = sig.get("question", "")[:55]
+                    emoji = "🟢" if direction == "YES" else "🔴"
+                    lines.append(
+                        f"{i}. {emoji} {q}\n"
+                        f"   Edge: <b>{edge:+.1f}%</b> | Conf: {conf:.0f}%"
+                    )
+            else:
+                lines.append("Aucun signal fort hier.")
+
+            await telegram.send_message("\n".join(lines))
+        except Exception as e:
+            logger.error(f"Daily report erreur: {e}")
+
+
 async def health_check(db: Database) -> None:
     """Rapport de santé toutes les heures."""
     while True:
@@ -197,8 +255,9 @@ async def main() -> None:
         asyncio.create_task(learner.run_forever(),    name="Agent5-Learning"),
         asyncio.create_task(ob_agent.run_forever(),   name="Agent6-OrderBook"),
         asyncio.create_task(arb.run_forever(),        name="Agent7-Arbitrage"),
-        asyncio.create_task(feed.run_forever(),       name="RealtimeFeed"),
-        asyncio.create_task(health_check(db),         name="HealthCheck"),
+        asyncio.create_task(feed.run_forever(),             name="RealtimeFeed"),
+        asyncio.create_task(health_check(db),               name="HealthCheck"),
+        asyncio.create_task(daily_report_task(db, telegram), name="DailyReport"),
     ]
 
     console.print("[bold green]7 agents opérationnels — Feed temps réel actif[/bold green]\n")

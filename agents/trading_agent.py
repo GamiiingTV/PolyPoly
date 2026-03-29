@@ -305,7 +305,7 @@ class TradingAgent:
             self._simulation_mode = False
             logger.info("Agent 4 (Trading) en mode LIVE")
         else:
-            logger.warning("Agent 4 (Trading) en mode SIMULATION (pas de clé privée)")
+            logger.info("Agent 4 (Trading) en mode PAPER TRADING — accumulation données XGBoost")
 
         self._exit_manager = SmartExitManager(
             self.db, self.clob, self.telegram, self._simulation_mode
@@ -351,7 +351,6 @@ class TradingAgent:
     async def _process_pending_signals(self) -> None:
         """Traite les signaux récents — priorité aux signaux combinés et arbitrage."""
         signals = await self.db.get_recent_signals(limit=50)
-        # Trier par confiance décroissante
         signals.sort(key=lambda x: x.get("confidence", 0), reverse=True)
 
         # Priorité : ARBITRAGE > COMBINED > PREDICTION > ORDERBOOK > SENTIMENT
@@ -361,13 +360,16 @@ class TradingAgent:
             if x.get("signal_type") in priority_order else 99
         )
 
+        # En mode paper, on inclut aussi les signaux SENTIMENT pour accumuler
+        # des données d'entraînement rapidement (XGBoost a besoin de 50+ trades)
+        tradeable_types = ["ARBITRAGE", "COMBINED", "PREDICTION", "ORDERBOOK"]
+        if self._simulation_mode:
+            tradeable_types.append("SENTIMENT")
+
         for signal in signals:
             if signal.get("acted_on"):
                 continue
-            # Accepter PREDICTION, ORDERBOOK, ARBITRAGE, COMBINED
-            if signal.get("signal_type") not in (
-                "PREDICTION", "ORDERBOOK", "ARBITRAGE", "COMBINED"
-            ):
+            if signal.get("signal_type") not in tradeable_types:
                 continue
 
             can, reason = await self.risk.can_trade(signal)
@@ -414,10 +416,12 @@ class TradingAgent:
 
         order_id = None
         if self._simulation_mode:
-            order_id = f"SIM_{market_id[:8]}_{int(datetime.now().timestamp())}"
+            order_id = f"PAPER_{market_id[:8]}_{int(datetime.now().timestamp())}"
+            sig_type = signal.get("signal_type", "?")
             logger.info(
-                f"[SIM] {direction} ${trade_size} @ {price:.3f} "
-                f"| conf={confidence:.2%} | {market['question'][:50]}"
+                f"[PAPER] {direction} ${trade_size:.2f} @ {price:.3f} "
+                f"| {sig_type} conf={confidence:.2%} edge={edge:.2%} "
+                f"| {market['question'][:60]}"
             )
         else:
             if not token_id:

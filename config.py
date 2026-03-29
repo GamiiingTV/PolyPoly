@@ -56,6 +56,7 @@ REDDIT_CLIENT_SECRET: str = os.getenv("REDDIT_CLIENT_SECRET", "")
 REDDIT_USER_AGENT: str = os.getenv("REDDIT_USER_AGENT", "PolyPolyBot/1.0")
 
 RSS_FEEDS = [
+    # Actualités générales
     "https://feeds.reuters.com/reuters/topNews",
     "https://feeds.bbci.co.uk/news/world/rss.xml",
     "https://rss.cnn.com/rss/edition.rss",
@@ -66,6 +67,20 @@ RSS_FEEDS = [
     "https://www.axios.com/feeds/feed.rss",
     "https://feeds.washingtonpost.com/rss/world",
     "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+    # Crypto / Finance
+    "https://cointelegraph.com/rss",
+    "https://coindesk.com/arc/outboundfeeds/rss/",
+    "https://decrypt.co/feed",
+    "https://cryptonews.com/news/feed/",
+    "https://feeds.a.dj.com/rss/RSSMarketsMain.xml",
+    "https://finance.yahoo.com/rss/topfinstories",
+    # Sport
+    "https://feeds.bbci.co.uk/sport/rss.xml",
+    "https://www.espn.com/espn/rss/news",
+    "https://www.skysports.com/rss/12040",
+    # Politique US / Géopolitique
+    "https://www.foreignaffairs.com/rss.xml",
+    "https://theintercept.com/feed/?rss",
 ]
 
 TWITTER_KEYWORDS = [
@@ -107,6 +122,44 @@ SPREAD_ANOMALY_THRESHOLD: float = 0.15  # Spread bid-ask >15%
 
 # Nombre de marchés à scanner
 TARGET_MARKETS_COUNT: int = 300
+
+# ============================================================
+# DÉTECTION DE CATÉGORIE (mots-clés → catégorie)
+# ============================================================
+CATEGORY_KEYWORDS: dict = {
+    "crypto": [
+        "bitcoin", "btc", "ethereum", "eth", "crypto", "blockchain",
+        "solana", "sol", "xrp", "ripple", "defi", "nft", "binance",
+        "coinbase", "stablecoin", "usdc", "usdt", "doge", "dogecoin",
+    ],
+    "sports": [
+        "nba", "nfl", "mlb", "nhl", "soccer", "football", "basketball",
+        "tennis", "golf", "mma", "ufc", "boxing", "championship",
+        "world cup", "super bowl", "playoffs", "tournament", "league",
+        "match", "game", "win", "score", "player", "team", "coach",
+    ],
+    "politics_us": [
+        "trump", "biden", "harris", "democrat", "republican", "congress",
+        "senate", "house", "president", "election", "vote", "white house",
+        "supreme court", "fbi", "cia", "pentagon", "gop",
+    ],
+    "geopolitics": [
+        "russia", "ukraine", "china", "taiwan", "iran", "israel",
+        "nato", "war", "military", "sanctions", "nuclear", "missile",
+        "ceasefire", "invasion", "conflict", "troops", "strike",
+    ],
+    "economics": [
+        "fed", "federal reserve", "interest rate", "inflation", "gdp",
+        "recession", "unemployment", "cpi", "fomc", "powell",
+        "stock market", "s&p", "nasdaq", "dow", "earnings", "ipo",
+        "treasury", "debt", "tariff", "trade",
+    ],
+    "tech": [
+        "ai", "artificial intelligence", "openai", "google", "apple",
+        "microsoft", "meta", "spacex", "elon musk", "tesla",
+        "nvidia", "chatgpt", "gpt", "robot", "autonomous",
+    ],
+}
 
 # ============================================================
 # SCANNER — INTERVALLES (secondes)

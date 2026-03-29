@@ -14,6 +14,7 @@ from config import (
     MAX_TIME_TO_RESOLUTION_DAYS, MIN_TIME_TO_RESOLUTION_HOURS,
     PRICE_ANOMALY_THRESHOLD, PRICE_ANOMALY_WINDOW_MIN,
     SPREAD_ANOMALY_THRESHOLD, TARGET_MARKETS_COUNT, SCANNER_INTERVAL_SEC,
+    CATEGORY_KEYWORDS,
 )
 from utils.database import Database
 from utils.polymarket_api import GammaAPI, parse_market
@@ -75,6 +76,10 @@ class MarketScanner:
                 spread=market["spread"],
                 volume=market["volume_24h"],
             )
+
+            # Détecter la catégorie automatiquement
+            if not market.get("category"):
+                market["category"] = self._detect_category(market)
 
             # Calculer le score d'anomalie
             anomaly_score = await self._compute_anomaly_score(market)
@@ -202,6 +207,19 @@ class MarketScanner:
                 return min(volatility / 0.15, 1.0) * 0.5
 
         return 0.0
+
+    @staticmethod
+    def _detect_category(market: dict) -> str:
+        """Détecte la catégorie du marché via mots-clés dans la question."""
+        text = (market.get("question", "") + " " + market.get("description", "")).lower()
+        scores: dict[str, int] = {}
+        for category, keywords in CATEGORY_KEYWORDS.items():
+            score = sum(1 for kw in keywords if kw in text)
+            if score > 0:
+                scores[category] = score
+        if not scores:
+            return "other"
+        return max(scores, key=lambda k: scores[k])
 
     async def get_top_markets(self, n: int = 20) -> list[dict]:
         """Retourne les N meilleurs marchés par score d'anomalie."""
