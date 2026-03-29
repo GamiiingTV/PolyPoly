@@ -221,11 +221,18 @@ class Database:
         sql = """
         SELECT s.*, m.question FROM signals s
         JOIN markets m ON s.market_id = m.id
+        WHERE s.acted_on = 0
         ORDER BY s.created_at DESC LIMIT ?
         """
         async with self._conn.execute(sql, (limit,)) as cur:
             rows = await cur.fetchall()
             return [dict(r) for r in rows]
+
+    async def mark_signal_acted_on(self, signal_id: int) -> None:
+        await self._conn.execute(
+            "UPDATE signals SET acted_on=1 WHERE id=?", (signal_id,)
+        )
+        await self._conn.commit()
 
     # ------------------------------------------------------------------ #
     # TRADES

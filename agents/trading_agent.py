@@ -374,7 +374,7 @@ class TradingAgent:
 
             can, reason = await self.risk.can_trade(signal)
             if not can:
-                logger.debug(f"Trade refusé [{signal['market_id'][:8]}]: {reason}")
+                logger.info(f"Trade refusé [{signal['market_id'][:8]}]: {reason}")
                 continue
 
             await self._execute_trade(signal)
@@ -455,7 +455,11 @@ class TradingAgent:
         }
 
         trade_id = await self.db.save_trade(trade)
-        logger.info(f"Trade #{trade_id}: {direction} ${trade_size} | {market_id[:8]}")
+        logger.info(f"Trade #{trade_id}: {direction} ${trade_size:.2f} | {market_id[:8]} | {market.get('question','')[:50]}")
+
+        # Marquer le signal comme traité pour éviter les doublons
+        if signal.get("id"):
+            await self.db.mark_signal_acted_on(signal["id"])
 
         await self.telegram.notify_trade_placed({
             **trade, "question": market.get("question", ""),

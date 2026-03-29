@@ -387,6 +387,10 @@ class SentimentAgent:
             f"| edge={edge:.2%} | conf={confidence:.2%}"
         )
 
+        # Notifier Telegram si signal fort
+        if confidence >= 0.70:
+            await self.telegram.notify_opportunity(signal)
+
         return signal
 
     async def get_sentiment_for_market(self, market_id: str) -> Optional[float]:
