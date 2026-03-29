@@ -416,6 +416,19 @@ Réponds en JSON:
             await self.db.set_param("best_category", best_cat, f"Win rate {best_wr:.0%}")
             logger.info(f"Meilleure catégorie: '{best_cat}' ({best_wr:.0%} win rate)")
 
+        # Sauvegarder les win rates par catégorie pour calibration des signaux
+        category_win_rates = {
+            cat: round(s["wins"] / s["total"], 3)
+            for cat, s in cat_stats.items()
+            if s["total"] >= 5
+        }
+        if category_win_rates:
+            await self.db.set_param(
+                "category_win_rates", category_win_rates,
+                "Calibration automatique par catégorie"
+            )
+            logger.info(f"Win rates par catégorie mis à jour: {category_win_rates}")
+
     async def _analyze_feature_importance(self, closed_trades: list[dict]) -> None:
         """
         Analyse l'importance des features XGBoost pour identifier les features

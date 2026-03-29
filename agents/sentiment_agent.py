@@ -56,6 +56,35 @@ except Exception:
     MetaculusAgent = None  # type: ignore
 
 
+class _VelocityTracker:
+    """Suit la vélocité des news — détecte les pics d'articles par topic."""
+    def __init__(self, window_size: int = 5):
+        from collections import deque
+        self._counts: dict[str, deque] = {}  # topic → historique des counts
+        self._window = window_size
+
+    def record(self, topic: str, count: int):
+        from collections import deque
+        if topic not in self._counts:
+            self._counts[topic] = deque(maxlen=self._window)
+        self._counts[topic].append(count)
+
+    def velocity_multiplier(self, topic: str, count: int) -> float:
+        """Retourne un multiplicateur de confiance (1.0 = normal, >1.0 = pic)."""
+        history = self._counts.get(topic)
+        if not history or len(history) < 2:
+            return 1.0
+        avg = sum(history) / len(history)
+        if avg < 3:
+            return 1.0
+        ratio = count / avg
+        if ratio >= 3.0:
+            return 1.12   # Pic massif (+12% confiance)
+        if ratio >= 2.0:
+            return 1.07   # Pic modéré (+7% confiance)
+        return 1.0
+
+
 class SentimentAgent:
     """
     Agent 2 — Analyse de sentiment multi-sources.
@@ -80,6 +109,7 @@ class SentimentAgent:
         self._twitter_client = None
         self._reddit_client = None
         self._http = httpx.AsyncClient(timeout=20.0)
+        self._velocity = _VelocityTracker(window_size=6)
 
     async def start(self) -> None:
         """Initialise les clients API."""
@@ -388,6 +418,15 @@ class SentimentAgent:
         direction = "YES" if edge > 0 else "NO"
         confidence = min(0.5 + abs(sentiment_score) * 0.3 + abs_edge * 0.5, 0.85)
 
+        # Bonus de vélocité : si le volume d'articles sur ce topic a soudainement spikété
+        topic_key = " ".join(market.get("question", "").lower().split()[:3])
+        n_relevant = len(relevant_texts)
+        self._velocity.record(topic_key, n_relevant)
+        vel_mult = self._velocity.velocity_multiplier(topic_key, n_relevant)
+        if vel_mult > 1.0:
+            confidence = min(confidence * vel_mult, 0.90)
+            logger.info(f"Vélocité news x{vel_mult:.2f} sur: {topic_key}")
+
         signal = {
             "market_id": market["id"],
             "question": market.get("question", ""),
@@ -404,6 +443,18 @@ class SentimentAgent:
             "urgency_bonus": market.get("urgency_bonus", 0),
             "category": market.get("category", "other"),
         }
+
+        # ── Calibration par catégorie (win rate historique) ─────────────
+        cat_wr = await self.db.get_param("category_win_rates", {})
+        cat = market.get("category", "other")
+        if isinstance(cat_wr, dict) and cat in cat_wr:
+            historical_wr = cat_wr[cat]
+            if historical_wr > 0.60:
+                signal["confidence"] = min(signal["confidence"] * 1.08, 0.92)
+                logger.debug(f"Catégorie '{cat}' ({historical_wr:.0%} WR) → boost confiance")
+            elif historical_wr < 0.45:
+                signal["confidence"] = max(signal["confidence"] * 0.88, 0.0)
+                logger.debug(f"Catégorie '{cat}' ({historical_wr:.0%} WR) → pénalité confiance")
 
         # ── Validation LLM (Claude) ──────────────────────────────────────
         if self._llm:

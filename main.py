@@ -26,9 +26,10 @@ from agents.learning_agent   import LearningAgent
 from agents.orderbook_agent  import OrderBookAgent
 from agents.arbitrage_scanner import ArbitrageScanner
 from agents.signal_combiner  import SignalCombiner
-from agents.llm_validator    import LLMValidator
-from agents.metaculus_agent  import MetaculusAgent
-from agents.whale_tracker    import WhaleTracker
+from agents.llm_validator      import LLMValidator
+from agents.metaculus_agent    import MetaculusAgent
+from agents.whale_tracker      import WhaleTracker
+from agents.cross_platform_agent import CrossPlatformAgent
 
 console = Console()
 
@@ -77,6 +78,10 @@ def print_banner() -> None:
     table.add_row("WebSocket", "[green]✓[/green]")
     table.add_row("OrderBook", "[green]✓[/green]")
     table.add_row("Arbitrage", "[green]✓[/green]")
+    table.add_row("Cross-Platform", "[green]✓ Manifold vs Polymarket[/green]")
+    table.add_row("Vélocité news", "[green]✓[/green]")
+    table.add_row("Calibration catégorie", "[green]✓[/green]")
+    table.add_row("Événements planifiés", "[green]✓[/green]")
     table.add_row("Smart Exits", "[green]✓ (TP 80% / SL 35% / Trail 30%)[/green]")
     console.print(table)
     console.print()
@@ -229,8 +234,9 @@ async def main() -> None:
     combiner  = SignalCombiner(db, telegram)
     trader    = TradingAgent(db, clob, gamma, telegram)
     learner   = LearningAgent(db, telegram)
-    arb       = ArbitrageScanner(db, gamma, clob, telegram)
-    whale     = WhaleTracker(db, gamma, clob)
+    arb        = ArbitrageScanner(db, gamma, clob, telegram)
+    whale      = WhaleTracker(db, gamma, clob)
+    cross_plat = CrossPlatformAgent(db, telegram)
 
     # --- Feed temps réel ---
     try:
@@ -269,11 +275,12 @@ async def main() -> None:
         asyncio.create_task(arb.run_forever(),        name="Agent7-Arbitrage"),
         asyncio.create_task(feed.run_forever(),              name="RealtimeFeed"),
         asyncio.create_task(whale.run_forever(),             name="Agent10-Whale"),
+        asyncio.create_task(cross_plat.run_forever(),        name="Agent11-CrossPlatform"),
         asyncio.create_task(health_check(db),                name="HealthCheck"),
         asyncio.create_task(daily_report_task(db, telegram), name="DailyReport"),
     ]
 
-    console.print("[bold green]7 agents opérationnels — Feed temps réel actif[/bold green]\n")
+    console.print("[bold green]11 agents opérationnels — Feed temps réel actif[/bold green]\n")
     logger.info("PolyPoly v2 opérationnel")
 
     try:
@@ -285,7 +292,7 @@ async def main() -> None:
         for task in tasks:
             task.cancel()
         for agent in [scanner, sentiment, predictor, trader, learner,
-                      ob_agent, arb, feed, whale, llm_validator, metaculus]:
+                      ob_agent, arb, feed, whale, llm_validator, metaculus, cross_plat]:
             try:
                 agent.stop()
             except Exception:

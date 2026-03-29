@@ -85,8 +85,11 @@ class MarketScanner:
             anomaly_score = await self._compute_anomaly_score(market)
             # Bonus d'urgence : marché se résolvant dans <48h
             urgency_bonus = self._compute_urgency_bonus(market)
-            market["anomaly_score"] = min(anomaly_score + urgency_bonus, 1.0)
+            # Bonus événement planifié (FOMC, élections, finales sportives…)
+            event_bonus = self._detect_scheduled_event_bonus(market)
+            market["anomaly_score"] = min(anomaly_score + urgency_bonus + event_bonus, 1.0)
             market["urgency_bonus"] = urgency_bonus
+            market["event_bonus"] = event_bonus
 
             # Sauvegarder dans la DB
             await self.db.upsert_market(market)
@@ -244,6 +247,43 @@ class MarketScanner:
             return 0.0
         except Exception:
             return 0.0
+
+    @staticmethod
+    def _detect_scheduled_event_bonus(market: dict) -> float:
+        """
+        Détecte si le marché concerne un événement planifié imminent
+        (FOMC, résultats d'entreprise, sommet, match important…).
+        Retourne un bonus entre 0.0 et 0.20.
+        """
+        text = (market.get("question", "") + " " + market.get("description", "")).lower()
+
+        # Mots-clés d'événements à haute valeur prédictive
+        HIGH_VALUE_EVENTS = [
+            "fomc", "federal reserve", "fed meeting", "rate decision",
+            "earnings", "quarterly results", "q1 ", "q2 ", "q3 ", "q4 ",
+            "election", "vote", "referendum", "inauguration",
+            "summit", "g7", "g20", "nato summit", "un security",
+            "trial verdict", "court decision", "supreme court",
+            "ipo", "merger", "acquisition", "bankruptcy",
+            "world cup final", "championship final", "super bowl",
+            "nba finals", "stanley cup", "grand slam",
+        ]
+
+        for keyword in HIGH_VALUE_EVENTS:
+            if keyword in text:
+                return 0.12  # Bonus significatif pour événements planifiés
+
+        # Mots-clés secondaires
+        SECONDARY_EVENTS = [
+            "debate", "speech", "press conference", "announcement",
+            "report", "data release", "jobs report", "cpi",
+            "playoff", "semifinal", "final", "championship",
+        ]
+        for keyword in SECONDARY_EVENTS:
+            if keyword in text:
+                return 0.06
+
+        return 0.0
 
     @staticmethod
     def _detect_category(market: dict) -> str:

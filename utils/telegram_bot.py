@@ -77,6 +77,26 @@ class TelegramNotifier:
             logger.error(f"Erreur envoi Telegram: {e}")
             return False
 
+    # Émojis par catégorie
+    _CATEGORY_EMOJI = {
+        "crypto": "₿", "sports": "⚽", "politics_us": "🇺🇸",
+        "geopolitics": "🌍", "economics": "📉", "tech": "💻", "other": "🎯",
+    }
+
+    # Traductions direction
+    _DIRECTION_FR = {"YES": "ACHETER OUI", "NO": "VENDRE NON"}
+
+    # Traductions type de signal
+    _TYPE_FR = {
+        "ARBITRAGE": "Arbitrage inter-plateformes",
+        "SENTIMENT": "Signal de sentiment",
+        "ORDERBOOK": "Signal carnet d'ordres",
+        "PREDICTION": "Prédiction ML",
+        "WHALE": "Activité baleine",
+        "COMBINED": "Signal combiné",
+        "ANOMALY": "Anomalie de prix",
+    }
+
     async def notify_opportunity(self, signal: dict) -> None:
         # Anti-doublon : ignorer si déjà notifié dans les 2 dernières heures
         market_id = str(signal.get("market_id", ""))
@@ -87,46 +107,77 @@ class TelegramNotifier:
             return
         self._last_notified[market_id] = now
 
-        direction_emoji = "🟢" if signal.get("direction") == "YES" else "🔴"
+        direction = signal.get("direction", "YES")
+        direction_emoji = "🟢" if direction == "YES" else "🔴"
+        direction_fr = self._DIRECTION_FR.get(direction, direction)
         confidence = signal.get("confidence", 0) * 100
         edge = signal.get("edge", 0) * 100
         market_price = signal.get("market_price", 0) * 100
         predicted_prob = signal.get("predicted_prob", 0) * 100
         market_url = signal.get("market_url", "")
+        category = signal.get("category", "other")
+        cat_emoji = self._CATEGORY_EMOJI.get(category, "🎯")
+        sig_type_fr = self._TYPE_FR.get(signal.get("signal_type", ""), "Signal IA")
+        n_sources = signal.get("texts_count", 0)
 
-        # Ligne LLM reasoning
-        llm_line = ""
-        if signal.get("llm_reasoning"):
-            llm_line = f"\n🤖 <b>IA:</b> <i>{signal['llm_reasoning'][:160]}</i>"
+        # ── Opinion IA (pièce centrale du message) ──────────────────────
+        llm_reasoning = signal.get("llm_reasoning", "").strip()
+        if llm_reasoning:
+            opinion_block = f"🤖 <b>Avis du bot :</b>\n<i>{llm_reasoning[:220]}</i>\n\n"
+        else:
+            # Générer un avis minimal à partir des données si pas de LLM
+            if abs(edge) >= 30:
+                opinion_block = f"🤖 <b>Avis du bot :</b>\n<i>Décalage très fort ({edge:+.0f}%) entre le prix du marché et la probabilité estimée — opportunité rare.</i>\n\n"
+            elif abs(edge) >= 15:
+                opinion_block = f"🤖 <b>Avis du bot :</b>\n<i>Décalage significatif détecté ({edge:+.0f}%). Probabilité estimée à {predicted_prob:.0f}% vs {market_price:.0f}¢ sur le marché.</i>\n\n"
+            else:
+                opinion_block = ""
 
-        # Ligne Metaculus consensus
-        meta_line = ""
+        # ── Validation externe (Metaculus / Manifold) ────────────────────
+        external_line = ""
         if signal.get("metaculus_prob") is not None:
             meta_prob = signal["metaculus_prob"] * 100
             meta_src = signal.get("metaculus_source", "Experts")
-            meta_line = f"\n📐 <b>{meta_src}:</b> {meta_prob:.0f}% de probabilité"
+            external_line = f"📐 <b>{meta_src} :</b> {meta_prob:.0f}% — <i>{'confirme' if abs(meta_prob - predicted_prob) < 10 else 'signale une divergence'}</i>\n"
+        elif signal.get("cross_platform_prob") is not None:
+            cp_prob = signal["cross_platform_prob"] * 100
+            cp_src = signal.get("cross_platform_source", "Manifold")
+            external_line = f"🔄 <b>{cp_src} :</b> {cp_prob:.0f}% de probabilité\n"
 
-        # Urgence si marché se résout bientôt
-        urgency_line = ""
+        # ── Urgence ──────────────────────────────────────────────────────
         urgency = signal.get("urgency_bonus", 0)
-        if urgency >= 0.25:
-            urgency_line = "\n⚡ <b>URGENT</b> — résolution dans <24h"
+        if urgency >= 0.40:
+            urgency_line = "⚡ <b>ULTRA-URGENT</b> — résolution dans moins de 6h\n"
+        elif urgency >= 0.25:
+            urgency_line = "⚡ <b>URGENT</b> — résolution dans moins de 24h\n"
         elif urgency >= 0.15:
-            urgency_line = "\n⏳ Résolution dans <48h"
+            urgency_line = "⏳ Résolution dans moins de 48h\n"
+        else:
+            urgency_line = ""
 
-        url_line = f'\n🔗 <a href="{market_url}">Voir sur Polymarket</a>' if market_url else ""
+        # ── Lien ─────────────────────────────────────────────────────────
+        url_line = f'🔗 <a href="{market_url}"><b>Parier maintenant sur Polymarket →</b></a>' if market_url else ""
+
+        # ── Barre de confiance visuelle ───────────────────────────────────
+        filled = int(confidence / 10)
+        conf_bar = "█" * filled + "░" * (10 - filled)
 
         msg = (
-            f"🎯 <b>OPPORTUNITÉ DÉTECTÉE</b>\n\n"
-            f"📊 <b>Marché:</b> {signal.get('question', 'N/A')[:80]}\n"
-            f"{direction_emoji} <b>Direction:</b> {signal.get('direction', 'N/A')}\n"
-            f"💰 <b>Prix marché:</b> {market_price:.1f}¢\n"
-            f"🧠 <b>Prob. prédite:</b> {predicted_prob:.1f}%\n"
-            f"📈 <b>Edge:</b> {edge:+.1f}%\n"
-            f"🎲 <b>Confiance:</b> {confidence:.1f}%\n"
-            f"📡 <b>Source:</b> {signal.get('source', 'N/A')}"
-            f"{meta_line}{llm_line}{urgency_line}{url_line}\n"
-            f"⏰ {datetime.now().strftime('%H:%M:%S')}"
+            f"{cat_emoji} <b>{sig_type_fr.upper()}</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"📌 <b>{signal.get('question', 'N/A')[:90]}</b>\n\n"
+            f"{opinion_block}"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"{direction_emoji} <b>{direction_fr}</b>\n"
+            f"💰 Prix actuel : <b>{market_price:.1f}¢</b>   →   Prob. estimée : <b>{predicted_prob:.1f}%</b>\n"
+            f"📈 Edge : <b>{edge:+.1f}%</b>\n"
+            f"🎲 Confiance : <b>{confidence:.0f}%</b>  [{conf_bar}]\n"
+            f"📡 Sources analysées : {n_sources}\n"
+            f"{external_line}"
+            f"{urgency_line}"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"{url_line}\n"
+            f"⏰ {now.strftime('%d/%m %H:%M')}"
         )
         await self.send_message(msg)
 
