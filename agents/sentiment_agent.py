@@ -136,13 +136,18 @@ class SentimentAgent:
         logger.info(f"Sentiment: {len(all_texts)} textes collectés")
 
         # Analyser chaque marché
-        signals = []
+        raw_signals = []
         for market in markets:
             signal = await self._analyze_market_sentiment(market, all_texts)
             if signal:
-                signals.append(signal)
+                raw_signals.append(signal)
 
-        logger.info(f"Sentiment: {len(signals)} signaux générés")
+        # Dédupliquer : garder uniquement le signal au plus fort edge
+        # par "topic" (premiers 4 mots de la question) pour éviter les
+        # alertes répétitives sur des marchés corrélés (ex: BTC $60k / $65k)
+        signals = self._deduplicate_signals(raw_signals)
+
+        logger.info(f"Sentiment: {len(signals)} signaux générés ({len(raw_signals)} avant dédup)")
         return signals
 
     async def _fetch_twitter_data(self) -> list[str]:
@@ -346,7 +351,7 @@ class SentimentAgent:
         """
         relevant_texts = self._find_relevant_texts(market, all_texts)
 
-        if len(relevant_texts) < 3:
+        if len(relevant_texts) < 7:
             return None
 
         sentiment_score = self._compute_sentiment(relevant_texts)
@@ -394,6 +399,29 @@ class SentimentAgent:
             await self.telegram.notify_opportunity(signal)
 
         return signal
+
+    @staticmethod
+    def _deduplicate_signals(signals: list[dict]) -> list[dict]:
+        """
+        Garde un seul signal par topic (pour éviter BTC $60k + BTC $65k + BTC $68k).
+        Topic = 3 premiers mots significatifs de la question.
+        Garde le signal avec le plus grand |edge|.
+        """
+        stop = {"will", "the", "a", "an", "in", "on", "at", "to", "for",
+                "of", "and", "or", "is", "be", "by", "as", "it", "hit",
+                "dip", "price", "above", "below", "reach", "end"}
+
+        def topic_key(signal: dict) -> str:
+            words = re.findall(r'\b\w{3,}\b', signal.get("question", "").lower())
+            keywords = [w for w in words if w not in stop][:3]
+            return " ".join(keywords)
+
+        best: dict[str, dict] = {}
+        for sig in signals:
+            key = topic_key(sig)
+            if key not in best or abs(sig["edge"]) > abs(best[key]["edge"]):
+                best[key] = sig
+        return list(best.values())
 
     @staticmethod
     def _get_market_url(market: dict) -> str:
