@@ -5,7 +5,7 @@ Utilise l'API HTTP Telegram directement (pas de python-telegram-bot).
 
 import asyncio
 import aiohttp
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 from loguru import logger
 
@@ -17,11 +17,15 @@ TELEGRAM_BASE_URL = "https://api.telegram.org/bot{token}/{method}"
 class TelegramNotifier:
     """Gestionnaire de notifications Telegram via HTTP direct."""
 
+    # Cooldown anti-doublon : 2h par marché
+    _NOTIF_COOLDOWN_HOURS = 2
+
     def __init__(self):
         self.chat_id = TELEGRAM_CHAT_ID
         self._token = TELEGRAM_BOT_TOKEN
         self._enabled = bool(self._token and self.chat_id)
         self._session: Optional[aiohttp.ClientSession] = None
+        self._last_notified: dict[str, datetime] = {}  # market_id → heure dernière alerte
 
     async def start(self):
         if not self._enabled:
@@ -74,6 +78,15 @@ class TelegramNotifier:
             return False
 
     async def notify_opportunity(self, signal: dict) -> None:
+        # Anti-doublon : ignorer si déjà notifié dans les 2 dernières heures
+        market_id = str(signal.get("market_id", ""))
+        now = datetime.now()
+        last = self._last_notified.get(market_id)
+        if last and (now - last) < timedelta(hours=self._NOTIF_COOLDOWN_HOURS):
+            logger.debug(f"Doublon ignoré ({market_id}) — déjà notifié il y a {(now-last).seconds//60}min")
+            return
+        self._last_notified[market_id] = now
+
         direction_emoji = "🟢" if signal.get("direction") == "YES" else "🔴"
         confidence = signal.get("confidence", 0) * 100
         edge = signal.get("edge", 0) * 100
@@ -108,7 +121,7 @@ class TelegramNotifier:
             f"📊 <b>Marché:</b> {signal.get('question', 'N/A')[:80]}\n"
             f"{direction_emoji} <b>Direction:</b> {signal.get('direction', 'N/A')}\n"
             f"💰 <b>Prix marché:</b> {market_price:.1f}¢\n"
-            f"🧠 <b>Prob. prédite:</b> {predicted_prob:.1f}¢\n"
+            f"🧠 <b>Prob. prédite:</b> {predicted_prob:.1f}%\n"
             f"📈 <b>Edge:</b> {edge:+.1f}%\n"
             f"🎲 <b>Confiance:</b> {confidence:.1f}%\n"
             f"📡 <b>Source:</b> {signal.get('source', 'N/A')}"
