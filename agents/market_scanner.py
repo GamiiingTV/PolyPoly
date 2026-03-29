@@ -134,9 +134,9 @@ class MarketScanner:
             except (ValueError, TypeError):
                 pass
 
-        # Filtrer les marchés avec prix extrêmes (>95¢ ou <5¢) — quasi-résolus
+        # Filtrer les marchés avec prix extrêmes (>85¢ ou <5¢) — quasi-résolus
         yes_price = market.get("yes_price", 0.5)
-        if yes_price > 0.95 or yes_price < 0.05:
+        if yes_price > 0.85 or yes_price < 0.05:
             return False
 
         return True
