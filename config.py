@@ -93,12 +93,12 @@ MAX_OPEN_POSITIONS: int = int(os.getenv("MAX_OPEN_POSITIONS", "10"))
 DAILY_LOSS_LIMIT_USD: float = float(os.getenv("DAILY_LOSS_LIMIT_USD", "15.0"))
 
 # Seuils de qualité
-MIN_CONFIDENCE_THRESHOLD: float = float(os.getenv("MIN_CONFIDENCE_THRESHOLD", "0.72"))
+MIN_CONFIDENCE_THRESHOLD: float = float(os.getenv("MIN_CONFIDENCE_THRESHOLD", "0.65"))
 MIN_EDGE_THRESHOLD: float = float(os.getenv("MIN_EDGE_THRESHOLD", "0.05"))   # 5% d'écart minimum
 MIN_LIQUIDITY_USD: float = float(os.getenv("MIN_LIQUIDITY_USD", "1000.0"))
 MIN_VOLUME_24H_USD: float = float(os.getenv("MIN_VOLUME_24H_USD", "500.0"))
 MAX_TIME_TO_RESOLUTION_DAYS: int = 30    # Ne trade pas les marchés >30j
-MIN_TIME_TO_RESOLUTION_HOURS: int = 4   # Ne trade pas si résolution <4h
+MIN_TIME_TO_RESOLUTION_HOURS: int = 1   # Ne trade pas si résolution <1h (sports inclus)
 
 # Anomalie de prix : si le prix bouge de X% en Y minutes
 PRICE_ANOMALY_THRESHOLD: float = 0.08   # 8% de mouvement

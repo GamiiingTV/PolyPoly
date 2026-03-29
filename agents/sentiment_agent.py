@@ -73,8 +73,9 @@ class SentimentAgent:
         # Twitter
         if TWEEPY_AVAILABLE and TWITTER_BEARER_TOKEN:
             try:
-                self._twitter_client = tweepy.AsyncClient(
-                    bearer_token=TWITTER_BEARER_TOKEN
+                self._twitter_client = tweepy.Client(
+                    bearer_token=TWITTER_BEARER_TOKEN,
+                    wait_on_rate_limit=True,
                 )
                 logger.info("Twitter API connectée")
             except Exception as e:
@@ -144,34 +145,33 @@ class SentimentAgent:
         return signals
 
     async def _fetch_twitter_data(self) -> list[str]:
-        """Récupère les tweets récents."""
-        texts = []
+        """Récupère les tweets récents via tweepy.Client (sync) dans un executor."""
         if not self._twitter_client:
+            return []
+
+        def _sync_fetch():
+            texts = []
+            try:
+                query = " OR ".join(f'"{kw}"' for kw in TWITTER_KEYWORDS[:5])
+                query += " -is:retweet lang:en"
+                response = self._twitter_client.search_recent_tweets(
+                    query=query,
+                    max_results=100,
+                    tweet_fields=["text", "created_at", "public_metrics"],
+                )
+                if response.data:
+                    for tweet in response.data:
+                        metrics = getattr(tweet, "public_metrics", {}) or {}
+                        likes = metrics.get("like_count", 0)
+                        rts = metrics.get("retweet_count", 0)
+                        weight = 1 + min((likes + rts * 2) / 50, 5)
+                        texts.extend([tweet.text] * int(weight))
+            except Exception as e:
+                logger.warning(f"Twitter fetch erreur: {e}")
             return texts
 
-        try:
-            query = " OR ".join(f'"{kw}"' for kw in TWITTER_KEYWORDS[:5])
-            query += " -is:retweet lang:en"
-
-            response = await self._twitter_client.search_recent_tweets(
-                query=query,
-                max_results=100,
-                tweet_fields=["text", "created_at", "public_metrics"],
-            )
-
-            if response.data:
-                for tweet in response.data:
-                    # Pondérer par engagement
-                    metrics = getattr(tweet, "public_metrics", {}) or {}
-                    likes = metrics.get("like_count", 0)
-                    rts = metrics.get("retweet_count", 0)
-                    weight = 1 + min((likes + rts * 2) / 50, 5)
-                    texts.extend([tweet.text] * int(weight))
-
-        except Exception as e:
-            logger.warning(f"Twitter fetch erreur: {e}")
-
-        return texts
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, _sync_fetch)
 
     async def _fetch_reddit_data(self) -> list[str]:
         """Récupère les posts Reddit récents."""
