@@ -96,9 +96,37 @@ class CrossPlatformAgent:
         if abs_div < MIN_DIVERGENCE:
             return None
 
+        traders = manifold["traders"]
         direction = "YES" if divergence > 0 else "NO"
-        # Confiance plus haute si divergence grande et marché Manifold a des paris
-        confidence = min(0.62 + abs_div * 1.8, 0.90)
+
+        # Confiance pondérée par le nombre de traders Manifold :
+        # Avec 18 traders, Manifold est peu fiable vs Polymarket.
+        # Avec 200+ traders, la divergence est plus crédible.
+        trader_weight = min(traders / 100, 1.0)   # 0.0 → 1.0 selon le volume Manifold
+
+        # Si Polymarket a un prix < 15¢ ou > 85¢, ses traders ont probablement
+        # plus d'info sur un marché factuel (tweet count, score sportif, etc.)
+        polymarket_informed_bonus = 0.0
+        if yes_price < 0.15 or yes_price > 0.85:
+            polymarket_informed_bonus = -0.10  # Pénalité : Polymarket probablement correct
+
+        # Si résolution dans < 48h, Polymarket est généralement mieux informé
+        urgency = market.get("urgency_bonus", 0)
+        if urgency >= 0.25:
+            polymarket_informed_bonus -= 0.08  # Encore plus de pénalité si résolution imminente
+
+        base_confidence = 0.62 + abs_div * 1.8
+        confidence = min(
+            base_confidence * (0.5 + trader_weight * 0.5) + polymarket_informed_bonus,
+            0.88
+        )
+
+        if confidence < 0.60:
+            logger.debug(
+                f"Cross-platform rejeté (confiance trop basse {confidence:.0%}): "
+                f"{question[:50]}"
+            )
+            return None
 
         logger.info(
             f"DIVERGENCE INTER-PLATEFORME: Poly={yes_price:.0%} "
@@ -178,7 +206,7 @@ class CrossPlatformAgent:
             prob = best.get("probability", 0.5)
             traders = best.get("uniqueBettorCount", 0)
             # Ignorer les marchés Manifold avec peu de traders (données peu fiables)
-            if traders < 5:
+            if traders < 25:
                 return None
 
             return {
