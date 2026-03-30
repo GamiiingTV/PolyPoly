@@ -461,24 +461,11 @@ class TradingAgent:
         if not market:
             return None
 
-        raw_market = json.loads(market.get("raw_data", "{}"))
-        clob_token_ids = raw_market.get("clobTokenIds", [])
-
-        # Gérer le cas où clobTokenIds est stocké comme string JSON
-        if isinstance(clob_token_ids, str):
-            try:
-                clob_token_ids = json.loads(clob_token_ids)
-            except Exception:
-                clob_token_ids = []
-
-        token_id = None
-        if clob_token_ids and len(clob_token_ids) >= 1:
-            if direction == "YES":
-                token_id = clob_token_ids[0]
-            elif len(clob_token_ids) >= 2:
-                token_id = clob_token_ids[1]
-            else:
-                token_id = clob_token_ids[0]  # Fallback: seul token disponible
+        # token_id injecté par Database._enrich_market() — pas besoin de parser raw_data
+        if direction == "YES":
+            token_id = market.get("token_id_yes")
+        else:
+            token_id = market.get("token_id_no") or market.get("token_id_yes")
 
         # Capital disponible
         if self._simulation_mode:

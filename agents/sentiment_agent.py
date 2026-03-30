@@ -182,8 +182,16 @@ class SentimentAgent:
                     pass
             # Filtre date dans le SLUG/URL — critique pour le sport
             # Ex: "atp-draxl-galarne-2026-03-29" → date 29/03 passée → filtré
-            # Polymarket résout 24-48h après l'événement, mais l'event est déjà fini
-            url = m.get("market_url", "") or m.get("id", "")
+            # IMPORTANT: market_url n'est PAS une colonne DB → chercher dans raw_data
+            url = m.get("market_url", "")
+            if not url:
+                try:
+                    raw = json.loads(m.get("raw_data", "{}") or "{}")
+                    url = (raw.get("market_url") or
+                           raw.get("slug") or
+                           raw.get("groupSlug") or "")
+                except Exception:
+                    url = ""
             slug_date = re.search(r'(\d{4}-\d{2}-\d{2})', url)
             if slug_date:
                 try:

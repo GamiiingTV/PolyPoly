@@ -171,12 +171,50 @@ class Database:
         """
         async with self._conn.execute(sql, (min_liquidity, limit)) as cur:
             rows = await cur.fetchall()
-            return [dict(r) for r in rows]
+            return [self._enrich_market(dict(r)) for r in rows]
 
     async def get_market(self, market_id: str) -> Optional[dict]:
         async with self._conn.execute("SELECT * FROM markets WHERE id=?", (market_id,)) as cur:
             row = await cur.fetchone()
-            return dict(row) if row else None
+            return self._enrich_market(dict(row)) if row else None
+
+    @staticmethod
+    def _enrich_market(market: dict) -> dict:
+        """
+        Injecte market_url et token_id_yes/no depuis raw_data.
+        Ces champs ne sont pas des colonnes DB mais sont nécessaires à tous les agents.
+        """
+        import json as _json
+        import ast as _ast
+        raw_str = market.get("raw_data", "")
+        if not raw_str:
+            return market
+        try:
+            raw = _json.loads(raw_str) if isinstance(raw_str, str) else raw_str
+
+            # market_url depuis slug ou groupSlug
+            if not market.get("market_url"):
+                group_slug = raw.get("groupSlug", "") or raw.get("group_slug", "")
+                slug = raw.get("slug", "")
+                if group_slug:
+                    market["market_url"] = f"https://polymarket.com/event/{group_slug}"
+                elif slug:
+                    market["market_url"] = f"https://polymarket.com/market/{slug}"
+
+            # token_id_yes / token_id_no depuis clobTokenIds
+            if not market.get("token_id_yes"):
+                clob_ids = raw.get("clobTokenIds", [])
+                if isinstance(clob_ids, str):
+                    try:
+                        clob_ids = _ast.literal_eval(clob_ids)
+                    except Exception:
+                        clob_ids = []
+                if clob_ids:
+                    market["token_id_yes"] = clob_ids[0]
+                    market["token_id_no"] = clob_ids[1] if len(clob_ids) > 1 else clob_ids[0]
+        except Exception:
+            pass
+        return market
 
     # ------------------------------------------------------------------ #
     # HISTORIQUE DES PRIX
