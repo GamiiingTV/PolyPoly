@@ -369,7 +369,7 @@ class TradingAgent:
         # car ces signaux sont indépendants du XGBoost
         tradeable_types = [
             "BOOKMAKER", "ARBITRAGE", "COHERENCE", "WIKI", "COMBINED",
-            "PREDICTION", "ORDERBOOK", "WHALE",
+            "PREDICTION", "ORDERBOOK", "WHALE", "SMART_MONEY",
         ]
         if self._simulation_mode:
             tradeable_types.append("SENTIMENT")

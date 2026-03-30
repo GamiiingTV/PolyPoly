@@ -32,6 +32,8 @@ from agents.whale_tracker        import WhaleTracker
 from agents.cross_platform_agent import CrossPlatformAgent
 from agents.wikipedia_agent      import WikipediaAgent
 from agents.bookmaker_agent      import BookmakerAgent
+from agents.news_flash_agent     import NewsFlashAgent
+from agents.smart_money_agent    import SmartMoneyAgent
 
 console = Console()
 
@@ -83,6 +85,8 @@ def print_banner() -> None:
     table.add_row("Cross-Platform", "[green]✓ Manifold vs Polymarket[/green]")
     table.add_row("Wikipedia Monitor", "[green]✓ Éditions temps réel[/green]")
     table.add_row("Bookmaker Odds", "[green]✓[/green]" if config.ODDS_API_KEY else "[yellow]✗ (ODDS_API_KEY manquant)[/yellow]")
+    table.add_row("News Flash", "[green]✓ Breaking news → marchés[/green]")
+    table.add_row("Smart Money", "[green]✓ Copy trading gros wallets[/green]")
     table.add_row("XGBoost historique", "[green]✓ Pré-entraîné au démarrage[/green]")
     table.add_row("Cohérence inter-marchés", "[green]✓[/green]")
     table.add_row("Vélocité news", "[green]✓[/green]")
@@ -243,8 +247,10 @@ async def main() -> None:
     arb        = ArbitrageScanner(db, gamma, clob, telegram)
     whale      = WhaleTracker(db, gamma, clob)
     cross_plat = CrossPlatformAgent(db, telegram)
-    wiki       = WikipediaAgent(db, telegram)
-    bookmaker  = BookmakerAgent(db, telegram)
+    wiki        = WikipediaAgent(db, telegram)
+    bookmaker   = BookmakerAgent(db, telegram)
+    news_flash  = NewsFlashAgent(db, telegram)
+    smart_money = SmartMoneyAgent(db, telegram)
 
     # --- Feed temps réel ---
     try:
@@ -286,12 +292,14 @@ async def main() -> None:
         asyncio.create_task(cross_plat.run_forever(),        name="Agent11-CrossPlatform"),
         asyncio.create_task(wiki.run_forever(),              name="Agent12-Wikipedia"),
         asyncio.create_task(bookmaker.run_forever(),         name="Agent13-Bookmaker"),
+        asyncio.create_task(news_flash.run_forever(),        name="Agent14-NewsFlash"),
+        asyncio.create_task(smart_money.run_forever(),       name="Agent15-SmartMoney"),
         asyncio.create_task(combiner.run_forever(),          name="SignalCombiner"),
         asyncio.create_task(health_check(db),                name="HealthCheck"),
         asyncio.create_task(daily_report_task(db, telegram), name="DailyReport"),
     ]
 
-    console.print("[bold green]13 agents opérationnels — XGBoost pré-entraîné — Feed temps réel actif[/bold green]\n")
+    console.print("[bold green]15 agents opérationnels — News Flash + Smart Money + XGBoost pré-entraîné[/bold green]\n")
     logger.info("PolyPoly v2 opérationnel")
 
     try:
@@ -304,7 +312,7 @@ async def main() -> None:
             task.cancel()
         for agent in [scanner, sentiment, predictor, trader, learner,
                       ob_agent, arb, feed, whale, llm_validator, metaculus,
-                      cross_plat, wiki, bookmaker, combiner]:
+                      cross_plat, wiki, bookmaker, news_flash, smart_money, combiner]:
             try:
                 agent.stop()
             except Exception:

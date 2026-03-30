@@ -17,26 +17,42 @@ except ImportError:
 
 from config import ANTHROPIC_API_KEY, LLM_MODEL
 
-VALIDATION_PROMPT = """You are an expert prediction market trader on Polymarket. Analyze this signal concisely.
+VALIDATION_PROMPT = """Tu es un trader expert sur Polymarket. Décide si ce signal vaut la peine d'être joué.
 
-Market: {question}
-Market price (YES): {yes_price:.0%}
-Our model prediction: {predicted_prob:.0%}
-Direction: {direction} | Edge: {edge:+.0%} | Confidence: {confidence:.0%}
+═══ SIGNAL ═══
+Marché : {question}
+Prix YES actuel : {yes_price:.0%}  |  Modèle prédit : {predicted_prob:.0%}
+Direction : {direction}  |  Edge : {edge:+.0%}  |  Confiance modèle : {confidence:.0%}
 
-Recent news ({n_texts} sources):
+═══ ACTUALITÉS ({n_texts} sources) ═══
 {news_summary}
 
-Answer in JSON only (reason must be in French):
+═══ ANALYSE EN 4 ÉTAPES ═══
+
+1. ARGUMENTS POUR parier {direction} (basés sur les news ci-dessus)
+2. AVOCAT DU DIABLE — pourquoi NE PAS parier (sois sévère, cherche les pièges)
+3. CONSENSUS — sur 10 analystes qui voient ces mêmes news, combien voteraient {direction} ?
+4. TU ES L'INVESTISSEUR — tu as ${capital:.0f} en jeu. C'est ton argent. Tu parierais OUI ou NON ?
+
+Réponds en JSON uniquement (pas de texte hors du JSON) :
 {{
-  "valid": true or false,
-  "adj": float between -0.15 and +0.15 (confidence adjustment),
-  "prob": float 0.0-1.0 (your probability estimate for YES),
-  "reason": "1-2 phrases en français expliquant l'opportunité ou le problème",
-  "flags": ["list any red flags, empty if none"]
+  "pour": ["argument 1", "argument 2"],
+  "contre": ["contre-argument 1", "contre-argument 2"],
+  "consensus_pct": 0.0,
+  "verdict": "OUI" ou "NON" ou "ABSTAIN",
+  "certitude": 1,
+  "valid": true,
+  "adj": 0.0,
+  "prob": 0.5,
+  "reason": "1-2 phrases en français résumant ton verdict final"
 }}
 
-Red flags to check: event already resolved, news irrelevant to market, direction contradicts news, market at extreme price for wrong reasons."""
+Règles :
+- consensus_pct : fraction 0.0→1.0 des analystes qui voteraient dans le sens du signal
+- certitude : 1 (zéro confiance) à 10 (quasi-certain)
+- valid doit être FALSE si : certitude < 6, consensus_pct < 0.55, événement déjà résolu, news contredisent le signal
+- adj : ajustement de confiance entre -0.15 et +0.15
+- prob : ta propre estimation de probabilité YES (0.0 à 1.0)"""
 
 
 class LLMValidator:
@@ -92,6 +108,7 @@ class LLMValidator:
                 f"• {t[:180]}" for t in relevant_texts[:6]
             ) or "No news found."
 
+            from config import CAPITAL_USD
             prompt = VALIDATION_PROMPT.format(
                 question=signal.get("question", ""),
                 yes_price=signal.get("market_price", 0.5),
@@ -101,6 +118,7 @@ class LLMValidator:
                 confidence=signal.get("confidence", 0.7),
                 n_texts=signal.get("texts_count", 0),
                 news_summary=news_summary,
+                capital=CAPITAL_USD,
             )
 
             response = await self._client.messages.create(
@@ -124,20 +142,33 @@ class LLMValidator:
             adj = float(result.get("adj", 0.0))
             prob = float(result.get("prob", signal.get("predicted_prob", 0.5)))
             reasoning = str(result.get("reason", ""))
-            flags = result.get("flags", [])
+            certitude = int(result.get("certitude", 5))
+            consensus_pct = float(result.get("consensus_pct", 0.5))
+            verdict = str(result.get("verdict", "ABSTAIN"))
+            pour = result.get("pour", [])
+            contre = result.get("contre", [])
+
+            # Forcer valid=False si certitude trop basse ou consensus insuffisant
+            if certitude < 6 or consensus_pct < 0.55:
+                valid = False
 
             new_conf = min(max(signal.get("confidence", 0.7) + adj, 0.0), 1.0)
 
             signal["llm_valid"] = valid
             signal["llm_reasoning"] = reasoning
             signal["llm_prob"] = prob
-            signal["llm_flags"] = flags
+            signal["llm_flags"] = contre  # contre-arguments comme flags
+            signal["llm_certitude"] = certitude
+            signal["llm_consensus"] = consensus_pct
+            signal["llm_verdict"] = verdict
+            signal["llm_pour"] = pour
+            signal["llm_contre"] = contre
             signal["confidence"] = new_conf
 
             status = "✅ VALIDÉ" if valid else "❌ REJETÉ"
             logger.info(
                 f"LLM {status}: {signal.get('question', '')[:55]} "
-                f"| adj={adj:+.2f} | {reasoning[:70]}"
+                f"| certitude={certitude}/10 | consensus={consensus_pct:.0%} | {reasoning[:70]}"
             )
 
         except Exception as e:

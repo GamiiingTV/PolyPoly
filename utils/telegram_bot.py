@@ -95,6 +95,10 @@ class TelegramNotifier:
         "WHALE": "Activité baleine",
         "COMBINED": "Signal combiné",
         "ANOMALY": "Anomalie de prix",
+        "SMART_MONEY": "Smart Money / Gros traders",
+        "BOOKMAKER": "Cotes bookmaker",
+        "WIKI": "Signal Wikipedia",
+        "COHERENCE": "Cohérence inter-marchés",
     }
 
     async def notify_opportunity(self, signal: dict) -> None:
@@ -122,14 +126,43 @@ class TelegramNotifier:
 
         # ── Opinion IA (pièce centrale du message) ──────────────────────
         llm_reasoning = signal.get("llm_reasoning", "").strip()
+        certitude = signal.get("llm_certitude", 0)
+        consensus = signal.get("llm_consensus", 0.0)
+        verdict = signal.get("llm_verdict", "")
+        pour_args = signal.get("llm_pour", [])
+        contre_args = signal.get("llm_contre", [])
+
         if llm_reasoning:
-            opinion_block = f"🤖 <b>Avis du bot :</b>\n<i>{llm_reasoning[:220]}</i>\n\n"
+            verdict_line = ""
+            if verdict in ("OUI", "NON"):
+                verdict_emoji = "✅" if verdict == "OUI" else "❌"
+                verdict_line = f"{verdict_emoji} <b>Verdict :</b> {verdict}"
+                if certitude:
+                    verdict_line += f"  |  🎯 Certitude : <b>{certitude}/10</b>"
+                if consensus:
+                    verdict_line += f"  |  👥 Consensus : <b>{consensus:.0%}</b>"
+                verdict_line += "\n"
+
+            pour_line = ""
+            if pour_args:
+                pour_line = "✅ <i>" + " / ".join(str(a)[:80] for a in pour_args[:2]) + "</i>\n"
+            contre_line = ""
+            if contre_args:
+                contre_line = "⚠️ <i>" + " / ".join(str(a)[:80] for a in contre_args[:2]) + "</i>\n"
+
+            opinion_block = (
+                f"🤖 <b>Analyse IA :</b>\n"
+                f"{pour_line}"
+                f"{contre_line}"
+                f"{verdict_line}"
+                f"<i>{llm_reasoning[:200]}</i>\n\n"
+            )
         else:
             # Générer un avis minimal à partir des données si pas de LLM
             if abs(edge) >= 30:
                 opinion_block = f"🤖 <b>Avis du bot :</b>\n<i>Décalage très fort ({edge:+.0f}%) entre le prix du marché et la probabilité estimée — opportunité rare.</i>\n\n"
             elif abs(edge) >= 15:
-                opinion_block = f"🤖 <b>Avis du bot :</b>\n<i>Décalage significatif détecté ({edge:+.0f}%). Probabilité estimée à {predicted_prob:.0f}% vs {market_price:.0f}¢ sur le marché.</i>\n\n"
+                opinion_block = f"🤖 <b>Avis du bot :</b>\n<i>Décalage significatif détecté ({edge:+.0f}%). Probabilité estimée à {predicted_prob:.0f}% vs {market_price:.0f}% sur le marché.</i>\n\n"
             else:
                 opinion_block = ""
 
@@ -247,6 +280,38 @@ class TelegramNotifier:
             f"🔍 <b>Pattern détecté:</b> {pattern}\n"
             f"🔧 <b>Action corrective:</b> {action}\n"
             f"⏰ {datetime.now().strftime('%H:%M:%S')}"
+        )
+        await self.send_message(msg)
+
+    async def notify_news_flash(self, article: dict, market: dict) -> None:
+        """Envoie une alerte info quand une news récente correspond à un marché actif."""
+        title = article.get("title", "")[:120]
+        source = article.get("source", "RSS")
+        pub_date = article.get("pub_date")
+        age_min = 0
+        if pub_date:
+            from datetime import timezone as _tz
+            now = datetime.now(_tz.utc)
+            age_min = int((now - pub_date).total_seconds() / 60)
+
+        question = market.get("question", "")[:90]
+        yes_price = market.get("yes_price", 0.5) * 100
+        volume = market.get("volume_24h", 0)
+        market_url = market.get("market_url", "")
+        category = market.get("category", "other")
+        cat_emoji = self._CATEGORY_EMOJI.get(category, "🎯")
+
+        url_line = f'\n🔗 <a href="{market_url}">Voir le marché →</a>' if market_url else ""
+
+        msg = (
+            f"📰 <b>FLASH INFO {cat_emoji}</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"🗞 <b>{title}</b>\n"
+            f"<i>Source : {source} — il y a {age_min} min</i>\n\n"
+            f"📌 <b>Marché lié :</b> {question}\n"
+            f"💰 Prix YES : <b>{yes_price:.1f}%</b>  |  Vol. 24h : <b>${volume:,.0f}</b>\n"
+            f"{url_line}\n"
+            f"⏰ {datetime.now().strftime('%d/%m %H:%M')}"
         )
         await self.send_message(msg)
 
