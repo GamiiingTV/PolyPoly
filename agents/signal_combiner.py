@@ -301,7 +301,7 @@ class SignalCombiner:
         for m in markets:
             # Ignorer les marchés quasi-résolus (prix déjà extrême)
             yes_p = m.get("yes_price", 0.5)
-            if yes_p < 0.09 or yes_p > 0.91:
+            if yes_p < 0.15 or yes_p > 0.85:
                 continue
             q = m.get("question", "")
             words = [w.lower() for w in _re.findall(r'\b\w{4,}\b', q) if w.lower() not in stop][:3]

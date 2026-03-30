@@ -51,7 +51,7 @@ class RiskManager:
 
         # 0b. Filtre marché quasi-résolu — prix déjà à l'extrême, aucun edge possible
         market_price = float(signal.get("market_price", 0.5))
-        if market_price < 0.09 or market_price > 0.91:
+        if market_price < 0.15 or market_price > 0.85:
             return False, f"Marché quasi-résolu (YES={market_price:.1%}) — risque de perte certaine"
 
         # 1. Seuil de confiance dynamique

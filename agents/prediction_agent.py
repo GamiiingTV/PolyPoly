@@ -302,6 +302,10 @@ class PredictionAgent:
         features = self._build_features(market, sentiment, ob_features, price_history)
         yes_price = market.get("yes_price", 0.5)
 
+        # Filtre : marché quasi-résolu → aucun edge possible, on ne prédit pas
+        if yes_price < 0.15 or yes_price > 0.85:
+            return None
+
         # --- Prédiction XGBoost ---
         xgb_prob = None
         if self._model_trained and self._model and XGB_AVAILABLE:
@@ -331,6 +335,9 @@ class PredictionAgent:
         else:
             return None  # Pas de prédiction possible
 
+        # Plafonner la probabilité prédite — XGBoost non entraîné peut diverger
+        predicted_prob = min(max(predicted_prob, 0.08), 0.92)
+
         # --- Calculer l'edge et la confiance ---
         edge = predicted_prob - yes_price
         abs_edge = abs(edge)
@@ -346,6 +353,9 @@ class PredictionAgent:
             confidence = base_confidence * (0.7 + agreement * 0.3)
         else:
             confidence = base_confidence * 0.85  # Un seul modèle → moins confiant
+
+        # Plafonner la confiance à 0.82 (XGBoost non calibré peut surestimer)
+        confidence = min(confidence, 0.82)
 
         # Filtre final par seuil de confiance
         if confidence < MIN_CONFIDENCE_THRESHOLD:

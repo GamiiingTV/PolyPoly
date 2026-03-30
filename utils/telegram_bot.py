@@ -102,6 +102,15 @@ class TelegramNotifier:
     }
 
     async def notify_opportunity(self, signal: dict) -> None:
+        # ── Garde absolue : marché quasi-résolu → on ne notifie JAMAIS ──────
+        market_price = float(signal.get("market_price", 0.5))
+        if market_price < 0.15 or market_price > 0.85:
+            logger.debug(
+                f"notify_opportunity bloquée: prix {market_price:.1%} extrême "
+                f"→ marché quasi-résolu ou terminé ({signal.get('question','')[:50]})"
+            )
+            return
+
         # Anti-doublon : ignorer si déjà notifié dans les 2 dernières heures
         market_id = str(signal.get("market_id", ""))
         now = datetime.now()
