@@ -243,7 +243,7 @@ async def main() -> None:
     predictor = PredictionAgent(db, telegram, ob_agent=ob_agent)
     combiner  = SignalCombiner(db, telegram)
     trader    = TradingAgent(db, clob, gamma, telegram)
-    learner   = LearningAgent(db, telegram)
+    learner   = LearningAgent(db, telegram, llm_validator=llm_validator)
     arb        = ArbitrageScanner(db, gamma, clob, telegram)
     whale      = WhaleTracker(db, gamma, clob)
     cross_plat = CrossPlatformAgent(db, telegram)

@@ -1,7 +1,7 @@
 """
 PolyPoly — Agent 8 : Validation LLM (Claude)
-Analyse experte de chaque signal AVANT trade.
-Raisonnement fondamental — pas de moyenne de probabilités.
+Framework des meilleurs traders du monde : Soros + Silver + Renaissance + Kahneman.
+Raisonnement fondamental, pas de moyennage de probabilités.
 """
 
 import asyncio
@@ -20,105 +20,134 @@ from config import ANTHROPIC_API_KEY, LLM_MODEL
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Persona d'expert adapté à la catégorie du marché
+# Persona expert adapté à la catégorie
 # ─────────────────────────────────────────────────────────────────────────────
 _EXPERT_PERSONA = {
     "crypto": (
-        "un trader crypto senior avec 10 ans d'expérience en prop trading. "
-        "Tu analyses les cycles de marché, les catalyseurs macro (Fed, ETF, halving), "
-        "et le sentiment on-chain. Tu sais quand les marchés crypto sur-réagissent "
-        "ou sous-réagissent aux news."
+        "un trader crypto de niveau institutionnel (10+ ans, prop trading, ex-Alameda type). "
+        "Tu comprends les cycles on-chain, les catalyseurs macro (Fed, ETF, halving), "
+        "la psychologie des marchés crypto, et tu sais distinguer la spéculation du fondamental."
     ),
     "politics_us": (
-        "un analyste électoral américain de haut niveau (niveau Nate Silver / Larry Sabato). "
+        "un modélisateur électoral de niveau Nate Silver / Larry Sabato. "
         "Tu connais les biais systématiques des sondages, les taux de base historiques, "
-        "l'effet incumbency, et les dynamiques de retournement de dernière minute. "
-        "Tu ne te fies jamais à un seul sondage."
+        "l'effet incumbency, les dynamiques de base late swing, "
+        "et tu ne te fies JAMAIS à un seul signal."
     ),
     "geopolitics": (
-        "un analyste géopolitique senior (niveau RAND Corporation / IISS). "
-        "Tu évalues les conflits, accords, et dynamiques de pouvoir avec recul historique. "
-        "Tu sais distinguer ce qui est du bruit médiatique de ce qui est structurellement significatif."
+        "un analyste géopolitique de niveau RAND Corporation / IISS. "
+        "Tu évalues les dynamiques de conflits et d'accords avec recul historique profond. "
+        "Tu sépares le bruit médiatique des signaux structurels vrais."
     ),
     "sports": (
-        "un analyste sportif quantitatif (niveau FiveThirtyEight Sports). "
-        "Tu analyses les statistiques récentes, les tendances de forme, "
-        "les blessures, et les dynamiques domicile/extérieur. "
-        "Tu sais que les marchés sportifs sont TRÈS efficients — un edge > 8% est rare."
+        "un analyste sportif quantitatif de niveau FiveThirtyEight / Two Hat. "
+        "Tu sais que les marchés sportifs sont TRÈS efficients. "
+        "Un edge >8% sur un marché sport est extrêmement rare — sois ultra-sceptique."
     ),
     "economics": (
-        "un économiste macro senior (ex-hedge fund macro global, 15 ans d'expérience). "
-        "Tu analyses les données Fed, inflation, emploi, et leurs impacts sur les marchés. "
-        "Tu comprends les décalages temporels entre les événements macro et leurs effets."
+        "un macro trader senior de hedge fund global (15+ ans). "
+        "Tu analyses les dynamiques Fed, inflation, emploi avec une précision chirurgicale. "
+        "Tu sais que les marchés économiques intègrent très vite les données publiques."
     ),
     "tech": (
-        "un analyste tech senior (ex-VC top tier, 10 ans Silicon Valley). "
+        "un analyste tech senior (ex-VC tier-1, 10+ ans Silicon Valley). "
         "Tu comprends les cycles produit, les dynamiques concurrentielles, "
-        "et les signaux faibles dans l'écosystème tech."
+        "et les signaux faibles qui précèdent les retournements."
     ),
     "other": (
-        "un trader professionnel de marchés de prédiction (Polymarket top 1%). "
-        "Tu as vu des milliers de marchés se résoudre. Tu sais quand un edge est réel "
-        "et quand c'est une illusion statistique."
+        "l'un des 10 meilleurs traders de marchés de prédiction au monde. "
+        "Tu as résolu des milliers de marchés. Tu sais que l'edge est RARE. "
+        "Tu refuses 90% des opportunités qui se présentent."
     ),
 }
 
+# Seuils d'edge requis selon l'efficience du marché
+_EFFICIENCY_TIERS = [
+    (500_000, 0.15, "Ultra-efficient"),
+    (100_000, 0.10, "Très efficient"),
+    (25_000,  0.07, "Efficient"),
+    (5_000,   0.05, "Modérément efficient"),
+    (0,       0.03, "Peu efficient"),
+]
+
+
+def _efficiency_label(volume: float, edge: float) -> tuple[str, bool]:
+    """Retourne (description du tier, edge_suffisant)."""
+    for threshold, required_edge, label in _EFFICIENCY_TIERS:
+        if volume >= threshold:
+            return label, abs(edge) >= required_edge
+    return "Inconnu", True
+
+
 # ─────────────────────────────────────────────────────────────────────────────
-# Prompt principal
+# PROMPT PRINCIPAL — Framework élite
 # ─────────────────────────────────────────────────────────────────────────────
 VALIDATION_PROMPT = """Tu es {expert_persona}
 
-Un algorithme vient de détecter une opportunité de trading sur Polymarket.
-Ton rôle : DÉCIDER si cela vaut vraiment la peine d'investir. Comme si c'était ton propre argent.
+Un algorithme vient de détecter ce qui ressemble à une opportunité de trading sur Polymarket.
+TON RÔLE : décider si c'est une VRAIE opportunité ou une illusion statistique.
+Les meilleurs traders du monde refusent 9 opportunités sur 10. Sois exigeant.
 
 ══════════════════════════════════════════
-OPPORTUNITÉ DÉTECTÉE
+OPPORTUNITÉ
 ══════════════════════════════════════════
 Question   : {question}
-Catégorie  : {category}
-Signal type: {signal_type}
+Catégorie  : {category}  |  Type signal : {signal_type}
 
-Prix actuel YES : {yes_price:.1%}  → le marché dit qu'il y a {yes_pct:.0f}% de chance que OUI
-Notre algo prédit: {predicted_prob:.1%}  → edge apparent de {edge:+.1%}
-Volume 24h : ${volume_24h:,.0f}   |   Résolution dans : {time_to_resolution}
-Confiance modèle : {confidence:.0%}
+Marché dit : {yes_pct:.0f}% de chance OUI  (prix {yes_price:.2f})
+Algo prédit : {predicted_pct:.0f}%  →  Edge apparent : {edge:+.1%}
+Volume 24h : ${volume_24h:,.0f}  ({efficiency_label})  |  Résolution : {time_to_resolution}
+
+Seuil d'edge requis pour ce niveau de liquidité : {required_edge:.0%}
+Edge suffisant ? {edge_ok}
 
 Sources analysées ({n_texts} articles) :
 {news_summary}
 
 ══════════════════════════════════════════
-TON ANALYSE D'EXPERT EN 5 POINTS
+FRAMEWORK EN 7 QUESTIONS — RÉPONDS CHACUNE
 ══════════════════════════════════════════
 
-POINT 1 — POURQUOI LE MARCHÉ AURAIT TORT ?
-Le marché dit {yes_pct:.0f}%. Si notre thèse est correcte, c'est que le marché sous-estime
-ou surestime quelque chose. Qu'est-ce que les autres participants ont raté ou ignoré ?
-(NE DIS PAS "les sources indiquent X%" — dis POURQUOI fondamentalement)
+① RÉFLEXIVITÉ (Soros)
+"Qui a fixé ce prix à {yes_pct:.0f}% et POURQUOI auraient-ils tort ?
+ S'agit-il de smart money ou de parieurs lambdas qui ont suivi une narrative ?"
 
-POINT 2 — LES VRAIS DRIVERS DE L'OUTCOME
-Quels sont les 2-3 facteurs qui vont RÉELLEMENT déterminer si l'outcome est OUI ou NON ?
-Pas les probabilités des autres sites. Les CAUSES fondamentales.
+② BASE RATE (Nate Silver)
+"Pour ce TYPE d'événement dans le passé, quelle est la probabilité historique de base ?
+ Ex : les incumbents gagnent 70% des re-elections. Les favoris sportifs gagnent X%.
+ Après avoir posé cette base rate, les news actuelles la font-elles monter ou descendre ?"
 
-POINT 3 — LE SCÉNARIO PERDANT
-Quel est le scénario le plus plausible où ce trade perd ? Quelle probabilité lui donnes-tu ?
-Quels biais cognitifs dois-tu éviter ici ? (recency bias, narrative fallacy, etc.)
+③ EDGE STRUCTUREL (Renaissance Technologies)
+"Est-ce que cet edge est structural — il se répéterait dans des situations similaires ?
+ Ou est-ce un pattern aléatoire qui n'existera qu'une fois ?"
 
-POINT 4 — LA VALEUR ESPÉRÉE RÉELLE
-Edge apparent : {edge:+.1%}
-Si le marché est efficient sur ce type de marché (volume ${volume_24h:,.0f}), un edge {edge:+.1%} est-il réel ou du bruit ?
-Est-ce que l'asymétrie risque/récompense justifie vraiment d'y mettre ${capital:.0f} ?
+④ AVANTAGE INFORMATIONNEL
+"En une phrase précise : quelle information exacte le marché n'a-t-il PAS intégrée ?
+ Si tu ne peux pas répondre avec précision → il n'y a PAS d'edge, réponds 'Aucun identifié'."
 
-POINT 5 — DÉCISION FINALE (c'est ton argent, pas celui d'un algo)
-En tant qu'expert humain avec tous les éléments en main :
-Tu parierais {direction} sur ce marché OUI ou NON — ou tu PASSES ?
+⑤ PRÉ-MORTEM (Kahneman)
+"Dans 30 jours, ce trade a perdu. Raconte le scénario qui s'est produit.
+ Quelle probabilité donnes-tu à ce scénario perdant ?"
+
+⑥ AVOCAT DU DIABLE (obligatoire)
+"Donne les 2 arguments les plus solides CONTRE ce trade.
+ Sois impitoyable — cherche les failles, les biais, les angles morts."
+
+⑦ DÉCISION FINALE — ${capital:.0f}$ de ta poche
+"En tenant compte de TOUT ce qui précède : est-ce que TOI, avec ta propre expertise,
+ tu placerais ce trade avec ${capital:.0f}$ de ton argent réel ?
+ OUI = je parie | NON = signal invalide | PASSE = pas assez clair pour agir"
 
 ══════════════════════════════════════════
-RÉPONSE JSON UNIQUEMENT
+JSON UNIQUEMENT — ZÉRO TEXTE HORS DU JSON
 ══════════════════════════════════════════
 {{
-  "pourquoi_marche_tort": "1-2 phrases : l'avantage informationnel RÉEL ou 'Aucun avantage clair identifié'",
-  "drivers_fondamentaux": "2-3 phrases : les vrais facteurs causaux",
-  "scenario_perdant": "1-2 phrases : le scénario le plus plausible pour perdre",
+  "reflexivite": "Qui a fixé le prix et pourquoi auraient-ils tort (ou pas)",
+  "base_rate": "Base rate historique = X%, mise à jour avec les news = Y%",
+  "edge_structurel": true ou false,
+  "avantage_info": "L'information précise que le marché n'a pas, ou 'Aucun identifié'",
+  "premortem": "Scénario perdant + sa probabilité estimée",
+  "contre_arguments": ["argument 1", "argument 2"],
   "ev_positif": true ou false,
   "verdict": "OUI" ou "NON" ou "PASSE",
   "conviction": 1 à 10,
@@ -126,33 +155,33 @@ RÉPONSE JSON UNIQUEMENT
   "valid": true ou false,
   "adj": -0.20 à +0.20,
   "prob": 0.0 à 1.0,
-  "reason": "2-3 phrases en français : ton verdict final comme un trader expert humain"
+  "reason": "2-3 phrases : ton verdict final comme le meilleur trader du monde"
 }}
 
-RÈGLES NON NÉGOCIABLES :
-- valid = false si conviction < 7
-- valid = false si consensus_pct < 0.55
-- valid = false si ev_positif = false
-- valid = false si "pourquoi_marche_tort" dit 'Aucun avantage clair'
-- valid = false si marché très efficient (volume > $200k ET edge < 0.08)
-- valid = false si résolution dans < 2h (trop tard pour agir)
-- Si tu n'as PAS de vraie thèse fondamentale → verdict = PASSE, valid = false
-- Sois SÉVÈRE. Il vaut mieux rater une opportunité que perdre de l'argent."""
+RÈGLES ABSOLUES (si une seule est violée → valid = false) :
+• conviction < 7 → valid = false
+• consensus_pct < 0.55 → valid = false
+• edge_structurel = false ET volume > $50k → valid = false
+• avantage_info = 'Aucun identifié' → valid = false, verdict = PASSE
+• ev_positif = false → valid = false
+• edge insuffisant pour le tier de liquidité → valid = false
+• résolution < 2h → valid = false (trop tard pour agir)
+• PASSE est TOUJOURS préférable à NON si tu n'as pas de thèse solide
+• Conviction 8+ = thèse fondamentale béton seulement"""
 
 
 class LLMValidator:
     """
-    Agent 8 — Validation LLM des signaux avec Claude.
+    Agent 8 — Analyse experte de chaque signal avec le framework des meilleurs traders.
 
-    Pour chaque signal ≥65% confiance :
-    - Analyse fondamentale (pas juste une moyenne de probabilités)
-    - Expert adapté à la catégorie du marché
-    - Rejet si conviction < 7/10 ou consensus < 55%
-    - Enrichit le signal avec le raisonnement expert complet
+    Framework : Soros (réflexivité) + Silver (base rates) +
+                Renaissance (edge structurel) + Kahneman (pré-mortem)
+
+    Seuils : conviction ≥ 7/10, consensus ≥ 55%, edge adapté à l'efficience du marché.
     """
 
-    CONVICTION_THRESHOLD = 7   # Conviction minimum pour valider un signal
-    CONSENSUS_THRESHOLD = 0.55  # % d'experts qui voteraient dans le sens du signal
+    CONVICTION_THRESHOLD = 7
+    CONSENSUS_THRESHOLD  = 0.55
 
     def __init__(self):
         self._client = None
@@ -160,6 +189,9 @@ class LLMValidator:
         self._calls_this_hour = 0
         self._max_calls_per_hour = 50
         self._hour_reset_task: Optional[asyncio.Task] = None
+        # Suivi de calibration en mémoire
+        self._predictions: list[dict] = []   # {prob, outcome, timestamp}
+        self._calibration_score: float = 1.0  # 1.0 = parfaitement calibré
 
     async def start(self):
         if not self._enabled:
@@ -167,28 +199,22 @@ class LLMValidator:
             return
         self._client = anthropic.AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
         self._hour_reset_task = asyncio.create_task(self._reset_counter_loop())
-        logger.info("Agent 8 (LLM Validator / Expert Trader) connecté")
+        logger.info("Agent 8 (LLM Expert Trader — Soros/Silver/Renaissance) connecté")
 
     async def _reset_counter_loop(self):
-        """Réinitialise le compteur d'appels toutes les heures."""
         while True:
             await asyncio.sleep(3600)
             self._calls_this_hour = 0
             logger.debug("LLM Validator: compteur horaire réinitialisé")
 
     def _format_time_to_resolution(self, signal: dict) -> str:
-        """Formate le temps restant avant résolution."""
         end_date = signal.get("end_date") or signal.get("market_end_date")
         if not end_date:
             urgency = signal.get("urgency_bonus", 0)
-            if urgency >= 0.40:
-                return "< 6 heures"
-            elif urgency >= 0.25:
-                return "< 24 heures"
-            elif urgency >= 0.15:
-                return "< 48 heures"
+            if urgency >= 0.40: return "< 6 heures ⚠️"
+            elif urgency >= 0.25: return "< 24 heures"
+            elif urgency >= 0.15: return "< 48 heures"
             return "inconnu"
-
         try:
             if isinstance(end_date, str):
                 end_dt = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
@@ -196,27 +222,47 @@ class LLMValidator:
                 end_dt = end_date
             if end_dt.tzinfo is None:
                 end_dt = end_dt.replace(tzinfo=timezone.utc)
-            now = datetime.now(timezone.utc)
-            delta = end_dt - now
-            total_hours = delta.total_seconds() / 3600
-            if total_hours < 0:
-                return "EXPIRÉ"
-            elif total_hours < 2:
-                return f"{int(total_hours * 60)} minutes"
-            elif total_hours < 48:
-                return f"{int(total_hours)} heures"
-            else:
-                return f"{int(total_hours / 24)} jours"
+            delta = end_dt - datetime.now(timezone.utc)
+            hours = delta.total_seconds() / 3600
+            if hours < 0:   return "EXPIRÉ ⛔"
+            elif hours < 2: return f"{int(hours*60)} min ⚠️"
+            elif hours < 48: return f"{int(hours)}h"
+            else:            return f"{int(hours/24)} jours"
         except Exception:
             return "inconnu"
 
+    def record_outcome(self, predicted_prob: float, outcome: bool):
+        """Enregistre un résultat pour suivre la calibration."""
+        self._predictions.append({
+            "prob": predicted_prob,
+            "outcome": 1 if outcome else 0,
+            "ts": datetime.now(timezone.utc).timestamp(),
+        })
+        # Garder les 200 dernières prédictions
+        self._predictions = self._predictions[-200:]
+        self._update_calibration()
+
+    def _update_calibration(self):
+        """
+        Calcule le score de calibration (Brier score).
+        1.0 = parfait, 0.0 = catastrophique.
+        """
+        if len(self._predictions) < 10:
+            return
+        brier = sum(
+            (p["prob"] - p["outcome"]) ** 2
+            for p in self._predictions
+        ) / len(self._predictions)
+        # Brier 0.25 = random, 0.0 = parfait → score 0→1
+        self._calibration_score = max(0.0, 1.0 - brier / 0.25)
+        logger.info(f"LLM Calibration: {self._calibration_score:.2f} (Brier={brier:.3f}, n={len(self._predictions)})")
+
     async def validate(self, signal: dict, relevant_texts: list[str]) -> dict:
         """
-        Analyse experte d'un signal avec Claude.
+        Analyse experte d'un signal.
         Retourne le signal enrichi avec le raisonnement complet.
         """
         if not self._client:
-            logger.debug("LLM Validator ignoré: client non initialisé")
             signal["llm_valid"] = True
             signal["llm_reasoning"] = ""
             return signal
@@ -228,24 +274,31 @@ class LLMValidator:
             return signal
 
         try:
-            # Préparer le résumé des actualités
+            # Préparer les actualités
             news_summary = "\n".join(
-                f"• {t[:200]}" for t in relevant_texts[:8]
-            ) or "Aucune news récente trouvée pour ce marché."
+                f"• {t[:220]}" for t in relevant_texts[:8]
+            ) or "Aucune news récente disponible pour ce marché."
 
-            # Persona expert selon la catégorie
+            # Persona expert
             category = signal.get("category", "other")
             expert_persona = _EXPERT_PERSONA.get(category, _EXPERT_PERSONA["other"])
 
             # Contexte temporel
             time_to_resolution = self._format_time_to_resolution(signal)
 
-            # Volume 24h (depuis le signal ou 0)
+            # Efficience du marché
             volume_24h = float(signal.get("volume_24h", 0) or 0)
+            edge = signal.get("edge", 0)
+            eff_label, edge_ok = _efficiency_label(volume_24h, edge)
+            # Trouver l'edge requis
+            required_edge = 0.03
+            for threshold, req, _ in _EFFICIENCY_TIERS:
+                if volume_24h >= threshold:
+                    required_edge = req
+                    break
 
             from config import CAPITAL_USD
-            yes_price = signal.get("market_price", 0.5)
-            edge = signal.get("edge", 0)
+            yes_price = float(signal.get("market_price", 0.5))
 
             prompt = VALIDATION_PROMPT.format(
                 expert_persona=expert_persona,
@@ -254,37 +307,36 @@ class LLMValidator:
                 signal_type=signal.get("signal_type", "COMBINED"),
                 yes_price=yes_price,
                 yes_pct=yes_price * 100,
-                predicted_prob=signal.get("predicted_prob", 0.5),
+                predicted_pct=signal.get("predicted_prob", 0.5) * 100,
                 edge=edge,
                 volume_24h=volume_24h,
+                efficiency_label=eff_label,
+                required_edge=required_edge,
+                edge_ok="✅ OUI" if edge_ok else "❌ NON — edge insuffisant pour ce marché",
                 time_to_resolution=time_to_resolution,
-                confidence=signal.get("confidence", 0.7),
                 n_texts=signal.get("texts_count", 0),
                 news_summary=news_summary,
-                direction=signal.get("direction", "YES"),
                 capital=CAPITAL_USD,
             )
 
             response = await self._client.messages.create(
                 model=LLM_MODEL,
-                max_tokens=700,
+                max_tokens=800,
                 messages=[{"role": "user", "content": prompt}],
             )
             self._calls_this_hour += 1
 
             text = response.content[0].text.strip()
-
-            # Extraire le JSON
-            if "{" in text and "}" in text:
-                json_str = text[text.index("{"):text.rindex("}") + 1]
-                result = json.loads(json_str)
-            else:
+            if "{" not in text or "}" not in text:
                 logger.warning("LLM: pas de JSON dans la réponse")
                 signal["llm_valid"] = True
                 signal["llm_reasoning"] = ""
                 return signal
 
-            # ── Lecture des champs ───────────────────────────────────────
+            json_str = text[text.index("{"):text.rindex("}") + 1]
+            result = json.loads(json_str)
+
+            # ── Extraction ────────────────────────────────────────────────
             valid         = bool(result.get("valid", True))
             adj           = float(result.get("adj", 0.0))
             prob          = float(result.get("prob", signal.get("predicted_prob", 0.5)))
@@ -293,54 +345,82 @@ class LLMValidator:
             consensus_pct = float(result.get("consensus_pct", 0.5))
             verdict       = str(result.get("verdict", "PASSE")).upper()
             ev_positif    = bool(result.get("ev_positif", True))
-            pourquoi      = str(result.get("pourquoi_marche_tort", "")).strip()
-            drivers       = str(result.get("drivers_fondamentaux", "")).strip()
-            risque        = str(result.get("scenario_perdant", "")).strip()
+            edge_struct   = bool(result.get("edge_structurel", False))
+            avantage      = str(result.get("avantage_info", "")).strip()
+            premortem     = str(result.get("premortem", "")).strip()
+            reflexivite   = str(result.get("reflexivite", "")).strip()
+            base_rate     = str(result.get("base_rate", "")).strip()
+            contre_args   = result.get("contre_arguments", [])
 
-            # ── Règles absolues ──────────────────────────────────────────
+            # ── Règles absolues ───────────────────────────────────────────
+            reject_reasons = []
+
             if conviction < self.CONVICTION_THRESHOLD:
                 valid = False
+                reject_reasons.append(f"conviction {conviction}/10 < {self.CONVICTION_THRESHOLD}")
+
             if consensus_pct < self.CONSENSUS_THRESHOLD:
                 valid = False
+                reject_reasons.append(f"consensus {consensus_pct:.0%} < {self.CONSENSUS_THRESHOLD:.0%}")
+
             if not ev_positif:
                 valid = False
+                reject_reasons.append("EV négative")
+
             if verdict == "PASSE":
                 valid = False
-            if time_to_resolution in ("EXPIRÉ", "< 2 heures"):
-                valid = False
+                reject_reasons.append("verdict PASSE")
 
-            # Marché très efficient : edge doit être plus grand
-            if volume_24h > 200_000 and abs(edge) < 0.08:
+            if "Aucun identifié" in avantage or not avantage:
                 valid = False
-                reasoning = (
-                    f"Marché trop efficient (${volume_24h:,.0f} de volume) "
-                    f"pour un edge de seulement {edge:+.1%}. " + reasoning
+                reject_reasons.append("aucun avantage informationnel identifié")
+
+            if not edge_ok:
+                valid = False
+                reject_reasons.append(
+                    f"edge {abs(edge):.1%} insuffisant pour marché {eff_label} (requis {required_edge:.0%})"
                 )
+
+            if not edge_struct and volume_24h > 50_000:
+                valid = False
+                reject_reasons.append("edge non structurel sur marché efficient")
+
+            if "EXPIRÉ" in time_to_resolution or "min ⚠️" in time_to_resolution:
+                valid = False
+                reject_reasons.append("résolution imminente")
+
+            # Ajustement calibration : si le bot est sur-confiant, on réduit
+            if self._calibration_score < 0.6:
+                adj = min(adj, -0.05)
+                logger.warning(f"LLM sous-calibré ({self._calibration_score:.2f}) — ajustement négatif")
 
             new_conf = min(max(signal.get("confidence", 0.7) + adj, 0.0), 1.0)
 
-            # ── Enrichissement du signal ─────────────────────────────────
-            signal["llm_valid"]      = valid
-            signal["llm_reasoning"]  = reasoning
-            signal["llm_prob"]       = prob
-            signal["llm_conviction"] = conviction
-            signal["llm_consensus"]  = consensus_pct
-            signal["llm_verdict"]    = verdict
-            signal["llm_ev"]         = ev_positif
-            signal["llm_edge_info"]  = pourquoi
-            signal["llm_drivers"]    = drivers
-            signal["llm_risque"]     = risque
-            # Rétro-compat avec anciens champs
-            signal["llm_pour"]       = [pourquoi, drivers] if pourquoi else []
-            signal["llm_contre"]     = [risque] if risque else []
-            signal["llm_flags"]      = [risque] if risque else []
-            signal["confidence"]     = new_conf
+            # ── Enrichissement ────────────────────────────────────────────
+            signal["llm_valid"]       = valid
+            signal["llm_reasoning"]   = reasoning
+            signal["llm_prob"]        = prob
+            signal["llm_conviction"]  = conviction
+            signal["llm_consensus"]   = consensus_pct
+            signal["llm_verdict"]     = verdict
+            signal["llm_ev"]          = ev_positif
+            signal["llm_edge_info"]   = avantage
+            signal["llm_reflexivite"] = reflexivite
+            signal["llm_base_rate"]   = base_rate
+            signal["llm_premortem"]   = premortem
+            signal["llm_edge_struct"] = edge_struct
+            signal["llm_contre"]      = contre_args
+            # Rétro-compat
+            signal["llm_pour"]        = [avantage, base_rate] if avantage else []
+            signal["llm_flags"]       = contre_args
+            signal["confidence"]      = new_conf
 
             status = "✅ VALIDÉ" if valid else "❌ REJETÉ"
+            reject_str = f" [{', '.join(reject_reasons[:2])}]" if reject_reasons else ""
             logger.info(
-                f"LLM {status} [{verdict}]: {signal.get('question', '')[:55]} "
+                f"LLM {status}{reject_str}: {signal.get('question','')[:55]} "
                 f"| conviction={conviction}/10 | consensus={consensus_pct:.0%} "
-                f"| EV={'✓' if ev_positif else '✗'} | {reasoning[:80]}"
+                f"| EV={'✓' if ev_positif else '✗'} | {eff_label}"
             )
 
         except Exception as e:

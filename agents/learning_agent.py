@@ -53,12 +53,15 @@ class LearningAgent:
     - Coordonne avec les autres agents via la DB
     """
 
-    def __init__(self, db: Database, telegram: TelegramNotifier):
+    def __init__(self, db: Database, telegram: TelegramNotifier,
+                 llm_validator=None):
         self.db = db
         self.telegram = telegram
         self._running = False
         self._llm: Optional[object] = None
+        self._llm_validator = llm_validator   # référence au LLMValidator pour calibration
         self._improvements_made = 0
+        self._calibration_fed: set[int] = set()  # trade IDs déjà envoyés au calibrateur
 
     async def run_forever(self) -> None:
         """Boucle principale."""
@@ -126,14 +129,54 @@ class LearningAgent:
         # 4. Rapport de performance
         await self._generate_performance_report(stats)
 
-        # 5. Analyse LLM approfondie
+        # 5. Calibration LLM — feedback boucle fermée
+        await self._update_llm_calibration(closed_trades)
+
+        # 6. Analyse LLM approfondie
         if self._llm and total >= 20:
             await self._llm_deep_analysis(stats, losing_trades[:20])
 
-        # 6. Snapshot
+        # 7. Snapshot
         await self._save_snapshot(stats)
 
         logger.info(f"Agent 5: {self._improvements_made} améliorations appliquées")
+
+    async def _update_llm_calibration(self, closed_trades: list[dict]) -> None:
+        """
+        Boucle de calibration fermée : pour chaque trade résolu,
+        envoie (prob_LLM, outcome) au LLMValidator pour qu'il suive
+        sa propre précision et ajuste son niveau de confiance en conséquence.
+        """
+        if not self._llm_validator:
+            return
+
+        new_fed = 0
+        for trade in closed_trades:
+            trade_id = trade.get("id")
+            if not trade_id or trade_id in self._calibration_fed:
+                continue
+
+            llm_prob = trade.get("llm_prob") or trade.get("confidence")
+            if llm_prob is None:
+                continue
+
+            status = trade.get("status", "")
+            if status not in ("WON", "LOST"):
+                continue
+
+            outcome = (status == "WON")
+            self._llm_validator.record_outcome(float(llm_prob), outcome)
+            self._calibration_fed.add(trade_id)
+            new_fed += 1
+
+        if new_fed:
+            cal = getattr(self._llm_validator, "_calibration_score", None)
+            if cal is not None:
+                await self.db.set_param(
+                    "llm_calibration_score", round(cal, 4),
+                    f"Mis à jour après {new_fed} résolutions"
+                )
+                logger.info(f"LLM Calibration: score={cal:.2f} ({new_fed} nouveaux trades intégrés)")
 
     async def _analyze_losing_patterns(self, losing_trades: list[dict]) -> dict:
         """Analyse statistique des patterns dans les trades perdants."""

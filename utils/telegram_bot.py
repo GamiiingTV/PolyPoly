@@ -124,44 +124,53 @@ class TelegramNotifier:
         sig_type_fr = self._TYPE_FR.get(signal.get("signal_type", ""), "Signal IA")
         n_sources = signal.get("texts_count", 0)
 
-        # ── Analyse experte IA ───────────────────────────────────────────
+        # ── Analyse experte IA — Soros/Silver/Renaissance ───────────────
         llm_reasoning  = signal.get("llm_reasoning", "").strip()
         conviction     = signal.get("llm_conviction", 0)
         consensus      = signal.get("llm_consensus", 0.0)
         verdict        = signal.get("llm_verdict", "")
         ev_ok          = signal.get("llm_ev", None)
-        edge_info      = signal.get("llm_edge_info", "").strip()
-        drivers        = signal.get("llm_drivers", "").strip()
-        risque         = signal.get("llm_risque", "").strip()
+        avantage       = signal.get("llm_edge_info", "").strip()
+        base_rate      = signal.get("llm_base_rate", "").strip()
+        premortem      = signal.get("llm_premortem", "").strip()
+        reflexivite    = signal.get("llm_reflexivite", "").strip()
+        contre_args    = signal.get("llm_contre", [])
+        edge_struct    = signal.get("llm_edge_struct", None)
 
-        if llm_reasoning or edge_info:
-            # Ligne de verdict
-            v_emoji  = {"OUI": "✅", "NON": "❌", "PASSE": "⏸"}.get(verdict, "🔍")
-            ev_icon  = "📈" if ev_ok else ("📉" if ev_ok is False else "")
-            verdict_line = f"{v_emoji} <b>Verdict expert :</b> {verdict}"
-            if conviction:
-                verdict_line += f"  |  🎯 Conviction : <b>{conviction}/10</b>"
-            if consensus:
-                verdict_line += f"  |  👥 Consensus : <b>{consensus:.0%}</b>"
+        if llm_reasoning or avantage:
+            # ─ Ligne de verdict enrichie
+            v_emoji = {"OUI": "✅", "NON": "❌", "PASSE": "⏸"}.get(verdict, "🔍")
+            struct_icon = "🔁" if edge_struct else ("⚡" if edge_struct is False else "")
+            verdict_line = (
+                f"{v_emoji} <b>Verdict :</b> {verdict}"
+                f"  |  🎯 Conviction <b>{conviction}/10</b>"
+                f"  |  👥 Consensus <b>{consensus:.0%}</b>"
+            )
             if ev_ok is not None:
-                verdict_line += f"  |  {ev_icon} EV {'positive' if ev_ok else 'négative'}"
+                verdict_line += f"  |  {'📈' if ev_ok else '📉'} EV {'✓' if ev_ok else '✗'}"
+            if edge_struct is not None:
+                verdict_line += f"  |  {struct_icon} Edge {'structurel' if edge_struct else 'éphémère'}"
             verdict_line += "\n"
 
-            # Avantage informationnel
-            edge_line = f"💡 <i>{edge_info[:160]}</i>\n" if edge_info else ""
+            # ─ Avantage informationnel (le plus important)
+            avantage_line = f"💡 <b>Edge :</b> <i>{avantage[:180]}</i>\n" if avantage else ""
 
-            # Risque principal
-            risk_line = f"⚠️ <i>Risque : {risque[:140]}</i>\n" if risque else ""
+            # ─ Base rate Silver
+            base_line = f"📊 <b>Base rate :</b> <i>{base_rate[:140]}</i>\n" if base_rate else ""
 
-            # Conclusion expert
-            reason_line = f"🤖 <i>{llm_reasoning[:220]}</i>\n" if llm_reasoning else ""
+            # ─ Pré-mortem
+            premortem_line = f"💀 <b>Si on perd :</b> <i>{premortem[:140]}</i>\n" if premortem else ""
+
+            # ─ Conclusion
+            reason_line = f"🤖 <i>{llm_reasoning[:200]}</i>\n" if llm_reasoning else ""
 
             opinion_block = (
                 f"━━━━━━━━━━━━━━━━━━━━\n"
                 f"🧠 <b>ANALYSE EXPERT IA</b>\n"
-                f"{edge_line}"
-                f"{risk_line}"
                 f"{verdict_line}"
+                f"{avantage_line}"
+                f"{base_line}"
+                f"{premortem_line}"
                 f"{reason_line}"
                 f"\n"
             )

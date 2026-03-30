@@ -45,6 +45,10 @@ class RiskManager:
     async def can_trade(self, signal: dict) -> tuple[bool, str]:
         """Vérifie si on peut placer ce trade. Retourne (True/False, raison)."""
 
+        # 0. Vérification LLM expert : si le validateur a rejeté → bloquer immédiatement
+        if signal.get("llm_valid") is False:
+            return False, f"Rejeté par analyse experte LLM (conviction={signal.get('llm_conviction',0)}/10)"
+
         # 1. Seuil de confiance dynamique
         dynamic_confidence = await self.db.get_param(
             "min_confidence_threshold", MIN_CONFIDENCE_THRESHOLD
@@ -52,11 +56,21 @@ class RiskManager:
         if signal.get("confidence", 0) < dynamic_confidence:
             return False, f"Confiance insuffisante ({signal.get('confidence',0):.2%} < {dynamic_confidence:.2%})"
 
-        # 2. Edge minimum dynamique
+        # 2. Edge minimum dynamique + tiers d'efficience de marché
         dynamic_edge = await self.db.get_param(
             "min_edge_threshold", MIN_EDGE_THRESHOLD
         )
         edge = abs(signal.get("edge", 0))
+        volume_24h = float(signal.get("volume_24h", 0) or 0)
+
+        # Seuil d'edge adapté au volume (marchés très liquides = très efficients)
+        if volume_24h >= 500_000 and edge < 0.15:
+            return False, f"Marché ultra-efficient (${volume_24h:,.0f}/24h) — edge {edge:.1%} < 15% requis"
+        elif volume_24h >= 100_000 and edge < 0.10:
+            return False, f"Marché très efficient (${volume_24h:,.0f}/24h) — edge {edge:.1%} < 10% requis"
+        elif volume_24h >= 25_000 and edge < 0.07:
+            return False, f"Marché efficient (${volume_24h:,.0f}/24h) — edge {edge:.1%} < 7% requis"
+
         if edge < dynamic_edge:
             return False, f"Edge insuffisant ({edge:.2%} < {dynamic_edge:.2%})"
 
@@ -119,40 +133,64 @@ class RiskManager:
     def compute_trade_size(self, signal: dict, available_capital: float,
                            win_rate: float = 0.55) -> float:
         """
-        Calcule la taille optimale du trade avec Kelly adaptatif.
-        Le Kelly s'ajuste en fonction du win rate observé.
-        JAMAIS plus de MAX_TRADE_SIZE_USD (5$).
+        Kelly fractionnel élite — taille optimale basée sur :
+        - Probabilité de gain (LLM prob ou predicted_prob)
+        - Conviction LLM (1-10) → module la fraction Kelly
+        - Win rate historique → ajuste le niveau d'agression
+        - Cap strict : jamais plus de MAX_TRADE_SIZE_USD
         """
-        confidence = signal.get("confidence", 0.5)
+        market_price = float(signal.get("market_price", 0.5))
         edge = abs(signal.get("edge", 0))
-        market_price = signal.get("market_price", 0.5)
 
-        # Kelly adaptatif : utilise le win rate réel si disponible
-        effective_win_prob = max(confidence * 0.9, win_rate)
+        # Utiliser la probabilité LLM si disponible (plus fiable)
+        our_prob = (
+            signal.get("llm_prob")
+            or signal.get("predicted_prob")
+            or signal.get("confidence", 0.5)
+        )
+        our_prob = float(our_prob)
 
-        if market_price > 0.01 and market_price < 0.99:
-            odds = 1 / market_price - 1
-            kelly = (effective_win_prob * odds - (1 - effective_win_prob)) / odds
+        # ── Formule Kelly exacte : f* = (b·p - q) / b ─────────────────
+        # b = (1-price)/price (cotes décimales pour YES)
+        if 0.02 < market_price < 0.98:
+            b = (1.0 - market_price) / market_price
+            p = our_prob
+            q = 1.0 - p
+            kelly_full = (b * p - q) / b
         else:
-            kelly = edge
+            kelly_full = edge
 
-        kelly = max(kelly, 0)
+        kelly_full = max(kelly_full, 0.0)
 
-        # Fraction Kelly plus conservatrice si win rate bas
-        if win_rate < 0.5:
-            fraction = 0.15   # Plus prudent si on perd souvent
+        # ── Fraction Kelly selon conviction LLM ────────────────────────
+        # conviction 7 = 18%, 8 = 22%, 9 = 27%, 10 = 33%
+        # (base conservatrice : on ne joue jamais 100% Kelly)
+        conviction = int(signal.get("llm_conviction", 5))
+        base_fraction = 0.08 + max(conviction - 5, 0) * 0.05   # 0.08 → 0.33
+
+        # Modulation par win rate historique
+        if win_rate < 0.45:
+            wr_mult = 0.60   # On perd trop — réduire fortement
+        elif win_rate < 0.52:
+            wr_mult = 0.80
         elif win_rate > 0.65:
-            fraction = 0.30   # Plus agressif si on gagne bien
+            wr_mult = 1.25   # On gagne bien — légèrement plus agressif
         else:
-            fraction = 0.22
+            wr_mult = 1.00
 
-        fractional_kelly = kelly * fraction
+        fraction = min(base_fraction * wr_mult, 0.33)
+
+        fractional_kelly = kelly_full * fraction
         kelly_size = available_capital * fractional_kelly
 
-        # Cap strict : jamais plus de 5$, jamais plus de 5% du capital
+        # Cap strict
         trade_size = min(kelly_size, MAX_TRADE_SIZE_USD, available_capital * 0.05)
         trade_size = max(trade_size, 1.0)
 
+        logger.debug(
+            f"Kelly: f*={kelly_full:.3f} × fraction={fraction:.2f} "
+            f"→ ${trade_size:.2f} (conviction={conviction}/10, WR={win_rate:.0%})"
+        )
         return round(trade_size, 2)
 
 
