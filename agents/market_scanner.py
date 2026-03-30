@@ -59,6 +59,8 @@ class MarketScanner:
     async def scan_cycle(self) -> list[dict]:
         """Un cycle complet de scan."""
         logger.info("Scanner: démarrage cycle...")
+        # Purger les marchés expirés de la DB (end_date dans le passé)
+        await self._purge_expired_markets()
 
         raw_markets = await self.gamma.get_all_active_markets(TARGET_MARKETS_COUNT)
         filtered = []
@@ -144,6 +146,20 @@ class MarketScanner:
         yes_price = market.get("yes_price", 0.5)
         if yes_price > 0.85 or yes_price < 0.05:
             return False
+
+        # Filtre end_date strict : si l'événement est déjà passé → ignorer
+        # (catch les matchs de sport terminés dont le prix n'a pas encore bougé)
+        end_date_str = market.get("end_date")
+        if end_date_str:
+            try:
+                ed = str(end_date_str).replace("Z", "+00:00")
+                end_dt = datetime.fromisoformat(ed)
+                if end_dt.tzinfo is None:
+                    end_dt = end_dt.replace(tzinfo=timezone.utc)
+                if end_dt <= datetime.now(timezone.utc):
+                    return False
+            except (ValueError, TypeError):
+                pass
 
         return True
 
@@ -297,6 +313,31 @@ class MarketScanner:
         if not scores:
             return "other"
         return max(scores, key=lambda k: scores[k])
+
+    async def _purge_expired_markets(self) -> None:
+        """Marque comme inactifs les marchés dont l'end_date est passée."""
+        try:
+            now = datetime.now(timezone.utc)
+            markets = await self.db.get_active_markets(limit=500)
+            purged = 0
+            for m in markets:
+                end_str = m.get("end_date")
+                if not end_str:
+                    continue
+                try:
+                    ed = str(end_str).replace("Z", "+00:00")
+                    end_dt = datetime.fromisoformat(ed)
+                    if end_dt.tzinfo is None:
+                        end_dt = end_dt.replace(tzinfo=timezone.utc)
+                    if end_dt <= now:
+                        await self.db.upsert_market({**m, "active": False})
+                        purged += 1
+                except Exception:
+                    continue
+            if purged:
+                logger.info(f"Scanner: {purged} marchés expirés purgés de la DB")
+        except Exception as e:
+            logger.warning(f"Purge marchés expirés: {e}")
 
     async def get_top_markets(self, n: int = 20) -> list[dict]:
         """Retourne les N meilleurs marchés par score d'anomalie."""

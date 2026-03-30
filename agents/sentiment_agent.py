@@ -153,12 +153,38 @@ class SentimentAgent:
         """Cycle complet d'analyse de sentiment."""
         logger.info("Sentiment: démarrage analyse...")
 
-        # Récupérer les marchés actifs — filtrer les prix extrêmes ici aussi
+        # Récupérer les marchés actifs — triple filtre :
+        # 1. Prix entre 5¢ et 85¢ (exclut quasi-résolus)
+        # 2. end_date dans le futur (exclut matchs/événements terminés)
+        # 3. Marché encore actif selon le flag active
+        from datetime import timezone as _tz
+        _now = datetime.now(_tz.utc)
+
+        def _market_still_live(m: dict) -> bool:
+            # Filtre prix
+            price = m.get("yes_price", 0.5)
+            if price < 0.05 or price > 0.85:
+                return False
+            # Filtre end_date : si la date de résolution est passée → ignoré
+            end_str = m.get("end_date")
+            if end_str:
+                try:
+                    ed = str(end_str).replace("Z", "+00:00")
+                    end_dt = datetime.fromisoformat(ed)
+                    if end_dt.tzinfo is None:
+                        end_dt = end_dt.replace(tzinfo=_tz.utc)
+                    if end_dt <= _now:
+                        return False
+                except Exception:
+                    pass
+            # Filtre flag active
+            if m.get("active") is False:
+                return False
+            return True
+
         all_markets = await self.db.get_active_markets(limit=100)
-        markets = [
-            m for m in all_markets
-            if 0.05 <= m.get("yes_price", 0.5) <= 0.85
-        ]
+        markets = [m for m in all_markets if _market_still_live(m)]
+        logger.info(f"Sentiment: {len(markets)}/{len(all_markets)} marchés encore actifs")
         if not markets:
             return []
 
