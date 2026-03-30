@@ -480,6 +480,8 @@ class SentimentAgent:
             "market_url": self._get_market_url(market),
             "urgency_bonus": market.get("urgency_bonus", 0),
             "category": market.get("category", "other"),
+            "volume_24h": market.get("volume_24h", 0),
+            "end_date": market.get("end_date") or market.get("market_end_date"),
         }
 
         # ── Calibration par catégorie (win rate historique) ─────────────

@@ -124,45 +124,53 @@ class TelegramNotifier:
         sig_type_fr = self._TYPE_FR.get(signal.get("signal_type", ""), "Signal IA")
         n_sources = signal.get("texts_count", 0)
 
-        # ── Opinion IA (pièce centrale du message) ──────────────────────
-        llm_reasoning = signal.get("llm_reasoning", "").strip()
-        certitude = signal.get("llm_certitude", 0)
-        consensus = signal.get("llm_consensus", 0.0)
-        verdict = signal.get("llm_verdict", "")
-        pour_args = signal.get("llm_pour", [])
-        contre_args = signal.get("llm_contre", [])
+        # ── Analyse experte IA ───────────────────────────────────────────
+        llm_reasoning  = signal.get("llm_reasoning", "").strip()
+        conviction     = signal.get("llm_conviction", 0)
+        consensus      = signal.get("llm_consensus", 0.0)
+        verdict        = signal.get("llm_verdict", "")
+        ev_ok          = signal.get("llm_ev", None)
+        edge_info      = signal.get("llm_edge_info", "").strip()
+        drivers        = signal.get("llm_drivers", "").strip()
+        risque         = signal.get("llm_risque", "").strip()
 
-        if llm_reasoning:
-            verdict_line = ""
-            if verdict in ("OUI", "NON"):
-                verdict_emoji = "✅" if verdict == "OUI" else "❌"
-                verdict_line = f"{verdict_emoji} <b>Verdict :</b> {verdict}"
-                if certitude:
-                    verdict_line += f"  |  🎯 Certitude : <b>{certitude}/10</b>"
-                if consensus:
-                    verdict_line += f"  |  👥 Consensus : <b>{consensus:.0%}</b>"
-                verdict_line += "\n"
+        if llm_reasoning or edge_info:
+            # Ligne de verdict
+            v_emoji  = {"OUI": "✅", "NON": "❌", "PASSE": "⏸"}.get(verdict, "🔍")
+            ev_icon  = "📈" if ev_ok else ("📉" if ev_ok is False else "")
+            verdict_line = f"{v_emoji} <b>Verdict expert :</b> {verdict}"
+            if conviction:
+                verdict_line += f"  |  🎯 Conviction : <b>{conviction}/10</b>"
+            if consensus:
+                verdict_line += f"  |  👥 Consensus : <b>{consensus:.0%}</b>"
+            if ev_ok is not None:
+                verdict_line += f"  |  {ev_icon} EV {'positive' if ev_ok else 'négative'}"
+            verdict_line += "\n"
 
-            pour_line = ""
-            if pour_args:
-                pour_line = "✅ <i>" + " / ".join(str(a)[:80] for a in pour_args[:2]) + "</i>\n"
-            contre_line = ""
-            if contre_args:
-                contre_line = "⚠️ <i>" + " / ".join(str(a)[:80] for a in contre_args[:2]) + "</i>\n"
+            # Avantage informationnel
+            edge_line = f"💡 <i>{edge_info[:160]}</i>\n" if edge_info else ""
+
+            # Risque principal
+            risk_line = f"⚠️ <i>Risque : {risque[:140]}</i>\n" if risque else ""
+
+            # Conclusion expert
+            reason_line = f"🤖 <i>{llm_reasoning[:220]}</i>\n" if llm_reasoning else ""
 
             opinion_block = (
-                f"🤖 <b>Analyse IA :</b>\n"
-                f"{pour_line}"
-                f"{contre_line}"
+                f"━━━━━━━━━━━━━━━━━━━━\n"
+                f"🧠 <b>ANALYSE EXPERT IA</b>\n"
+                f"{edge_line}"
+                f"{risk_line}"
                 f"{verdict_line}"
-                f"<i>{llm_reasoning[:200]}</i>\n\n"
+                f"{reason_line}"
+                f"\n"
             )
         else:
-            # Générer un avis minimal à partir des données si pas de LLM
+            # Avis minimal si LLM non disponible
             if abs(edge) >= 30:
-                opinion_block = f"🤖 <b>Avis du bot :</b>\n<i>Décalage très fort ({edge:+.0f}%) entre le prix du marché et la probabilité estimée — opportunité rare.</i>\n\n"
+                opinion_block = f"🤖 <b>Avis bot :</b>\n<i>Décalage très fort ({edge:+.0f}%) — opportunité rare.</i>\n\n"
             elif abs(edge) >= 15:
-                opinion_block = f"🤖 <b>Avis du bot :</b>\n<i>Décalage significatif détecté ({edge:+.0f}%). Probabilité estimée à {predicted_prob:.0f}% vs {market_price:.0f}% sur le marché.</i>\n\n"
+                opinion_block = f"🤖 <b>Avis bot :</b>\n<i>Décalage {edge:+.0f}% — prob. estimée {predicted_prob:.0f}% vs {market_price:.0f}% marché.</i>\n\n"
             else:
                 opinion_block = ""
 
