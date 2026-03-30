@@ -217,14 +217,28 @@ class Database:
         await self._conn.commit()
         return signal_id
 
-    async def get_recent_signals(self, limit: int = 50) -> list:
+    async def get_recent_signals(self, limit: int = 50, hours: int = 3) -> list:
+        """Retourne les signaux non-actionnés des dernières `hours` heures."""
         sql = """
         SELECT s.*, m.question FROM signals s
         JOIN markets m ON s.market_id = m.id
         WHERE s.acted_on = 0
+        AND s.created_at >= datetime('now', ? || ' hours')
         ORDER BY s.created_at DESC LIMIT ?
         """
-        async with self._conn.execute(sql, (limit,)) as cur:
+        async with self._conn.execute(sql, (f"-{hours}", limit)) as cur:
+            rows = await cur.fetchall()
+            return [dict(r) for r in rows]
+
+    async def get_recent_signals_for_market(self, market_id: str, hours: int = 1) -> list:
+        """Retourne les signaux récents pour un marché spécifique."""
+        sql = """
+        SELECT * FROM signals
+        WHERE market_id = ?
+        AND created_at >= datetime('now', ? || ' hours')
+        ORDER BY created_at DESC
+        """
+        async with self._conn.execute(sql, (market_id, f"-{hours}")) as cur:
             rows = await cur.fetchall()
             return [dict(r) for r in rows]
 

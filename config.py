@@ -38,6 +38,12 @@ POLYGON_RPC_URL: str = os.getenv("POLYGON_RPC_URL", "https://polygon-rpc.com")
 # ============================================================
 ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
 OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+
+# ============================================================
+# THE ODDS API (cotes bookmaker professionnelles — gratuit)
+# Inscription : https://the-odds-api.com  (500 req/mois gratuit)
+# ============================================================
+ODDS_API_KEY: str = os.getenv("ODDS_API_KEY", "")
 LLM_MODEL = "claude-sonnet-4-6"          # Modèle Claude par défaut
 LLM_MAX_TOKENS = 2048
 LLM_TEMPERATURE = 0.1                     # Bas pour décisions financières

@@ -27,8 +27,8 @@ DEFAULT_WEIGHTS = {
     "ARBITRAGE":  1.00,    # Arbitrage — signal indépendant, pas combiné
 }
 
-# Seuil pour déclencher un trade combiné
-COMBINED_SIGNAL_THRESHOLD = 0.74
+# Seuil pour déclencher un trade combiné (abaissé car XGBoost en cours de formation)
+COMBINED_SIGNAL_THRESHOLD = 0.68
 # Bonus de confiance si 2+ signaux concordants
 CONCORDANCE_BONUS = 0.05
 # Bonus si 3+ signaux concordants
@@ -278,3 +278,129 @@ class SignalCombiner:
 
         logger.info(f"Poids mis à jour: {new_weights}")
         await self.db.set_param("signal_weights", new_weights, "Performance update")
+
+    async def detect_coherence_signals(self) -> list[dict]:
+        """
+        Détecte les incohérences logiques entre marchés liés.
+
+        Exemple : Si "Trump win" est à 60% et "Biden win" est à 55%
+        → leur somme = 115% > 100% → l'un des deux est sur-évalué.
+        → Signal SHORT sur le plus surévalué.
+
+        Exemple 2 : "Republicans win Senate" à 65% mais
+        "Trump win Presidency" à 40% → contradiction politique → signal.
+        """
+        import re as _re
+        markets = await self.db.get_active_markets(limit=200)
+        signals = []
+
+        # Grouper les marchés par topic (mots-clés communs)
+        stop = {"will", "the", "a", "an", "in", "on", "at", "to", "win", "be"}
+        grouped: dict[str, list[dict]] = {}
+
+        for m in markets:
+            q = m.get("question", "")
+            words = [w.lower() for w in _re.findall(r'\b\w{4,}\b', q) if w.lower() not in stop][:3]
+            if len(words) < 2:
+                continue
+            key = " ".join(sorted(words[:2]))
+            grouped.setdefault(key, []).append(m)
+
+        for key, group in grouped.items():
+            if len(group) < 2:
+                continue
+
+            # Détecter les paires mutuellement exclusives (YES A + YES B > 1.0)
+            for i, m1 in enumerate(group):
+                for m2 in group[i+1:]:
+                    p1 = m1.get("yes_price", 0.5)
+                    p2 = m2.get("yes_price", 0.5)
+
+                    # Incohérence : somme > 1.10 (l'un est clairement surévalué)
+                    if p1 + p2 > 1.10:
+                        # Shorter le plus surévalué (prix le plus haut)
+                        overvalued = m1 if p1 > p2 else m2
+                        overval_price = max(p1, p2)
+                        fair_price = 1.0 - min(p1, p2)  # Si l'autre est correct
+                        edge = fair_price - overval_price
+
+                        if abs(edge) > 0.08:
+                            sig = {
+                                "market_id": overvalued["id"],
+                                "question": overvalued.get("question", ""),
+                                "signal_type": "COHERENCE",
+                                "direction": "NO",
+                                "confidence": round(min(0.65 + abs(edge), 0.85), 4),
+                                "edge": round(edge, 4),
+                                "predicted_prob": round(fair_price, 4),
+                                "market_price": round(overval_price, 4),
+                                "sentiment_score": 0.0,
+                                "source": f"Incohérence logique avec '{group[0].get('question','')[:40]}'",
+                                "texts_count": 0,
+                                "market_url": overvalued.get("market_url", ""),
+                                "urgency_bonus": overvalued.get("urgency_bonus", 0),
+                                "category": overvalued.get("category", "other"),
+                                "llm_reasoning": (
+                                    f"Contradiction logique : '{m1.get('question','')[:40]}' à {p1:.0%} "
+                                    f"+ '{m2.get('question','')[:40]}' à {p2:.0%} = {p1+p2:.0%} > 100%. "
+                                    f"L'un est surévalué."
+                                ),
+                                "llm_valid": True,
+                            }
+                            await self.db.save_signal(sig)
+                            signals.append(sig)
+                            logger.info(
+                                f"COHÉRENCE: {m1.get('question','')[:30]} ({p1:.0%}) + "
+                                f"{m2.get('question','')[:30]} ({p2:.0%}) = {p1+p2:.0%}"
+                            )
+
+        return signals
+
+    async def run_forever(self) -> None:
+        """Boucle principale — combine les signaux et détecte les incohérences."""
+        self._running = True
+        logger.info("Signal Combiner démarré")
+        while self._running:
+            try:
+                markets = await self.db.get_active_markets(limit=100)
+                combined_count = 0
+                for market in markets:
+                    combined = await self.combine_signals(market["id"], market)
+                    if combined:
+                        combined_count += 1
+                        # Sauvegarder le signal combiné
+                        await self.db.save_signal({
+                            "market_id": combined.market_id,
+                            "question": combined.question,
+                            "signal_type": "COMBINED",
+                            "direction": combined.direction,
+                            "confidence": combined.combined_confidence,
+                            "edge": combined.combined_edge,
+                            "predicted_prob": round(
+                                market.get("yes_price", 0.5) + combined.combined_edge, 4
+                            ),
+                            "market_price": market.get("yes_price", 0.5),
+                            "sentiment_score": 0.0,
+                            "source": f"COMBINED({'+'.join(combined.source_types)})",
+                            "texts_count": combined.source_count,
+                            "market_url": market.get("market_url", ""),
+                            "urgency_bonus": market.get("urgency_bonus", 0),
+                            "category": market.get("category", "other"),
+                            "llm_reasoning": f"Signal combiné de {combined.source_count} agents concordants.",
+                            "llm_valid": True,
+                        })
+                if combined_count:
+                    logger.info(f"Combiner: {combined_count} signaux combinés générés")
+
+                # Détecter les incohérences inter-marchés
+                coherence = await self.detect_coherence_signals()
+                if coherence:
+                    logger.info(f"Combiner: {len(coherence)} signaux de cohérence")
+
+            except Exception as e:
+                logger.error(f"SignalCombiner erreur: {e}")
+            await asyncio.sleep(120)  # Toutes les 2 minutes
+
+    def stop(self):
+        self._running = False
+        logger.info("Signal Combiner arrêté")

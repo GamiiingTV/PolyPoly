@@ -26,10 +26,12 @@ from agents.learning_agent   import LearningAgent
 from agents.orderbook_agent  import OrderBookAgent
 from agents.arbitrage_scanner import ArbitrageScanner
 from agents.signal_combiner  import SignalCombiner
-from agents.llm_validator      import LLMValidator
-from agents.metaculus_agent    import MetaculusAgent
-from agents.whale_tracker      import WhaleTracker
+from agents.llm_validator        import LLMValidator
+from agents.metaculus_agent      import MetaculusAgent
+from agents.whale_tracker        import WhaleTracker
 from agents.cross_platform_agent import CrossPlatformAgent
+from agents.wikipedia_agent      import WikipediaAgent
+from agents.bookmaker_agent      import BookmakerAgent
 
 console = Console()
 
@@ -79,6 +81,10 @@ def print_banner() -> None:
     table.add_row("OrderBook", "[green]✓[/green]")
     table.add_row("Arbitrage", "[green]✓[/green]")
     table.add_row("Cross-Platform", "[green]✓ Manifold vs Polymarket[/green]")
+    table.add_row("Wikipedia Monitor", "[green]✓ Éditions temps réel[/green]")
+    table.add_row("Bookmaker Odds", "[green]✓[/green]" if config.ODDS_API_KEY else "[yellow]✗ (ODDS_API_KEY manquant)[/yellow]")
+    table.add_row("XGBoost historique", "[green]✓ Pré-entraîné au démarrage[/green]")
+    table.add_row("Cohérence inter-marchés", "[green]✓[/green]")
     table.add_row("Vélocité news", "[green]✓[/green]")
     table.add_row("Calibration catégorie", "[green]✓[/green]")
     table.add_row("Événements planifiés", "[green]✓[/green]")
@@ -237,6 +243,8 @@ async def main() -> None:
     arb        = ArbitrageScanner(db, gamma, clob, telegram)
     whale      = WhaleTracker(db, gamma, clob)
     cross_plat = CrossPlatformAgent(db, telegram)
+    wiki       = WikipediaAgent(db, telegram)
+    bookmaker  = BookmakerAgent(db, telegram)
 
     # --- Feed temps réel ---
     try:
@@ -276,11 +284,14 @@ async def main() -> None:
         asyncio.create_task(feed.run_forever(),              name="RealtimeFeed"),
         asyncio.create_task(whale.run_forever(),             name="Agent10-Whale"),
         asyncio.create_task(cross_plat.run_forever(),        name="Agent11-CrossPlatform"),
+        asyncio.create_task(wiki.run_forever(),              name="Agent12-Wikipedia"),
+        asyncio.create_task(bookmaker.run_forever(),         name="Agent13-Bookmaker"),
+        asyncio.create_task(combiner.run_forever(),          name="SignalCombiner"),
         asyncio.create_task(health_check(db),                name="HealthCheck"),
         asyncio.create_task(daily_report_task(db, telegram), name="DailyReport"),
     ]
 
-    console.print("[bold green]11 agents opérationnels — Feed temps réel actif[/bold green]\n")
+    console.print("[bold green]13 agents opérationnels — XGBoost pré-entraîné — Feed temps réel actif[/bold green]\n")
     logger.info("PolyPoly v2 opérationnel")
 
     try:
@@ -292,7 +303,8 @@ async def main() -> None:
         for task in tasks:
             task.cancel()
         for agent in [scanner, sentiment, predictor, trader, learner,
-                      ob_agent, arb, feed, whale, llm_validator, metaculus, cross_plat]:
+                      ob_agent, arb, feed, whale, llm_validator, metaculus,
+                      cross_plat, wiki, bookmaker, combiner]:
             try:
                 agent.stop()
             except Exception:

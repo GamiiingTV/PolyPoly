@@ -297,6 +297,8 @@ class TradingAgent:
         self._exit_manager: Optional[SmartExitManager] = None
         self._win_rate_cache: float = 0.55
         self._daily_loss_warned = False
+        self._refusal_log: list[tuple[str, str]] = []   # (raison, question)
+        self._last_refusal_report: Optional[datetime] = None
 
     async def run_forever(self) -> None:
         """Boucle principale."""
@@ -353,31 +355,57 @@ class TradingAgent:
         signals = await self.db.get_recent_signals(limit=50)
         signals.sort(key=lambda x: x.get("confidence", 0), reverse=True)
 
-        # Priorité : ARBITRAGE > COMBINED > PREDICTION > ORDERBOOK > SENTIMENT
-        priority_order = ["ARBITRAGE", "COMBINED", "PREDICTION", "ORDERBOOK", "SENTIMENT", "ANOMALY"]
+        # Priorité : BOOKMAKER > ARBITRAGE > WIKI > COMBINED > PREDICTION > ORDERBOOK > WHALE > SENTIMENT
+        priority_order = [
+            "BOOKMAKER", "ARBITRAGE", "COHERENCE", "WIKI", "COMBINED",
+            "PREDICTION", "ORDERBOOK", "WHALE", "SENTIMENT", "ANOMALY",
+        ]
         signals.sort(
             key=lambda x: priority_order.index(x.get("signal_type", "SENTIMENT"))
             if x.get("signal_type") in priority_order else 99
         )
 
-        # En mode paper, on inclut aussi les signaux SENTIMENT pour accumuler
-        # des données d'entraînement rapidement (XGBoost a besoin de 50+ trades)
-        tradeable_types = ["ARBITRAGE", "COMBINED", "PREDICTION", "ORDERBOOK"]
+        # Tous les types sont tradeable — BOOKMAKER/WIKI/WHALE même en live
+        # car ces signaux sont indépendants du XGBoost
+        tradeable_types = [
+            "BOOKMAKER", "ARBITRAGE", "COHERENCE", "WIKI", "COMBINED",
+            "PREDICTION", "ORDERBOOK", "WHALE",
+        ]
         if self._simulation_mode:
             tradeable_types.append("SENTIMENT")
+
+        # Raisons de refus permanents → marquer le signal pour ne pas re-traiter
+        PERMANENT_REFUSAL_KEYWORDS = [
+            "Confiance insuffisante", "Edge insuffisant",
+            "Trop de positions ouvertes",
+        ]
 
         for signal in signals:
             if signal.get("acted_on"):
                 continue
             if signal.get("signal_type") not in tradeable_types:
+                # Marquer comme vu pour éviter de le re-traiter indéfiniment
+                if signal.get("id"):
+                    await self.db.mark_signal_acted_on(signal["id"])
                 continue
 
             can, reason = await self.risk.can_trade(signal)
             if not can:
-                logger.info(f"Trade refusé [{signal['market_id'][:8]}]: {reason}")
+                logger.info(
+                    f"Trade refusé [{signal.get('signal_type','?')}] "
+                    f"{signal.get('question','')[:40]}: {reason}"
+                )
+                self._refusal_log.append((reason, signal.get("question", "")[:50]))
+                # Si refus permanent, marquer le signal pour éviter boucle infinie
+                if any(kw in reason for kw in PERMANENT_REFUSAL_KEYWORDS):
+                    if signal.get("id"):
+                        await self.db.mark_signal_acted_on(signal["id"])
                 continue
 
             await self._execute_trade(signal)
+
+        # Rapport de refus toutes les 2 heures
+        await self._maybe_send_refusal_report()
 
     async def _execute_trade(self, signal: dict) -> Optional[int]:
         """Place un trade basé sur un signal validé."""
@@ -550,6 +578,26 @@ class TradingAgent:
         await self.telegram.notify_trade_result({
             **trade, **updates, "question": market.get("question", ""),
         })
+
+    async def _maybe_send_refusal_report(self) -> None:
+        """Envoie un résumé des refus toutes les 2h pour diagnostiquer."""
+        now = datetime.now()
+        if (
+            not self._refusal_log
+            or (self._last_refusal_report and (now - self._last_refusal_report).seconds < 7200)
+        ):
+            return
+        self._last_refusal_report = now
+
+        from collections import Counter
+        reasons = Counter(r for r, _ in self._refusal_log)
+        top = reasons.most_common(5)
+        lines = ["📋 <b>Rapport trades refusés (2h)</b>\n"]
+        for reason, count in top:
+            lines.append(f"• {count}× {reason}")
+
+        await self.telegram.send_message("\n".join(lines))
+        self._refusal_log.clear()
 
     def stop(self) -> None:
         self._running = False

@@ -96,6 +96,11 @@ class PredictionAgent:
             self._llm = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
             logger.info("LLM (Claude) connecté")
 
+        # Pré-entraîner XGBoost sur l'historique Polymarket si pas encore fait
+        if XGB_AVAILABLE and not self._model_trained:
+            logger.info("XGBoost non entraîné — téléchargement historique Polymarket...")
+            await self._pretrain_on_polymarket_history()
+
         self._running = True
         logger.info("Agent 3 (Prédiction) démarré")
 
@@ -439,6 +444,130 @@ Réponds UNIQUEMENT en JSON:
             logger.debug(f"LLM predict erreur: {e}")
 
         return None
+
+    async def _pretrain_on_polymarket_history(self) -> None:
+        """
+        Télécharge des marchés résolus depuis la Gamma API et pré-entraîne
+        XGBoost immédiatement — sans attendre 50 trades paper.
+        Utilise les 500 derniers marchés résolus comme données d'entraînement.
+        """
+        if not XGB_AVAILABLE:
+            return
+        try:
+            import httpx as _httpx
+            logger.info("Téléchargement historique Polymarket pour pré-entraînement...")
+            async with _httpx.AsyncClient(timeout=30.0) as client:
+                resp = await client.get(
+                    "https://gamma-api.polymarket.com/markets",
+                    params={
+                        "closed": "true",
+                        "limit": 500,
+                        "order": "volume",
+                        "ascending": "false",
+                    },
+                )
+            if resp.status_code != 200:
+                logger.warning(f"Gamma API historique: HTTP {resp.status_code}")
+                return
+
+            raw_markets = resp.json()
+            if not isinstance(raw_markets, list):
+                raw_markets = raw_markets.get("markets", [])
+
+            logger.info(f"Historique: {len(raw_markets)} marchés résolus récupérés")
+
+            X_list, y_list = [], []
+            for raw in raw_markets:
+                # Label : YES si le marché s'est résolu YES (prix final proche de 1)
+                res = raw.get("resolution") or raw.get("resolutionSource", "")
+                final_price = float(raw.get("outcomePrices", ["0.5"])[0]) if raw.get("outcomePrices") else 0.5
+                if res == "YES" or final_price >= 0.95:
+                    label = 1
+                elif res == "NO" or final_price <= 0.05:
+                    label = 0
+                else:
+                    continue  # Ignorer les marchés ambigus
+
+                # Construire un vecteur de features simplifié depuis les données disponibles
+                try:
+                    yes_p = float(raw.get("bestAsk") or raw.get("lastTradePrice") or 0.5)
+                    no_p = 1.0 - yes_p
+                    liq = float(raw.get("liquidity") or 0)
+                    vol = float(raw.get("volume") or 0)
+                    spread = abs(
+                        float(raw.get("bestAsk") or 0.5) - float(raw.get("bestBid") or 0.5)
+                    )
+
+                    # Features de base (sous-ensemble des 35 features)
+                    features = np.array([
+                        yes_p, no_p, liq / 100_000, vol / 50_000,
+                        spread, abs(yes_p - 0.5),
+                        min(liq / 100_000, 1.0),
+                        min(vol / 50_000, 1.0),
+                        yes_p * no_p,  # Incertitude
+                        abs(yes_p + no_p - 1.0),  # Arbitrage gap
+                        1.0 if yes_p > 0.5 else 0.0,
+                        float(bool(raw.get("volume24hr", 0))),
+                        min(float(raw.get("volume24hr") or 0) / 10_000, 1.0),
+                        0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0,  # Features temporelles (inconnues)
+                        0.0, 0.0, 0.0, 0.0, 0.0,
+                        0.0, 0.0, 0.0, 0.0, 0.0,
+                        0.0, 0.0, 0.0, 0.0, 0.0,
+                    ], dtype=np.float32)
+
+                    # S'assurer d'avoir exactement 35 features
+                    if len(features) < 35:
+                        features = np.pad(features, (0, 35 - len(features)))
+                    features = features[:35]
+
+                    X_list.append(features)
+                    y_list.append(label)
+                except Exception:
+                    continue
+
+            if len(X_list) < 50:
+                logger.warning(f"Pré-entraînement: seulement {len(X_list)} exemples valides")
+                return
+
+            logger.info(f"Pré-entraînement XGBoost sur {len(X_list)} marchés historiques...")
+            X = np.array(X_list, dtype=np.float32)
+            y = np.array(y_list)
+
+            from sklearn.preprocessing import StandardScaler
+            from sklearn.model_selection import train_test_split
+            import xgboost as xgb
+
+            scaler = StandardScaler()
+            X_scaled = scaler.fit_transform(X)
+
+            X_train, X_val, y_train, y_val = train_test_split(
+                X_scaled, y, test_size=0.15, random_state=42
+            )
+
+            from config import XGBOOST_PARAMS
+            model = xgb.XGBClassifier(**{**XGBOOST_PARAMS, "n_estimators": 200})
+            model.fit(X_train, y_train, eval_set=[(X_val, y_val)], verbose=False)
+
+            self._model = model
+            self._scaler = scaler
+            self._model_trained = True
+            self._save_model()
+
+            from sklearn.metrics import roc_auc_score
+            y_pred = model.predict_proba(X_val)[:, 1]
+            auc = roc_auc_score(y_val, y_pred)
+            logger.info(
+                f"XGBoost pré-entraîné sur {len(X_list)} marchés historiques | "
+                f"AUC = {auc:.3f}"
+            )
+            await self.db.set_param(
+                "last_model_training",
+                datetime.now().isoformat(),
+                f"Pré-entraînement historique Polymarket ({len(X_list)} marchés)"
+            )
+
+        except Exception as e:
+            logger.warning(f"Pré-entraînement historique échoué: {e}")
 
     async def _maybe_retrain(self) -> None:
         """Ré-entraîne le modèle si assez de trades résolus."""
