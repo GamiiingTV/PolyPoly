@@ -148,7 +148,6 @@ class MarketScanner:
             return False
 
         # Filtre end_date strict : si l'événement est déjà passé → ignorer
-        # (catch les matchs de sport terminés dont le prix n'a pas encore bougé)
         end_date_str = market.get("end_date")
         if end_date_str:
             try:
@@ -159,6 +158,20 @@ class MarketScanner:
                 if end_dt <= datetime.now(timezone.utc):
                     return False
             except (ValueError, TypeError):
+                pass
+
+        # Filtre date dans le slug URL — catch les matchs sport terminés
+        # dont Polymarket n'a pas encore mis à jour le prix/statut.
+        # Ex: "atp-draxl-galarne-2026-03-29" → match hier → ignoré
+        import re as _re
+        url = market.get("market_url", "") or market.get("id", "")
+        slug_date = _re.search(r'(\d{4}-\d{2}-\d{2})', url)
+        if slug_date:
+            try:
+                event_date = datetime.fromisoformat(slug_date.group(1)).replace(tzinfo=timezone.utc)
+                if event_date.date() < datetime.now(timezone.utc).date():
+                    return False
+            except Exception:
                 pass
 
         return True

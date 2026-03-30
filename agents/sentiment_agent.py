@@ -165,7 +165,10 @@ class SentimentAgent:
             price = m.get("yes_price", 0.5)
             if price < 0.05 or price > 0.85:
                 return False
-            # Filtre end_date : si la date de résolution est passée → ignoré
+            # Filtre flag active
+            if m.get("active") is False:
+                return False
+            # Filtre end_date officielle Polymarket
             end_str = m.get("end_date")
             if end_str:
                 try:
@@ -177,9 +180,18 @@ class SentimentAgent:
                         return False
                 except Exception:
                     pass
-            # Filtre flag active
-            if m.get("active") is False:
-                return False
+            # Filtre date dans le SLUG/URL — critique pour le sport
+            # Ex: "atp-draxl-galarne-2026-03-29" → date 29/03 passée → filtré
+            # Polymarket résout 24-48h après l'événement, mais l'event est déjà fini
+            url = m.get("market_url", "") or m.get("id", "")
+            slug_date = re.search(r'(\d{4}-\d{2}-\d{2})', url)
+            if slug_date:
+                try:
+                    event_date = datetime.fromisoformat(slug_date.group(1)).replace(tzinfo=_tz.utc)
+                    if event_date.date() < _now.date():
+                        return False  # L'événement a eu lieu avant aujourd'hui
+                except Exception:
+                    pass
             return True
 
         all_markets = await self.db.get_active_markets(limit=100)
