@@ -299,6 +299,10 @@ class SignalCombiner:
         grouped: dict[str, list[dict]] = {}
 
         for m in markets:
+            # Ignorer les marchés quasi-résolus (prix déjà extrême)
+            yes_p = m.get("yes_price", 0.5)
+            if yes_p < 0.09 or yes_p > 0.91:
+                continue
             q = m.get("question", "")
             words = [w.lower() for w in _re.findall(r'\b\w{4,}\b', q) if w.lower() not in stop][:3]
             if len(words) < 2:

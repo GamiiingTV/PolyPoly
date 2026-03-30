@@ -480,7 +480,14 @@ Réponds UNIQUEMENT en JSON:
             for raw in raw_markets:
                 # Label : YES si le marché s'est résolu YES (prix final proche de 1)
                 res = raw.get("resolution") or raw.get("resolutionSource", "")
-                final_price = float(raw.get("outcomePrices", ["0.5"])[0]) if raw.get("outcomePrices") else 0.5
+                outcome_prices_raw = raw.get("outcomePrices", [])
+                if isinstance(outcome_prices_raw, str):
+                    try:
+                        import ast as _ast
+                        outcome_prices_raw = _ast.literal_eval(outcome_prices_raw)
+                    except Exception:
+                        outcome_prices_raw = []
+                final_price = float(outcome_prices_raw[0]) if outcome_prices_raw else 0.5
                 if res == "YES" or final_price >= 0.95:
                     label = 1
                 elif res == "NO" or final_price <= 0.05:

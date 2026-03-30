@@ -49,6 +49,11 @@ class RiskManager:
         if signal.get("llm_valid") is False:
             return False, f"Rejeté par analyse experte LLM (conviction={signal.get('llm_conviction',0)}/10)"
 
+        # 0b. Filtre marché quasi-résolu — prix déjà à l'extrême, aucun edge possible
+        market_price = float(signal.get("market_price", 0.5))
+        if market_price < 0.09 or market_price > 0.91:
+            return False, f"Marché quasi-résolu (YES={market_price:.1%}) — risque de perte certaine"
+
         # 1. Seuil de confiance dynamique
         dynamic_confidence = await self.db.get_param(
             "min_confidence_threshold", MIN_CONFIDENCE_THRESHOLD
@@ -459,9 +464,21 @@ class TradingAgent:
         raw_market = json.loads(market.get("raw_data", "{}"))
         clob_token_ids = raw_market.get("clobTokenIds", [])
 
+        # Gérer le cas où clobTokenIds est stocké comme string JSON
+        if isinstance(clob_token_ids, str):
+            try:
+                clob_token_ids = json.loads(clob_token_ids)
+            except Exception:
+                clob_token_ids = []
+
         token_id = None
-        if clob_token_ids and len(clob_token_ids) >= 2:
-            token_id = clob_token_ids[0] if direction == "YES" else clob_token_ids[1]
+        if clob_token_ids and len(clob_token_ids) >= 1:
+            if direction == "YES":
+                token_id = clob_token_ids[0]
+            elif len(clob_token_ids) >= 2:
+                token_id = clob_token_ids[1]
+            else:
+                token_id = clob_token_ids[0]  # Fallback: seul token disponible
 
         # Capital disponible
         if self._simulation_mode:
@@ -491,7 +508,10 @@ class TradingAgent:
             )
         else:
             if not token_id:
-                logger.warning(f"Token ID manquant pour {market_id[:8]}")
+                # Marquer le signal comme traité pour stopper le retry infini
+                if signal.get("id"):
+                    await self.db.mark_signal_acted_on(signal["id"])
+                logger.debug(f"Token ID manquant → signal {signal.get('id','?')} marqué traité ({market_id[:8]})")
                 return None
             try:
                 result = await self.clob.place_market_order(

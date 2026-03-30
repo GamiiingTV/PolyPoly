@@ -161,9 +161,9 @@ class SentimentAgent:
         _now = datetime.now(_tz.utc)
 
         def _market_still_live(m: dict) -> bool:
-            # Filtre prix
+            # Filtre prix : exclure marchés quasi-résolus (trop proche de 0% ou 100%)
             price = m.get("yes_price", 0.5)
-            if price < 0.05 or price > 0.85:
+            if price < 0.09 or price > 0.91:
                 return False
             # Filtre flag active
             if m.get("active") is False:
