@@ -141,7 +141,16 @@ class LLMValidator:
             )
 
         except Exception as e:
-            logger.warning(f"LLM validation erreur: {e}")
+            err_str = str(e)
+            if "credit balance is too low" in err_str or "insufficient_credits" in err_str:
+                # Désactiver le LLM jusqu'au prochain redémarrage pour éviter le spam
+                logger.error(
+                    "💳 ANTHROPIC: solde insuffisant — LLM Validator désactivé.\n"
+                    "→ Recharge sur https://console.anthropic.com/settings/billing"
+                )
+                self._client = None  # Désactive proprement
+            else:
+                logger.warning(f"LLM validation erreur: {e}")
             signal["llm_valid"] = True
             signal["llm_reasoning"] = ""
 
