@@ -225,33 +225,51 @@ async def main() -> None:
     clob = CLOBClient()
 
     # --- Telegram (lazy import pour compatibilité) ---
+    class _NoOpTelegram:
+        async def start(self): pass
+        async def stop(self): pass
+        async def send_message(self, *a, **k): pass
+        async def notify_opportunity(self, *a): pass
+        async def notify_trade_placed(self, *a): pass
+        async def notify_trade_result(self, *a): pass
+        async def notify_daily_report(self, *a): pass
+        async def notify_anomaly(self, *a): pass
+        async def notify_learning_update(self, *a): pass
+        async def notify_error(self, *a, **k): pass
+        async def notify_news_flash(self, *a, **k): pass
+
     try:
         from utils.telegram_bot import TelegramNotifier
         telegram = TelegramNotifier()
         await telegram.start()
-    except BaseException:
-        class _NoOpTelegram:
-            async def start(self): pass
-            async def send_message(self, *a, **k): pass
-            async def notify_opportunity(self, *a): pass
-            async def notify_trade_placed(self, *a): pass
-            async def notify_trade_result(self, *a): pass
-            async def notify_daily_report(self, *a): pass
-            async def notify_anomaly(self, *a): pass
-            async def notify_learning_update(self, *a): pass
-            async def notify_error(self, *a, **k): pass
+    except BaseException as _e:
         telegram = _NoOpTelegram()
-        logger.warning("Telegram désactivé (dépendance indisponible)")
+        logger.warning(f"Telegram désactivé: {_e}")
 
     # --- Agents 8, 9 (pas de boucle infinie, utilisés par d'autres agents) ---
-    llm_validator = LLMValidator()
-    await llm_validator.start()
+    try:
+        llm_validator = LLMValidator()
+        await llm_validator.start()
+    except Exception as e:
+        logger.error(f"LLMValidator init échoué (non bloquant): {e}")
+        class _NoOpValidator:
+            def stop(self): pass
+            async def validate_signal(self, *a, **k): return None
+            def record_outcome(self, *a, **k): pass
+        llm_validator = _NoOpValidator()
 
-    metaculus = MetaculusAgent()
+    try:
+        metaculus = MetaculusAgent()
+    except Exception as e:
+        logger.error(f"MetaculusAgent init échoué: {e}")
+        metaculus = None
 
-    # --- 7 Agents principaux ---
-    # Agent 6 doit être instancié avant Agent 3 (qui en dépend)
-    ob_agent  = OrderBookAgent(db, clob, gamma, telegram)
+    # --- Agents principaux — chaque instanciation protégée ---
+    try:
+        ob_agent = OrderBookAgent(db, clob, gamma, telegram)
+    except Exception as e:
+        logger.error(f"OrderBookAgent init échoué: {e}"); ob_agent = None
+
     scanner   = MarketScanner(db, gamma, telegram)
     sentiment = SentimentAgent(db, telegram,
                                llm_validator=llm_validator,
@@ -261,12 +279,36 @@ async def main() -> None:
     trader    = TradingAgent(db, clob, gamma, telegram)
     learner   = LearningAgent(db, telegram, llm_validator=llm_validator)
     arb        = ArbitrageScanner(db, gamma, clob, telegram)
-    whale      = WhaleTracker(db, gamma, clob)
-    cross_plat = CrossPlatformAgent(db, telegram)
-    wiki        = WikipediaAgent(db, telegram)
-    bookmaker   = BookmakerAgent(db, telegram)
-    news_flash  = NewsFlashAgent(db, telegram)
-    smart_money = SmartMoneyAgent(db, telegram)
+
+    try:
+        whale = WhaleTracker(db, gamma, clob)
+    except Exception as e:
+        logger.error(f"WhaleTracker init échoué: {e}"); whale = None
+
+    try:
+        cross_plat = CrossPlatformAgent(db, telegram)
+    except Exception as e:
+        logger.error(f"CrossPlatformAgent init échoué: {e}"); cross_plat = None
+
+    try:
+        wiki = WikipediaAgent(db, telegram)
+    except Exception as e:
+        logger.error(f"WikipediaAgent init échoué: {e}"); wiki = None
+
+    try:
+        bookmaker = BookmakerAgent(db, telegram)
+    except Exception as e:
+        logger.error(f"BookmakerAgent init échoué: {e}"); bookmaker = None
+
+    try:
+        news_flash = NewsFlashAgent(db, telegram)
+    except Exception as e:
+        logger.error(f"NewsFlashAgent init échoué: {e}"); news_flash = None
+
+    try:
+        smart_money = SmartMoneyAgent(db, telegram)
+    except Exception as e:
+        logger.error(f"SmartMoneyAgent init échoué: {e}"); smart_money = None
 
     # --- Feed temps réel ---
     try:
@@ -298,25 +340,31 @@ async def main() -> None:
             await feed.subscribe_markets(token_ids[:200])
 
     # --- Lancer tous les agents avec superviseur (crash d'un agent ≠ mort du bot) ---
-    tasks = [
-        asyncio.create_task(supervised_task(scanner.run_forever,    "Agent1-Scanner"),    name="Agent1-Scanner"),
-        asyncio.create_task(supervised_task(sentiment.run_forever,  "Agent2-Sentiment"),  name="Agent2-Sentiment"),
-        asyncio.create_task(supervised_task(predictor.run_forever,  "Agent3-Prediction"), name="Agent3-Prediction"),
-        asyncio.create_task(supervised_task(trader.run_forever,     "Agent4-Trading"),    name="Agent4-Trading"),
-        asyncio.create_task(supervised_task(learner.run_forever,    "Agent5-Learning"),   name="Agent5-Learning"),
-        asyncio.create_task(supervised_task(ob_agent.run_forever,   "Agent6-OrderBook"),  name="Agent6-OrderBook"),
-        asyncio.create_task(supervised_task(arb.run_forever,        "Agent7-Arbitrage"),  name="Agent7-Arbitrage"),
-        asyncio.create_task(supervised_task(feed.run_forever,       "RealtimeFeed"),      name="RealtimeFeed"),
-        asyncio.create_task(supervised_task(whale.run_forever,      "Agent10-Whale"),     name="Agent10-Whale"),
-        asyncio.create_task(supervised_task(cross_plat.run_forever, "Agent11-CrossPlat"), name="Agent11-CrossPlatform"),
-        asyncio.create_task(supervised_task(wiki.run_forever,       "Agent12-Wikipedia"), name="Agent12-Wikipedia"),
-        asyncio.create_task(supervised_task(bookmaker.run_forever,  "Agent13-Bookmaker"), name="Agent13-Bookmaker"),
-        asyncio.create_task(supervised_task(news_flash.run_forever, "Agent14-NewsFlash"), name="Agent14-NewsFlash"),
-        asyncio.create_task(supervised_task(smart_money.run_forever,"Agent15-SmartMoney"),name="Agent15-SmartMoney"),
-        asyncio.create_task(supervised_task(combiner.run_forever,   "SignalCombiner"),    name="SignalCombiner"),
+    def _task(agent, name):
+        """Crée une tâche supervisée seulement si l'agent a été instancié."""
+        if agent is None:
+            return None
+        return asyncio.create_task(supervised_task(agent.run_forever, name), name=name)
+
+    tasks = [t for t in [
+        _task(scanner,    "Agent1-Scanner"),
+        _task(sentiment,  "Agent2-Sentiment"),
+        _task(predictor,  "Agent3-Prediction"),
+        _task(trader,     "Agent4-Trading"),
+        _task(learner,    "Agent5-Learning"),
+        _task(ob_agent,   "Agent6-OrderBook"),
+        _task(arb,        "Agent7-Arbitrage"),
+        _task(feed,       "RealtimeFeed"),
+        _task(whale,      "Agent10-Whale"),
+        _task(cross_plat, "Agent11-CrossPlatform"),
+        _task(wiki,       "Agent12-Wikipedia"),
+        _task(bookmaker,  "Agent13-Bookmaker"),
+        _task(news_flash, "Agent14-NewsFlash"),
+        _task(smart_money,"Agent15-SmartMoney"),
+        _task(combiner,   "SignalCombiner"),
         asyncio.create_task(health_check(db),                name="HealthCheck"),
         asyncio.create_task(daily_report_task(db, telegram), name="DailyReport"),
-    ]
+    ] if t is not None]
 
     console.print("[bold green]15 agents opérationnels — News Flash + Smart Money + XGBoost pré-entraîné[/bold green]\n")
     logger.info("PolyPoly v2 opérationnel")
@@ -333,7 +381,8 @@ async def main() -> None:
                       ob_agent, arb, feed, whale, llm_validator, metaculus,
                       cross_plat, wiki, bookmaker, news_flash, smart_money, combiner]:
             try:
-                agent.stop()
+                if agent is not None:
+                    agent.stop()
             except Exception:
                 pass
         await gamma.close()
