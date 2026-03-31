@@ -197,6 +197,22 @@ async def realtime_price_handler(update, db: Database,
                 await db.upsert_market({**market, "anomaly_score": anomaly})
 
 
+async def supervised_task(coro_fn, name: str, restart_delay: float = 5.0):
+    """
+    Superviseur par tâche : si un agent crash, on le relance automatiquement
+    au lieu de tuer tout le bot.
+    """
+    while True:
+        try:
+            await coro_fn()
+        except asyncio.CancelledError:
+            logger.info(f"{name} annulé proprement")
+            return
+        except Exception as e:
+            logger.error(f"{name} a crashé: {e} — relance dans {restart_delay}s")
+            await asyncio.sleep(restart_delay)
+
+
 async def main() -> None:
     setup_logging()
     print_banner()
@@ -265,7 +281,10 @@ async def main() -> None:
 
     # --- Scan initial ---
     logger.info("Scan initial des marchés...")
-    await scanner.scan_cycle()
+    try:
+        await scanner.scan_cycle()
+    except Exception as e:
+        logger.warning(f"Scan initial échoué (non bloquant): {e}")
 
     # --- Souscription WebSocket aux marchés récupérés ---
     if isinstance(feed, RealtimeFeed):
@@ -278,23 +297,23 @@ async def main() -> None:
         if token_ids:
             await feed.subscribe_markets(token_ids[:200])
 
-    # --- Lancer tous les agents en parallèle ---
+    # --- Lancer tous les agents avec superviseur (crash d'un agent ≠ mort du bot) ---
     tasks = [
-        asyncio.create_task(scanner.run_forever(),    name="Agent1-Scanner"),
-        asyncio.create_task(sentiment.run_forever(),  name="Agent2-Sentiment"),
-        asyncio.create_task(predictor.run_forever(),  name="Agent3-Prediction"),
-        asyncio.create_task(trader.run_forever(),     name="Agent4-Trading"),
-        asyncio.create_task(learner.run_forever(),    name="Agent5-Learning"),
-        asyncio.create_task(ob_agent.run_forever(),   name="Agent6-OrderBook"),
-        asyncio.create_task(arb.run_forever(),        name="Agent7-Arbitrage"),
-        asyncio.create_task(feed.run_forever(),              name="RealtimeFeed"),
-        asyncio.create_task(whale.run_forever(),             name="Agent10-Whale"),
-        asyncio.create_task(cross_plat.run_forever(),        name="Agent11-CrossPlatform"),
-        asyncio.create_task(wiki.run_forever(),              name="Agent12-Wikipedia"),
-        asyncio.create_task(bookmaker.run_forever(),         name="Agent13-Bookmaker"),
-        asyncio.create_task(news_flash.run_forever(),        name="Agent14-NewsFlash"),
-        asyncio.create_task(smart_money.run_forever(),       name="Agent15-SmartMoney"),
-        asyncio.create_task(combiner.run_forever(),          name="SignalCombiner"),
+        asyncio.create_task(supervised_task(scanner.run_forever,    "Agent1-Scanner"),    name="Agent1-Scanner"),
+        asyncio.create_task(supervised_task(sentiment.run_forever,  "Agent2-Sentiment"),  name="Agent2-Sentiment"),
+        asyncio.create_task(supervised_task(predictor.run_forever,  "Agent3-Prediction"), name="Agent3-Prediction"),
+        asyncio.create_task(supervised_task(trader.run_forever,     "Agent4-Trading"),    name="Agent4-Trading"),
+        asyncio.create_task(supervised_task(learner.run_forever,    "Agent5-Learning"),   name="Agent5-Learning"),
+        asyncio.create_task(supervised_task(ob_agent.run_forever,   "Agent6-OrderBook"),  name="Agent6-OrderBook"),
+        asyncio.create_task(supervised_task(arb.run_forever,        "Agent7-Arbitrage"),  name="Agent7-Arbitrage"),
+        asyncio.create_task(supervised_task(feed.run_forever,       "RealtimeFeed"),      name="RealtimeFeed"),
+        asyncio.create_task(supervised_task(whale.run_forever,      "Agent10-Whale"),     name="Agent10-Whale"),
+        asyncio.create_task(supervised_task(cross_plat.run_forever, "Agent11-CrossPlat"), name="Agent11-CrossPlatform"),
+        asyncio.create_task(supervised_task(wiki.run_forever,       "Agent12-Wikipedia"), name="Agent12-Wikipedia"),
+        asyncio.create_task(supervised_task(bookmaker.run_forever,  "Agent13-Bookmaker"), name="Agent13-Bookmaker"),
+        asyncio.create_task(supervised_task(news_flash.run_forever, "Agent14-NewsFlash"), name="Agent14-NewsFlash"),
+        asyncio.create_task(supervised_task(smart_money.run_forever,"Agent15-SmartMoney"),name="Agent15-SmartMoney"),
+        asyncio.create_task(supervised_task(combiner.run_forever,   "SignalCombiner"),    name="SignalCombiner"),
         asyncio.create_task(health_check(db),                name="HealthCheck"),
         asyncio.create_task(daily_report_task(db, telegram), name="DailyReport"),
     ]
