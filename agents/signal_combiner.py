@@ -19,16 +19,18 @@ except BaseException:
 
 
 # Poids initiaux par type de signal (ajustés dynamiquement)
+# PREDICTION abaissé car XGBoost seul sans LLM = peu fiable
 DEFAULT_WEIGHTS = {
-    "PREDICTION": 0.45,    # XGBoost + LLM — le plus fiable
-    "ORDERBOOK":  0.30,    # Microstructure — alpha court terme
-    "SENTIMENT":  0.15,    # Sentiment — utile mais bruité
+    "PREDICTION": 0.25,    # XGBoost (sans LLM) — signal directionnel brut
+    "ORDERBOOK":  0.35,    # Microstructure — alpha court terme fiable
+    "SENTIMENT":  0.25,    # Sentiment — signal contextuel
     "ANOMALY":    0.10,    # Scanner anomalie — signal faible seul
+    "SMART_MONEY":0.30,    # Smart money — copy trading réel
     "ARBITRAGE":  1.00,    # Arbitrage — signal indépendant, pas combiné
 }
 
-# Seuil pour déclencher un trade combiné (abaissé car XGBoost en cours de formation)
-COMBINED_SIGNAL_THRESHOLD = 0.68
+# Seuil pour déclencher un signal combiné (relevé car on veut moins d'alertes)
+COMBINED_SIGNAL_THRESHOLD = 0.74
 # Bonus de confiance si 2+ signaux concordants
 CONCORDANCE_BONUS = 0.05
 # Bonus si 3+ signaux concordants

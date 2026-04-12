@@ -301,6 +301,7 @@ class PredictionAgent:
 
         features = self._build_features(market, sentiment, ob_features, price_history)
         yes_price = market.get("yes_price", 0.5)
+        category = market.get("category", "other")
 
         # Filtre : marché quasi-résolu → aucun edge possible, on ne prédit pas
         if yes_price < 0.15 or yes_price > 0.85:
@@ -325,37 +326,61 @@ class PredictionAgent:
                 llm_prob = llm_result.get("probability")
                 llm_reasoning = llm_result.get("reasoning", "")
 
+        # --- Sports : XGBoost seul est aveugle (pas de features sportives) ---
+        # XGBoost ne connaît pas les équipes, les pitchers, la météo, les stats.
+        # Sur marchés sports, seul le LLM peut apporter un vrai raisonnement.
+        # Sans LLM disponible → on ne génère pas de signal sports.
+        if category == "sports" and llm_prob is None:
+            return None
+
         # --- Combiner les prédictions ---
         if xgb_prob is not None and llm_prob is not None:
-            predicted_prob = xgb_prob * 0.6 + llm_prob * 0.4
-        elif xgb_prob is not None:
-            predicted_prob = xgb_prob
+            # LLM = source principale, XGBoost = ajustement mineur
+            predicted_prob = llm_prob * 0.70 + xgb_prob * 0.30
         elif llm_prob is not None:
             predicted_prob = llm_prob
+        elif xgb_prob is not None:
+            # XGBoost seul : uniquement pour marchés non-sports, avec prudence
+            predicted_prob = xgb_prob
         else:
             return None  # Pas de prédiction possible
 
-        # Plafonner la probabilité prédite — XGBoost non entraîné peut diverger
-        predicted_prob = min(max(predicted_prob, 0.08), 0.92)
+        # Plafonner la probabilité prédite (XGBoost peut diverger sans calibration)
+        predicted_prob = min(max(predicted_prob, 0.10), 0.90)
 
         # --- Calculer l'edge et la confiance ---
         edge = predicted_prob - yes_price
         abs_edge = abs(edge)
 
-        if abs_edge < MIN_EDGE_THRESHOLD:
+        # Seuils d'edge minimaux par catégorie
+        # Sports = très efficient → edge minimum 12%
+        # Autres  = 5% (MIN_EDGE_THRESHOLD)
+        min_edge = 0.12 if category == "sports" else MIN_EDGE_THRESHOLD
+        if abs_edge < min_edge:
             return None
 
-        # Confiance basée sur la magnitude de l'edge et la certitude du modèle
-        base_confidence = min(0.5 + abs_edge * 2, 0.95)
+        # Confiance : basée sur edge + nombre de modèles d'accord
+        # Plafond agressif pour XGBoost seul : max 0.68 (jamais de notification sans LLM)
         if xgb_prob is not None and llm_prob is not None:
-            # Les deux modèles sont d'accord → plus confiant
             agreement = 1 - abs(xgb_prob - llm_prob)
-            confidence = base_confidence * (0.7 + agreement * 0.3)
+            base_confidence = min(0.5 + abs_edge * 1.5, 0.88)
+            confidence = base_confidence * (0.75 + agreement * 0.25)
+        elif llm_prob is not None:
+            # LLM seul = fiable
+            base_confidence = min(0.5 + abs_edge * 1.5, 0.85)
+            confidence = base_confidence * 0.90
         else:
-            confidence = base_confidence * 0.85  # Un seul modèle → moins confiant
+            # XGBoost seul = peu fiable, plafond à 0.65
+            base_confidence = min(0.5 + abs_edge * 1.0, 0.65)
+            confidence = base_confidence * 0.80
 
-        # Plafonner la confiance à 0.82 (XGBoost non calibré peut surestimer)
-        confidence = min(confidence, 0.82)
+        # Plafonds finaux par cas
+        if xgb_prob is not None and llm_prob is not None:
+            confidence = min(confidence, 0.82)   # LLM + XGBoost
+        elif llm_prob is not None:
+            confidence = min(confidence, 0.78)   # LLM seul
+        else:
+            confidence = min(confidence, 0.62)   # XGBoost seul (jamais ≥ seuil notif)
 
         # Filtre final par seuil de confiance
         if confidence < MIN_CONFIDENCE_THRESHOLD:
@@ -384,8 +409,9 @@ class PredictionAgent:
             f"{market['question'][:50]} | edge={edge:.2%}"
         )
 
-        # Notifier Telegram si très haute confiance
-        if confidence > 0.80:
+        # Notifier Telegram uniquement si LLM impliqué ET confiance suffisante
+        # XGBoost seul (plafonné à 0.62) ne déclenchera jamais cette condition
+        if confidence > 0.74 and llm_prob is not None:
             await self.telegram.notify_opportunity({**signal, "question": market.get("question")})
 
         return signal
