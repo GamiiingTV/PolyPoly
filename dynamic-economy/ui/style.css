@@ -1,0 +1,337 @@
+/* ── Reset & base ────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg:          #0a0d10;
+    --surface:     #0f1318;
+    --border:      #1e2a35;
+    --accent:      #00d4ff;
+    --accent-dim:  #007a99;
+    --green:       #00ff88;
+    --red:         #ff3b5c;
+    --yellow:      #ffc94a;
+    --text:        #c9d8e8;
+    --text-dim:    #5a7080;
+    --font:        'Courier New', Courier, monospace;
+    --radius:      4px;
+}
+
+html, body {
+    height: 100%;
+    background: transparent;
+    font-family: var(--font);
+    font-size: 13px;
+    color: var(--text);
+}
+
+/* ── Terminal wrapper ────────────────────────────────────────────────────── */
+#terminal {
+    position: fixed;
+    inset: 5vh 5vw;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 0 40px rgba(0, 212, 255, 0.08);
+    transition: opacity .2s;
+}
+
+#terminal.hidden { display: none; }
+
+/* scanline overlay */
+#terminal::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,.08) 3px,
+        rgba(0,0,0,.08) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: .6rem 1rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.logo {
+    color: var(--accent);
+    font-weight: bold;
+    letter-spacing: .12em;
+    text-shadow: 0 0 8px rgba(0,212,255,.5);
+    flex: 1;
+}
+
+.ticker-time { color: var(--text-dim); font-size: 11px; }
+
+#btn-close {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: .2rem .6rem;
+    cursor: pointer;
+    border-radius: var(--radius);
+    font-family: var(--font);
+    transition: color .15s, border-color .15s;
+}
+#btn-close:hover { color: var(--red); border-color: var(--red); }
+
+/* ── Category tabs ───────────────────────────────────────────────────────── */
+#tabs {
+    display: flex;
+    gap: 1px;
+    background: var(--border);
+    flex-shrink: 0;
+}
+
+.tab {
+    flex: 1;
+    padding: .45rem;
+    background: var(--surface);
+    border: none;
+    color: var(--text-dim);
+    font-family: var(--font);
+    font-size: 11px;
+    letter-spacing: .1em;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.tab:hover  { background: var(--bg); color: var(--text); }
+.tab.active { background: var(--bg); color: var(--accent); border-bottom: 2px solid var(--accent); }
+
+/* ── Main layout ─────────────────────────────────────────────────────────── */
+main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* ── Price list ──────────────────────────────────────────────────────────── */
+#price-list {
+    flex: 1;
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+}
+
+#price-list::-webkit-scrollbar { width: 4px; }
+#price-list::-webkit-scrollbar-track { background: var(--bg); }
+#price-list::-webkit-scrollbar-thumb { background: var(--border); }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead th {
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    padding: .55rem .8rem;
+    text-align: left;
+    font-size: 10px;
+    letter-spacing: .12em;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+}
+
+tbody tr {
+    cursor: pointer;
+    border-bottom: 1px solid rgba(30,42,53,.6);
+    transition: background .1s;
+}
+tbody tr:hover  { background: rgba(0,212,255,.04); }
+tbody tr.active { background: rgba(0,212,255,.08); }
+
+tbody td {
+    padding: .55rem .8rem;
+    white-space: nowrap;
+}
+
+.loading { text-align: center; color: var(--text-dim); padding: 2rem !important; }
+
+.price-cell  { color: var(--accent); font-weight: bold; }
+.min-cell    { color: var(--text-dim); font-size: 11px; }
+.max-cell    { color: var(--text-dim); font-size: 11px; }
+
+.trend-up   { color: var(--green); }
+.trend-down { color: var(--red); }
+.trend-flat { color: var(--text-dim); }
+
+.btn-select {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: .15rem .5rem;
+    cursor: pointer;
+    font-family: var(--font);
+    font-size: 10px;
+    border-radius: var(--radius);
+    transition: color .15s, border-color .15s;
+}
+.btn-select:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ── Side panel ──────────────────────────────────────────────────────────── */
+#side-panel {
+    width: 340px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+    overflow-y: auto;
+}
+
+/* Item header */
+#item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .5rem;
+}
+
+#item-name { color: var(--text); letter-spacing: .06em; }
+
+.big-price {
+    color: var(--accent);
+    font-size: 20px;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(0,212,255,.4);
+}
+
+/* Chart */
+#chart-container {
+    position: relative;
+    height: 160px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    overflow: hidden;
+}
+
+#price-chart { width: 100%; height: 100%; }
+
+#chart-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 11px;
+    pointer-events: none;
+}
+
+/* Trade panel */
+#trade-panel {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: .8rem;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+}
+
+#trade-panel label {
+    color: var(--text-dim);
+    font-size: 10px;
+    letter-spacing: .1em;
+}
+
+.qty-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.qty-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: .3rem .5rem;
+    cursor: pointer;
+    font-family: var(--font);
+    border-radius: var(--radius);
+    transition: border-color .15s;
+}
+.qty-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+#qty-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: .3rem .5rem;
+    font-family: var(--font);
+    font-size: 14px;
+    text-align: center;
+    border-radius: var(--radius);
+    outline: none;
+}
+#qty-input:focus { border-color: var(--accent); }
+
+#trade-total {
+    font-size: 11px;
+    color: var(--text-dim);
+}
+#total-display { color: var(--yellow); font-weight: bold; }
+
+.trade-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .5rem;
+}
+
+.btn-trade {
+    padding: .55rem;
+    border: none;
+    border-radius: var(--radius);
+    font-family: var(--font);
+    font-size: 12px;
+    letter-spacing: .1em;
+    cursor: pointer;
+    font-weight: bold;
+    transition: opacity .15s, transform .1s;
+}
+.btn-trade:disabled { opacity: .3; cursor: not-allowed; }
+.btn-trade:not(:disabled):hover { opacity: .85; transform: translateY(-1px); }
+.btn-trade:not(:disabled):active { transform: translateY(0); }
+
+.btn-trade.buy  { background: var(--green);  color: #000; }
+.btn-trade.sell { background: var(--red);    color: #fff; }
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .4rem 1rem;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    font-size: 11px;
+    color: var(--text-dim);
+}
+
+#status-msg  { color: var(--green); }
+#next-update { color: var(--text-dim); }
+
+/* ── Flash animation on price update ────────────────────────────────────── */
+@keyframes flashGreen { 0%,100% { color: var(--accent); } 50% { color: var(--green); } }
+@keyframes flashRed   { 0%,100% { color: var(--accent); } 50% { color: var(--red);   } }
+.flash-up   { animation: flashGreen .6s ease; }
+.flash-down { animation: flashRed   .6s ease; }

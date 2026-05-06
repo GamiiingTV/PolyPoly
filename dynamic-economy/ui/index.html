@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamic Economy — Market Terminal</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div id="terminal" class="hidden">
+
+        <!-- Header bar -->
+        <header>
+            <span class="logo">▶ DYNAMIC ECONOMY MARKET</span>
+            <span id="ticker-time" class="ticker-time"></span>
+            <button id="btn-close" title="Fermer [ESC]">✕</button>
+        </header>
+
+        <!-- Category tabs -->
+        <nav id="tabs">
+            <button class="tab active" data-cat="all">TOUT</button>
+            <button class="tab" data-cat="drugs">MARCHÉ NOIR</button>
+            <button class="tab" data-cat="legal">BOUTIQUES</button>
+            <button class="tab" data-cat="resources">RESSOURCES</button>
+            <button class="tab" data-cat="crafting">CRAFTING</button>
+        </nav>
+
+        <!-- Main layout -->
+        <main>
+
+            <!-- Left: price list -->
+            <section id="price-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ITEM</th>
+                            <th>PRIX</th>
+                            <th>MIN</th>
+                            <th>MAX</th>
+                            <th>TENDANCE</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="price-table-body">
+                        <tr><td colspan="6" class="loading">Connexion au marché…</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Right: graph + trade panel -->
+            <aside id="side-panel">
+
+                <!-- Selected item info -->
+                <div id="item-header">
+                    <span id="item-name">Sélectionnez un item</span>
+                    <span id="item-price" class="big-price">—</span>
+                </div>
+
+                <!-- 24h price chart -->
+                <div id="chart-container">
+                    <canvas id="price-chart"></canvas>
+                    <div id="chart-placeholder">Cliquez sur un item pour voir le graphique</div>
+                </div>
+
+                <!-- Buy / Sell form -->
+                <div id="trade-panel">
+                    <label for="qty-input">Quantité</label>
+                    <div class="qty-row">
+                        <button class="qty-btn" data-delta="-10">-10</button>
+                        <button class="qty-btn" data-delta="-1">-1</button>
+                        <input id="qty-input" type="number" min="1" max="9999" value="1" />
+                        <button class="qty-btn" data-delta="+1">+1</button>
+                        <button class="qty-btn" data-delta="+10">+10</button>
+                    </div>
+                    <div id="trade-total">Total estimé : <span id="total-display">—</span></div>
+                    <div class="trade-buttons">
+                        <button id="btn-buy"  class="btn-trade buy"  disabled>ACHETER</button>
+                        <button id="btn-sell" class="btn-trade sell" disabled>VENDRE</button>
+                    </div>
+                </div>
+
+            </aside>
+        </main>
+
+        <!-- Status bar -->
+        <footer>
+            <span id="status-msg">En attente de données marché…</span>
+            <span id="next-update">Prochain cycle : —</span>
+        </footer>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
