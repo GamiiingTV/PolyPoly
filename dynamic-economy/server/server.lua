@@ -13,11 +13,12 @@ local crashActive      = false
 -- ─── Bootstrap ────────────────────────────────────────────────────────────────
 CreateThread(function()
     Wait(2000)  -- give oxmysql time to connect
+    if Config.Debug.autoConflictCheck then RunConflictCheck() end
     EnsureTables()
     LoadPricesFromDB()
     StartFluctuationLoop()
     if Config.Inflation.enabled then StartInflationLoop() end
-    print('^2[dynamic-economy]^0 Loaded — ' .. tableLength(Config.Items) .. ' items tracked.')
+    DEInfo('Loaded — ' .. tableLength(Config.Items) .. ' items tracked.')
 end)
 
 -- ─── Database setup ───────────────────────────────────────────────────────────
@@ -135,6 +136,9 @@ function StartFluctuationLoop()
                 if Config.Discord.enabled and swing >= Config.Discord.alertThreshold then
                     SendDiscordAlert(item, oldPrice, newPrice, swing)
                 end
+
+                DELog('price', string.format('%s: $%.2f → $%.2f (Δ%+.1f%%)',
+                    item, oldPrice, newPrice, (newPrice - oldPrice) / (oldPrice + 1) * 100))
             end
 
             -- Persist prices and snapshot history async
@@ -153,7 +157,7 @@ end
 -- ─── Market crash ─────────────────────────────────────────────────────────────
 function TriggerMarketCrash()
     crashActive = true
-    print('^1[dynamic-economy]^0 MARKET CRASH triggered!')
+    DELog('crash', 'MARKET CRASH triggered!')
 
     if Config.MarketCrash.notifyPlayers then
         TriggerClientEvent('dynamic-economy:notify', -1, Config.MarketCrash.notifyMessage, 'error')
@@ -198,7 +202,7 @@ function StartInflationLoop()
                 end
                 PersistPrices(applied)
                 TriggerClientEvent('dynamic-economy:pricesUpdated', -1, priceCache)
-                print('^3[dynamic-economy]^0 Inflation applied (x' .. m .. '). Server money: $' .. totalMoney)
+                DELog('inflate', 'Inflation applied (x' .. m .. '). Server money: $' .. totalMoney)
             end
         end
     end)
@@ -338,8 +342,8 @@ RegisterNetEvent('dynamic-economy:sellItem', function(item, qty)
     TriggerClientEvent('dynamic-economy:notify', src,
         'Vendu ' .. qty .. 'x ' .. cfg.label .. ' pour $' .. total, 'success')
 
-    print(string.format('^2[TX]^0 SELL | player=%s item=%s qty=%d price=%.2f total=%.2f',
-        tostring(src), item, qty, price, total))
+    DELog('sell', string.format('player=%s item=%s qty=%d price=%.2f total=%.2f',
+        GetPlayerIdentifier(src, 0) or tostring(src), item, qty, price, total))
 end)
 
 -- ─── Buy event ────────────────────────────────────────────────────────────────
@@ -396,6 +400,9 @@ RegisterNetEvent('dynamic-economy:buyItem', function(item, qty)
 
     TriggerClientEvent('dynamic-economy:notify', src,
         'Acheté ' .. qty .. 'x ' .. cfg.label .. ' pour $' .. total, 'success')
+
+    DELog('buy', string.format('player=%s item=%s qty=%d price=%.2f total=%.2f',
+        GetPlayerIdentifier(src, 0) or tostring(src), item, qty, price, total))
 end)
 
 -- ─── Client requests current prices (UI open) ────────────────────────────────
@@ -458,6 +465,34 @@ RegisterCommand('de_prices', function(src, args)
     for item, price in pairs(priceCache) do
         ReplyToAdmin(src, string.format('  %s = $%.2f', item, price))
     end
+end, false)
+
+RegisterCommand('de_test', function(src, args)
+    if not IsAdmin(src) then return end
+    ReplyToAdmin(src, '[DE] Lancement de la suite de tests…')
+    RunTestSuite(src)
+end, false)
+
+RegisterCommand('de_conflicts', function(src, args)
+    if not IsAdmin(src) then return end
+    local report = GetConflictReport()
+    ReplyToAdmin(src, '═══ CONFLICT REPORT ═══')
+    if #report.errors == 0 and #report.warnings == 0 and #report.infos == 0 then
+        ReplyToAdmin(src, '  Aucun conflit détecté au démarrage. Relancez le serveur pour une nouvelle analyse.')
+        return
+    end
+    for _, e in ipairs(report.errors)   do ReplyToAdmin(src, '^1[ERROR]^0 '   .. e) end
+    for _, w in ipairs(report.warnings) do ReplyToAdmin(src, '^3[WARN]^0 '    .. w) end
+    for _, i in ipairs(report.infos)    do ReplyToAdmin(src, '^5[INFO]^0 '    .. i) end
+    ReplyToAdmin(src, string.format('═══ %d erreur(s) | %d avertissement(s) | %d info(s) ═══',
+        #report.errors, #report.warnings, #report.infos))
+end, false)
+
+RegisterCommand('de_debug', function(src, args)
+    if not IsAdmin(src) then return end
+    Config.Debug.enabled = not Config.Debug.enabled
+    local state = Config.Debug.enabled and '^2ACTIVÉ^0' or '^3DÉSACTIVÉ^0'
+    ReplyToAdmin(src, '[DE] Mode debug : ' .. state)
 end, false)
 
 -- ─── Admin check ─────────────────────────────────────────────────────────────

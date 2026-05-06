@@ -15,6 +15,7 @@ shared_scripts {
 
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
+    'server/debug.lua',   -- must load before server.lua
     'server/server.lua',
 }
 

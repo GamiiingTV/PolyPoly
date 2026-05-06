@@ -5,6 +5,27 @@
 
 Config = {}
 
+-- ─── Debug & Diagnostics ──────────────────────────────────────────────────────
+Config.Debug = {
+    -- Master switch — set to true while setting up, false in production
+    enabled = true,
+
+    -- Granular log categories (only matters when enabled = true)
+    -- Set a category to false to silence it without disabling all debug output
+    levels = {
+        price    = true,   -- price recalculation details each cycle
+        sell     = true,   -- every sell transaction (item, qty, price, player)
+        buy      = true,   -- every buy transaction
+        db       = true,   -- SQL queries and DB operations
+        crash    = true,   -- market crash trigger/end
+        inflate  = true,   -- inflation system activations
+        conflict = true,   -- conflict & dependency checks at startup
+    },
+
+    -- Run the conflict scanner automatically on resource start
+    autoConflictCheck = true,
+}
+
 -- ─── Framework ────────────────────────────────────────────────────────────────
 -- 'qbcore' | 'esx'
 Config.Framework = 'qbcore'
