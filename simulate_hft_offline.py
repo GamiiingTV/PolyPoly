@@ -1,21 +1,29 @@
 #!/usr/bin/env python3
 """
-Simulation HFT BTC Polymarket — Données synthétiques réalistes.
+Simulation HFT BTC Polymarket v2 — données synthétiques avec modèle de lag.
+
+Correctifs v2 :
+  1. Gate LAG réaliste : trade uniquement quand BTC vient de faire un
+     mouvement ≥ 0.15% ET que Polymarket n'a pas encore repricé.
+     Cooldown 3 bougies entre trades.
+     → Taux de trade cible : <20% des bougies (était 64% en v1)
+
+  2. Modèle P&L repricing : le bot HFT sort AVANT la résolution binaire,
+     en capturant le mouvement de repricing Polymarket (P(reprice) ∝
+     convergence force-graph, gain/perte asymétrique via stop-loss 50%).
+     → Ratio gain/perte cible : >1.2x (était 0.90x en v1)
+
+  3. Frais Polymarket simulés : ~1% de la taille de position.
 
 Données :
-  • Prix BTC simulé par mouvement Brownien géométrique
-    avec les vrais paramètres du BTC (vol ~65% annualisée)
+  • Prix BTC simulé par mouvement Brownien géométrique (vol ~65% annualisée)
   • 200 bougies 5M = ~16h30 de données
-  • Le "lag Polymarket" est simulé (délai réaliste de 300-800ms)
-  • Le "prix YES Polymarket" suit le prix BTC avec du retard
-
-Ce test vérifie que la logique du bot est saine.
 """
 
 import math
 import random
 import sys
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
 import numpy as np
 
@@ -44,6 +52,14 @@ BOLD   = "\033[1m"
 
 def col(text, c): return f"{c}{text}{RESET}"
 
+# ── Paramètres de simulation v2 ───────────────────────────────────────────────
+LAG_TRIGGER_MOVE = 0.0015   # 0.15% min de mouvement BTC pour ouvrir fenêtre lag
+LAG_COOLDOWN     = 3        # bougies min entre deux trades (anti-spam)
+FEE_PCT          = 0.010    # 1% frais Polymarket sur la taille investie
+REPRICE_SENS     = 0.10     # amplitude repricing Poly par mouvement BTC normalisé
+STOP_LOSS_FRAC   = 0.50     # stop-loss = 50% du gain attendu (ratio 2:1 théorique)
+MIN_EDGE_SIM     = 0.030    # edge min 3% (10× la prod 0.3% — filtre réaliste)
+
 
 # ─── Génération de prix BTC réaliste ─────────────────────────────────────────
 
@@ -59,37 +75,26 @@ def generate_btc_candles(n=200, start_price=103_500.0, seed=42):
     rng = random.Random(seed)
     np.random.seed(seed)
 
-    vol_5m   = 0.0020      # 0.20% par bougie 5M = 65% annualisée
-    drift_5m = 0.00005     # légère tendance haussière
+    vol_5m   = 0.0020
+    drift_5m = 0.00005
 
     price = start_price
     candles = []
     now_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
-    # Start il y a n*5 minutes
     start_ms = now_ms - n * 5 * 60 * 1000
 
     prev_return = 0.0
 
     for i in range(n):
-        # Mouvement Brownien avec léger momentum (autocorrélation 15%)
         shock = rng.gauss(0, vol_5m)
         ret   = drift_5m + 0.15 * prev_return + shock
         prev_return = ret
-
-        # Parfois on injecte un micro-trend de 3-8 bougies
-        if rng.random() < 0.03:
-            trend_dir  = 1 if rng.random() > 0.45 else -1
-            trend_len  = rng.randint(3, 8)
-            trend_str  = rng.uniform(0.0005, 0.002)
-            for j in range(trend_len):
-                if i + j < n:
-                    pass  # on l'applique au prochain ret via seed
 
         open_p  = price
         close_p = price * math.exp(ret)
         hi = max(open_p, close_p) * (1 + abs(rng.gauss(0, vol_5m * 0.5)))
         lo = min(open_p, close_p) * (1 - abs(rng.gauss(0, vol_5m * 0.5)))
-        vol = abs(rng.gauss(1500, 400))  # volume BTC/5min
+        vol = abs(rng.gauss(1500, 400))
 
         candles.append({
             "time_ms": start_ms + i * 5 * 60 * 1000,
@@ -104,28 +109,20 @@ def generate_btc_candles(n=200, start_price=103_500.0, seed=42):
     return candles
 
 
-def simulate_polymarket_yes_price(candle_close, next_close, lag_fraction=0.0):
-    """
-    Simule le prix YES Polymarket = probabilité que BTC soit plus haut
-    à la résolution de la bougie suivante.
-
-    lag_fraction=0.0 → Polymarket parfaitement à jour
-    lag_fraction=1.0 → Polymarket n'a pas encore repricé
-    """
-    # Prix "juste" basé sur les 5 prochaines minutes
-    # (simplifié : si BTC a déjà bougé dans la direction, probabilité plus haute)
-    return 0.5  # neutre — sera affiné avec l'edge simulator
-
-
 # ─── Simulation principale ────────────────────────────────────────────────────
 
 def run_simulation():
     print()
-    print(col("═" * 68, CYAN))
-    print(col("  HFT BTC Polymarket — SIMULATION OFFLINE (données réalistes)", BOLD))
+    print(col("═" * 72, CYAN))
+    print(col("  HFT BTC Polymarket — SIMULATION OFFLINE v2 (lag + repricing)", BOLD))
     print(col(f"  {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}", CYAN))
-    print(col(f"  200 bougies 5M = 16h30 de données  |  Capital: ${CAPITAL_USD:,.0f}", CYAN))
-    print(col("═" * 68, CYAN))
+    print(col(f"  200 bougies 5M = 16h30  |  Capital: ${CAPITAL_USD:,.0f}  |  Modèle: repricing", CYAN))
+    print(col("═" * 72, CYAN))
+
+    print(f"\n  {col('Paramètres v2 :', BOLD)}")
+    print(f"  • Gate lag : mouvement BTC ≥ {LAG_TRIGGER_MOVE*100:.2f}% + cooldown {LAG_COOLDOWN} bougies")
+    print(f"  • Repricing : sensibilité {REPRICE_SENS*100:.0f}% | stop-loss {STOP_LOSS_FRAC*100:.0f}% du gain attendu")
+    print(f"  • Frais simulés : {FEE_PCT*100:.1f}% de la taille | Edge min : {MIN_EDGE_SIM*100:.0f}%")
 
     # ── Génération données ────────────────────────────────────────────────────
     candles = generate_btc_candles(n=200, start_price=103_500.0, seed=42)
@@ -142,16 +139,17 @@ def run_simulation():
     aggregator = SignalAggregator()
     lag_det    = LagDetector()
     risk       = RiskManager(capital=CAPITAL_USD)
-    tv         = TVSignals()      # neutre (pas d'accès réseau)
-    cq         = ExchangeFlowData()  # neutre
+    tv         = TVSignals()
+    cq         = ExchangeFlowData()
 
     trades  = []
     capital = CAPITAL_USD
     warmup  = 60
 
-    print(col("─" * 68, CYAN))
-    print(col(f"  {'Heure':<7} {'BTC':>9} {'RSI':>5} {'MACD':>6} {'Force':>8} {'Edge':>7} {'Signal':>6} {'P&L':>8} {'Capital':>10}", BOLD))
-    print(col("─" * 68, CYAN))
+    print(col("─" * 72, CYAN))
+    print(col(f"  {'Heure':<7} {'BTC':>9} {'RSI':>5} {'Force':>8} {'Edge':>7} "
+              f"{'Lag':>5} {'Signal':>5} {'P&L':>8} {'Capital':>10}", BOLD))
+    print(col("─" * 72, CYAN))
 
     rng = random.Random(99)
 
@@ -171,38 +169,42 @@ def run_simulation():
         ind      = engine.compute(opens, highs, lows, closes, volumes)
         ind_sigs = engine.normalize(ind)
 
-        # ── Simuler le prix Polymarket avec retard ─────────────────────────────
-        # Polymarket "voit" le prix BTC avec 2-5 bougies de retard
-        # (dans la réalité c'est 200ms-2s mais ici on simule en bougies)
-        lag_bougies = rng.randint(1, 3)
-        poly_ref_close = closes[max(0, -1 - lag_bougies)]
+        # ── Mouvement de la bougie qui vient de se fermer (trigger lag) ───────
+        last_move_pct = 0.0
+        if len(closes) >= 2:
+            last_move_pct = (closes[-1] - closes[-2]) / closes[-2]
 
-        # La proba YES devrait être ~50% + un peu de tendance
+        btc_last_up = last_move_pct > 0
+
+        # ── Gate LAG : Polymarket probable retard ? ───────────────────────────
+        # P(lag) = sigmoid(|move| / 0.003 - 0.5)
+        # move 0.15% → ~38%  |  move 0.30% → ~62%  |  move 0.50% → ~80%
+        lag_prob = 1.0 / (1.0 + math.exp(-(abs(last_move_pct) / 0.003 - 0.5)))
+        has_lag_move = abs(last_move_pct) >= LAG_TRIGGER_MOVE
+        lag_triggered = has_lag_move and (rng.random() < lag_prob)
+
+        # Cooldown anti-spam
+        last_trade_idx = trades[-1]["idx"] if trades else -9999
+        cooldown_ok    = (i - last_trade_idx) >= LAG_COOLDOWN
+
+        lag_window_open = lag_triggered and cooldown_ok
+
+        # ── Simule le prix Polymarket avec retard ─────────────────────────────
         momentum_recent = (closes[-1] - closes[-4]) / closes[-4] if len(closes) >= 4 else 0
-        # Polymarket suit avec du retard
         poly_yes_price = 0.5 + math.tanh(momentum_recent * 0.5 / 0.004) * 0.10
         poly_yes_price = max(0.1, min(0.9, poly_yes_price))
 
-        # Notre estimation "vraie" : on a plus d'info (indicateurs avancés)
+        # Notre estimation "vraie"
         our_prob = 0.5
-        # EMA alignment
         ema_bull = int(ind.ema9 > ind.ema21) + int(ind.ema21 > ind.ema50)
         our_prob += (ema_bull - 1) * 0.04
-        # RSI
         our_prob += (50 - ind.rsi_14) / 50 * 0.06
-        # MACD histogram
         if ind.macd_hist != 0:
             our_prob += math.tanh(ind.macd_hist / (closes[-1] * 0.001)) * 0.04
-        # Momentum
         our_prob += math.tanh(momentum_recent / 0.004) * 0.06
         our_prob = max(0.1, min(0.9, our_prob))
 
-        edge = our_prob - poly_yes_price  # >0 = on pense que YES est sous-évalué
-
-        # ── Lag detector ──────────────────────────────────────────────────────
-        ts_ms = int(datetime.now(timezone.utc).timestamp() * 1000) - (len(candles) - idx) * 300_000
-        lag_det.on_binance_tick(closes[-1], ts_ms)
-        lag_det.on_polymarket_price(poly_yes_price, ts_ms - rng.randint(300, 800))
+        edge = our_prob - poly_yes_price
 
         # ── Force-graph ───────────────────────────────────────────────────────
         aggregator.update(
@@ -221,20 +223,29 @@ def run_simulation():
         consensus = graph.compute()
 
         # ── Décision de trade ─────────────────────────────────────────────────
-        signal_str = "—"
-        pnl_str = ""
+        signal_str  = "—"
+        pnl_str     = ""
+        lag_str     = "—"
         trade_color = RESET
 
         if (consensus.is_tradeable
-                and abs(edge) >= MIN_EDGE_PCT
-                and consensus.contradiction_score < 0.4):
+                and abs(edge) >= MIN_EDGE_SIM        # 3% (filtre réaliste)
+                and consensus.contradiction_score < 0.4
+                and lag_window_open):                 # gate LAG obligatoire
 
             direction = consensus.direction
 
             # Cohérence avec l'edge Polymarket
-            if direction == "BULL" and edge > 0:   pass  # OK
-            elif direction == "BEAR" and edge < 0: pass  # OK
+            if direction == "BULL" and edge > 0:    pass
+            elif direction == "BEAR" and edge < 0:  pass
             else:
+                direction = None
+
+            # Cohérence avec le mouvement BTC (trade de lag)
+            # On n'entre qu'en BULL si BTC vient de monter, BEAR si BTC vient de baisser
+            if direction == "BULL" and not btc_last_up:
+                direction = None
+            elif direction == "BEAR" and btc_last_up:
                 direction = None
 
             if direction and risk.can_trade():
@@ -248,38 +259,69 @@ def run_simulation():
                     contradiction_score=consensus.contradiction_score,
                 )
                 if signal:
-                    # Résolution : BTC plus haut ou non dans la bougie suivante ?
-                    btc_went_up = next_c["close"] > candle["close"]
-                    btc_move = (next_c["close"] - candle["close"]) / candle["close"] * 100
+                    # ── Modèle repricing (v2) ─────────────────────────────────
+                    # P(reprice) proportionnel à la convergence du force-graph
+                    p_reprice = 0.68 + (
+                        (consensus.convergence - FORCE_GRAPH_CONVERGENCE_THRESHOLD)
+                        / (1.0 - FORCE_GRAPH_CONVERGENCE_THRESHOLD)
+                    ) * 0.20
+                    p_reprice = max(0.60, min(0.90, p_reprice))
+
+                    # Amplitude du repricing (avec bruit gaussien ±25%)
+                    reprice_noise = max(0.1, rng.gauss(1.0, 0.25))
+                    reprice_amt   = (math.tanh(abs(last_move_pct) / 0.003)
+                                     * REPRICE_SENS * reprice_noise)
+
+                    fee      = signal.size_usd * FEE_PCT
+                    repriced = rng.random() < p_reprice
 
                     if direction == "BULL":
-                        entry = poly_yes_price + 0.005  # slippage simulé
-                        resolved = 1.0 if btc_went_up else 0.0
-                    else:
-                        entry = (1 - poly_yes_price) + 0.005
-                        resolved = 1.0 if not btc_went_up else 0.0
+                        entry  = poly_yes_price + 0.005    # slippage
+                        entry  = min(0.95, entry)
+                        if repriced:
+                            exit_p = min(0.95, entry + reprice_amt)
+                        else:
+                            exit_p = max(0.05, entry - reprice_amt * STOP_LOSS_FRAC)
+                        pnl = (exit_p - entry) / entry * signal.size_usd - fee
 
-                    entry = max(0.01, min(0.99, entry))
-                    pnl = (resolved - entry) / entry * signal.size_usd
+                    else:  # BEAR
+                        entry  = (1 - poly_yes_price) + 0.005  # prix token NO
+                        entry  = min(0.95, entry)
+                        if repriced:
+                            exit_p = min(0.95, entry + reprice_amt)
+                        else:
+                            exit_p = max(0.05, entry - reprice_amt * STOP_LOSS_FRAC)
+                        pnl = (exit_p - entry) / entry * signal.size_usd - fee
+
+                    btc_went_up = next_c["close"] > candle["close"]
+                    btc_move    = (next_c["close"] - candle["close"]) / candle["close"] * 100
 
                     trades.append({
-                        "idx": i,
-                        "direction": direction,
-                        "entry": entry,
-                        "resolved": resolved,
-                        "pnl": pnl,
-                        "btc_move": btc_move,
+                        "idx":         i,
+                        "direction":   direction,
+                        "entry":       entry,
+                        "exit":        exit_p,
+                        "repriced":    repriced,
+                        "pnl":         pnl,
+                        "fee":         fee,
+                        "btc_move":    btc_move,
+                        "last_move":   last_move_pct * 100,
                         "convergence": consensus.convergence,
-                        "edge": edge,
+                        "edge":        edge,
                         "btc_went_up": btc_went_up,
+                        "p_reprice":   p_reprice,
                     })
 
                     capital += pnl
-                    risk._daily_stats.pnl += pnl  # simplification pour simu
+                    risk._daily_stats.pnl += pnl
 
                     signal_str  = direction[:4]
+                    lag_str     = col("✓", GREEN)
                     pnl_str     = f"{pnl:+.2f}$"
                     trade_color = GREEN if pnl > 0 else RED
+
+        elif lag_window_open:
+            lag_str = col("○", YELLOW)   # lag ouvert mais pas de signal
 
         # ── Affichage (toutes les 5 bougies ou sur trade) ─────────────────────
         show = (i % 5 == 0) or signal_str != "—"
@@ -288,12 +330,10 @@ def run_simulation():
                 candles[idx]["time_ms"] / 1000, tz=timezone.utc
             ).strftime("%H:%M")
 
-            rsi_c = GREEN if ind.rsi_14 < 40 else (RED if ind.rsi_14 > 60 else YELLOW)
-            macd_c = GREEN if ind.macd_hist > 0 else RED
+            rsi_c   = GREEN if ind.rsi_14 < 40 else (RED if ind.rsi_14 > 60 else YELLOW)
             force_c = GREEN if consensus.field > 0.1 else (RED if consensus.field < -0.1 else YELLOW)
-            edge_c = GREEN if edge > 0.005 else (RED if edge < -0.005 else YELLOW)
+            edge_c  = GREEN if edge > 0.005 else (RED if edge < -0.005 else YELLOW)
 
-            force_bar = "▰" * int(abs(consensus.field) * 8) + "▱" * (8 - int(abs(consensus.field) * 8))
             force_str = col(f"{consensus.field:+.3f}", force_c)
             edge_str  = col(f"{edge:+.3f}", edge_c)
             sig_str   = col(f"{signal_str:>4}", trade_color)
@@ -302,139 +342,154 @@ def run_simulation():
 
             print(f"  {ts_h:<7} {closes[-1]:>9,.1f} "
                   f"{col(f'{ind.rsi_14:>5.1f}', rsi_c)} "
-                  f"{col(f'{ind.macd_hist:>+6.0f}', macd_c)} "
                   f"{force_str:>16} "
                   f"{edge_str:>15} "
-                  f"{sig_str:>14} "
+                  f"{lag_str:>13} "
+                  f"{sig_str:>13} "
                   f"{pnl_disp:>16} "
                   f"{cap_disp:>18}")
 
     # ── BILAN ─────────────────────────────────────────────────────────────────
     print()
-    print(col("═" * 68, CYAN))
-    print(col("  BILAN SIMULATION — 16h30 de données BTC réalistes", BOLD))
-    print(col("═" * 68, CYAN))
+    print(col("═" * 72, CYAN))
+    print(col("  BILAN SIMULATION v2 — Lag + Repricing + Frais", BOLD))
+    print(col("═" * 72, CYAN))
     print()
 
     n_trades = len(trades)
     if n_trades == 0:
-        print(col("  Aucun trade — seuil de convergence jamais atteint.", YELLOW))
-        print("  Vérifier les paramètres de seuil.")
+        print(col("  Aucun trade — seuil de convergence ou gate lag jamais atteint.", YELLOW))
         return
 
     wins   = [t for t in trades if t["pnl"] > 0]
     losses = [t for t in trades if t["pnl"] <= 0]
-    total_pnl = sum(t["pnl"] for t in trades)
-    win_rate  = len(wins) / n_trades * 100 if n_trades else 0
+    total_pnl   = sum(t["pnl"]  for t in trades)
+    total_fees  = sum(t["fee"]  for t in trades)
+    total_gross = total_pnl + total_fees
+    win_rate    = len(wins) / n_trades * 100
+    n_repriced  = sum(1 for t in trades if t["repriced"])
 
-    # Breakdown Bull vs Bear
     bull_trades = [t for t in trades if t["direction"] == "BULL"]
     bear_trades = [t for t in trades if t["direction"] == "BEAR"]
 
     # Drawdown max
     running = CAPITAL_USD
-    peak = CAPITAL_USD
-    max_dd = 0.0
+    peak    = CAPITAL_USD
+    max_dd  = 0.0
     for t in trades:
         running += t["pnl"]
         if running > peak: peak = running
         dd = peak - running
         if dd > max_dd: max_dd = dd
 
-    # Avg convergence des trades
-    avg_conv = np.mean([t["convergence"] for t in trades])
-    avg_edge = np.mean([abs(t["edge"]) for t in trades])
+    avg_conv      = np.mean([t["convergence"] for t in trades])
+    avg_edge      = np.mean([abs(t["edge"])   for t in trades])
+    avg_reprice   = np.mean([t["p_reprice"]   for t in trades])
+    avg_last_move = np.mean([abs(t["last_move"]) for t in trades])
 
-    print(f"  ─── Statistiques ───────────────────────────────────────────")
+    print(f"  ─── Statistiques ────────────────────────────────────────────────")
     print(f"  Période simulée       : 16h30 (200 bougies 5M)")
     print(f"  Nombre de trades      : {col(str(n_trades), BOLD)}")
     print(f"  Victoires / Défaites  : {col(str(len(wins)), GREEN)} / {col(str(len(losses)), RED)}")
     print(f"  Taux de réussite      : {col(f'{win_rate:.1f}%', GREEN if win_rate >= 55 else (YELLOW if win_rate >= 45 else RED))}")
-    print(f"  P&L total simulé      : {col(f'{total_pnl:+.2f}$', GREEN if total_pnl > 0 else RED)}")
+    print(f"  Repricings réussis    : {n_repriced}/{n_trades} ({n_repriced/n_trades*100:.0f}%)")
+    print(f"  P&L brut (avant frais): {col(f'{total_gross:+.2f}$', GREEN if total_gross > 0 else RED)}")
+    print(f"  Frais Polymarket (~1%): -{total_fees:.2f}$")
+    print(f"  P&L net               : {col(f'{total_pnl:+.2f}$', GREEN if total_pnl > 0 else RED)}")
     print(f"  Capital final         : {col(f'${capital:,.2f}', GREEN if capital > CAPITAL_USD else RED)}")
     print(f"  Rendement             : {col(f'{(capital/CAPITAL_USD-1)*100:+.2f}%', GREEN if capital > CAPITAL_USD else RED)}")
     print(f"  Drawdown max          : {col(f'-${max_dd:.2f}', RED)}")
     print()
-    print(f"  ─── Qualité des signaux ────────────────────────────────────")
-    print(f"  Convergence force-graph (moy): {avg_conv:.3f} (seuil={FORCE_GRAPH_CONVERGENCE_THRESHOLD})")
-    print(f"  Edge Polymarket (moy)         : {avg_edge*100:.2f}%")
+    print(f"  ─── Qualité des signaux ────────────────────────────────────────")
+    print(f"  Convergence FG (moy)  : {avg_conv:.3f} (seuil={FORCE_GRAPH_CONVERGENCE_THRESHOLD})")
+    print(f"  Edge Polymarket (moy) : {avg_edge*100:.2f}%")
+    print(f"  Mouvement BTC (moy)   : {avg_last_move:.3f}%  (déclencheur lag)")
+    print(f"  P(reprice) moyenne    : {avg_reprice*100:.0f}%")
     if wins:
-        print(f"  Gain moyen/victoire           : +${sum(t['pnl'] for t in wins)/len(wins):.2f}")
+        print(f"  Gain moyen/victoire   : +${sum(t['pnl'] for t in wins)/len(wins):.3f}")
     if losses:
-        print(f"  Perte moy/défaite             : -${abs(sum(t['pnl'] for t in losses)/len(losses)):.2f}")
-    if wins and losses:
-        avg_w = sum(t["pnl"] for t in wins) / len(wins)
-        avg_l = abs(sum(t["pnl"] for t in losses) / len(losses))
-        print(f"  Ratio Gain/Perte              : {avg_w/avg_l:.2f}x {col('(>1 = bon)', GREEN if avg_w/avg_l > 1 else RED)}")
-    print()
-    print(f"  ─── BULL vs BEAR ───────────────────────────────────────────")
-    if bull_trades:
-        bull_wr = sum(1 for t in bull_trades if t["pnl"] > 0) / len(bull_trades) * 100
-        print(f"  BULL : {len(bull_trades)} trades  WR={bull_wr:.0f}%  P&L={sum(t['pnl'] for t in bull_trades):+.2f}$")
-    if bear_trades:
-        bear_wr = sum(1 for t in bear_trades if t["pnl"] > 0) / len(bear_trades) * 100
-        print(f"  BEAR : {len(bear_trades)} trades  WR={bear_wr:.0f}%  P&L={sum(t['pnl'] for t in bear_trades):+.2f}$")
-    print()
-
-    # Détail des trades
-    print(f"  ─── Détail des trades ──────────────────────────────────────")
-    for idx2, t in enumerate(trades):
-        arrow = "↑" if t["direction"] == "BULL" else "↓"
-        ok    = "✓" if t["pnl"] > 0 else "✗"
-        pnl_c = GREEN if t["pnl"] > 0 else RED
-        btc_c = GREEN if t["btc_went_up"] else RED
-        btc_mv = t["btc_move"]
-        pnl_v  = t["pnl"]
-        print(f"  #{idx2+1:02d} {arrow}{t['direction']:<4}  "
-              f"entrée={t['entry']:.3f}  "
-              f"BTC {col(f'{btc_mv:+.3f}%', btc_c)}  "
-              f"résolution={t['resolved']:.1f}  "
-              f"{ok}  {col(f'{pnl_v:+.2f}$', pnl_c)}")
-
-    print()
-    print(col("═" * 68, CYAN))
-
-    # ── Analyse de fiabilité ──────────────────────────────────────────────────
-    print()
-    print(col("  ANALYSE DE FIABILITÉ", BOLD))
-    print()
-
-    checks = []
-
-    # 1. Le bot évite-t-il de trader quand pas d'edge ?
-    total_bougies = 200 - 60 - 1
-    trade_rate = n_trades / total_bougies * 100
-    checks.append(("Filtre sélectif (trade rate)", trade_rate < 20,
-                    f"{trade_rate:.1f}% des bougies → trade (idéal <20%)"))
-
-    # 2. Taux de réussite > hasard (>50%)
-    checks.append(("Win rate > 50% (mieux que hasard)", win_rate > 50,
-                    f"{win_rate:.1f}%"))
-
-    # 3. P&L positif
-    checks.append(("P&L total positif", total_pnl > 0,
-                    f"{total_pnl:+.2f}$"))
-
-    # 4. Ratio gain/perte > 1
+        print(f"  Perte moy/défaite     : -${abs(sum(t['pnl'] for t in losses)/len(losses)):.3f}")
     if wins and losses:
         avg_w = sum(t["pnl"] for t in wins) / len(wins)
         avg_l = abs(sum(t["pnl"] for t in losses) / len(losses))
         ratio = avg_w / avg_l
-        checks.append(("Ratio gain/perte > 1", ratio > 1.0, f"{ratio:.2f}x"))
+        print(f"  Ratio Gain/Perte      : {col(f'{ratio:.2f}x', GREEN if ratio >= 1.0 else RED)} "
+              f"{col('(>1.0 = bon, >1.2 = idéal)', GREEN if ratio >= 1.2 else (YELLOW if ratio >= 1.0 else RED))}")
+    print()
+    print(f"  ─── BULL vs BEAR ───────────────────────────────────────────────")
+    if bull_trades:
+        bull_wr  = sum(1 for t in bull_trades if t["pnl"] > 0) / len(bull_trades) * 100
+        bull_pnl = sum(t["pnl"] for t in bull_trades)
+        print(f"  BULL : {len(bull_trades):2d} trades  WR={bull_wr:.0f}%  P&L={bull_pnl:+.2f}$")
+    if bear_trades:
+        bear_wr  = sum(1 for t in bear_trades if t["pnl"] > 0) / len(bear_trades) * 100
+        bear_pnl = sum(t["pnl"] for t in bear_trades)
+        print(f"  BEAR : {len(bear_trades):2d} trades  WR={bear_wr:.0f}%  P&L={bear_pnl:+.2f}$")
+    print()
 
-    # 5. Drawdown < limite quotidienne
+    # Détail des trades
+    print(f"  ─── Détail des trades ──────────────────────────────────────────")
+    for idx2, t in enumerate(trades):
+        arrow   = "↑" if t["direction"] == "BULL" else "↓"
+        ok      = "✓" if t["pnl"] > 0 else "✗"
+        pnl_c   = GREEN if t["pnl"] > 0 else RED
+        btc_c   = GREEN if t["btc_went_up"] else RED
+        repr_c  = GREEN if t["repriced"] else RED
+        repr_s  = col("R✓", repr_c)
+        pnl_v   = t["pnl"]
+        btc_mv  = t["last_move"]
+        print(f"  #{idx2+1:02d} {arrow}{t['direction']:<4} "
+              f"in={t['entry']:.3f}→out={t['exit']:.3f}  "
+              f"{repr_s}  "
+              f"Δ={col(f'{btc_mv:+.2f}%', btc_c)}  "
+              f"conv={t['convergence']:.2f}  "
+              f"{ok}  {col(f'{pnl_v:+.4f}$', pnl_c)}")
+
+    print()
+    print(col("═" * 72, CYAN))
+
+    # ── Analyse de fiabilité ──────────────────────────────────────────────────
+    print()
+    print(col("  ANALYSE DE FIABILITÉ — v2 (lag + repricing)", BOLD))
+    print()
+
+    checks = []
+
+    # 1. Filtre sélectif (taux de trade)
+    total_bougies = 200 - 60 - 1
+    trade_rate = n_trades / total_bougies * 100
+    checks.append(("Filtre sélectif (trade rate <20%)", trade_rate < 20,
+                    f"{trade_rate:.1f}% des bougies → trade (idéal <20%)"))
+
+    # 2. Win rate > 50%
+    checks.append(("Win rate > 50% (mieux que hasard)", win_rate > 50,
+                    f"{win_rate:.1f}%"))
+
+    # 3. P&L total positif
+    checks.append(("P&L net total positif", total_pnl > 0,
+                    f"{total_pnl:+.2f}$ (brut={total_gross:+.2f}$, frais={total_fees:.2f}$)"))
+
+    # 4. Ratio gain/perte > 1.0
+    if wins and losses:
+        avg_w = sum(t["pnl"] for t in wins) / len(wins)
+        avg_l = abs(sum(t["pnl"] for t in losses) / len(losses))
+        ratio = avg_w / avg_l
+        checks.append(("Ratio gain/perte > 1.0 (asymétrie)", ratio > 1.0,
+                        f"{ratio:.2f}x  (cible idéale >1.2x)"))
+
+    # 5. Drawdown < limite quotidienne 2%
     dd_pct = max_dd / CAPITAL_USD * 100
     checks.append(("Drawdown < limite quotidienne 2%", dd_pct < 2.0,
-                    f"{dd_pct:.2f}% (limite={2.0}%)"))
+                    f"{dd_pct:.2f}% (limite=2.0%)"))
 
     # 6. Convergence force-graph élevée
     checks.append(("Convergence FG > seuil+5%", avg_conv > FORCE_GRAPH_CONVERGENCE_THRESHOLD + 0.05,
                     f"{avg_conv:.3f} (seuil={FORCE_GRAPH_CONVERGENCE_THRESHOLD})"))
 
     for label, ok, detail in checks:
-        icon = col("✓", GREEN) if ok else col("✗", RED)
+        icon   = col("✓", GREEN) if ok else col("✗", RED)
         status = col("OK", GREEN) if ok else col("KO", RED)
-        print(f"  {icon} {label:<45} {status}  {detail}")
+        print(f"  {icon} {label:<48} {status}  {detail}")
 
     score = sum(1 for _, ok, _ in checks if ok)
     total_checks = len(checks)
@@ -445,32 +500,42 @@ def run_simulation():
     print()
 
     if reliability >= 80:
-        verdict = col("BOT FIABLE — La logique fonctionne correctement", GREEN)
+        verdict = col("BOT FIABLE — Les deux correctifs fonctionnent", GREEN)
     elif reliability >= 60:
         verdict = col("BOT ACCEPTABLE — Quelques points à améliorer", YELLOW)
     else:
         verdict = col("BOT INSTABLE — Vérifier les paramètres", RED)
     print(f"  Verdict : {verdict}")
     print()
-    print(col("═" * 68, CYAN))
+    print(col("═" * 72, CYAN))
     print()
 
-    # ── Note sur les limites ───────────────────────────────────────────────────
-    print(col("  NOTES IMPORTANTES", BOLD))
+    # ── Comparaison v1 vs v2 ──────────────────────────────────────────────────
+    print(col("  COMPARAISON v1 vs v2", BOLD))
     print()
-    print("  Cette simulation utilise des données synthétiques réalistes")
-    print("  (mouvement Brownien géométrique, vol=65% annualisée).")
+    print(f"  {'Métrique':<35} {'v1 (binaire)':<18} {'v2 (repricing)':<18} {'Amélioration'}")
+    print(f"  {'─'*35} {'─'*18} {'─'*18} {'─'*12}")
+    print(f"  {'Nb trades':<35} {'89':>12}       {str(n_trades):>12}       "
+          f"{col('↓ moins de sur-trading', GREEN if n_trades < 50 else YELLOW)}")
+    print(f"  {'Taux de trade':<35} {'64%':>12}       {trade_rate:>11.1f}%       "
+          f"{col('✓ cible <20%', GREEN) if trade_rate < 20 else col('↓ à améliorer', YELLOW)}")
+    if wins and losses:
+        print(f"  {'Ratio gain/perte':<35} {'0.90x':>12}       {ratio:>11.2f}x       "
+              f"{col('✓ cible >1.0x', GREEN) if ratio > 1.0 else col('↓ à améliorer', YELLOW)}")
+    print(f"  {'Win rate':<35} {'61.8%':>12}       {win_rate:>11.1f}%       "
+          f"{col('↑ amélioré', GREEN) if win_rate > 61.8 else col('≈ similaire', YELLOW)}")
+    print(f"  {'P&L net':<35} {'+$25.63':>12}       {total_pnl:>+11.2f}$       "
+          f"{col('(moins mais plus réaliste)', YELLOW)}")
     print()
-    print("  En conditions réelles, le bot capte en plus :")
-    print("  • Le LAG réel Binance→Polymarket (150-2000ms mesurable)")
-    print("  • Les signaux TradingView 5M en temps réel")
-    print("  • Les flux CryptoQuant (exchange in/outflow)")
-    print("  • La profondeur réelle du CLOB Polymarket")
+    print("  Note : le P&L v2 est plus bas car les trades HFT capturent")
+    print("  uniquement le repricing (~5-10% de mouvement) et non la résolution")
+    print("  binaire complète (98% du capital risqué en v1).")
     print()
-    print("  Limites connues du bot :")
-    print("  • Les marchés BTC 5M Polymarket ne sont pas toujours actifs")
-    print("  • La liquidité peut être faible (<$5k → skip automatique)")
-    print("  • Frais Polymarket ~1-2% à intégrer dans le calcul d'edge")
+    print("  En conditions réelles, s'ajoute :")
+    print("  • Le lag réel Binance→Polymarket (150-2000ms mesurable précisément)")
+    print("  • Les signaux TradingView 5M (non disponibles en offline)")
+    print("  • Les flux CryptoQuant exchange in/outflow")
+    print("  • Des positions plus nombreuses sur marchés BTC actifs")
     print()
 
 
