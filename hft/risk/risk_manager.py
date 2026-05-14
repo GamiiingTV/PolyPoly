@@ -36,6 +36,7 @@ from hft.config_hft import (
     COMPOUND_ENABLED,
     RESERVE_PCT,
     MIN_POLY_ORDER_USD,
+    FIXED_TRADE_USD,
 )
 
 
@@ -180,11 +181,20 @@ class RiskManager:
         """
         Position sizing Kelly-ajusté avec compound et réserve.
 
+        Si FIXED_TRADE_USD > 0 : montant fixe par trade (ignore Kelly).
         Si COMPOUND_ENABLED :
           - Le capital actif = capital total × (1 - RESERVE_PCT)
           - La réserve est intouchable même si le capital augmente
           - Les positions grossissent automatiquement avec chaque gain
         """
+        # ── Mode montant fixe ─────────────────────────────────────────────────
+        if FIXED_TRADE_USD > 0:
+            size = FIXED_TRADE_USD
+            daily_limit = self.capital * DAILY_RISK_LIMIT_PCT
+            remaining   = daily_limit + self._daily_stats.pnl
+            size = min(size, max(0.0, remaining * 0.5))
+            return max(0.0, round(size, 2))
+
         # Capital actif (hors réserve si compound activé)
         if COMPOUND_ENABLED:
             trading_capital = self.capital * (1.0 - RESERVE_PCT)

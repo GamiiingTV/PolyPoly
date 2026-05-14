@@ -29,6 +29,7 @@ HARD_STOP_USD: float = CAPITAL_USD * HARD_STOP_PCT
 COMPOUND_ENABLED:    bool  = os.getenv("HFT_COMPOUND_ENABLED", "true").lower() == "true"
 RESERVE_PCT:         float = float(os.getenv("HFT_RESERVE_PCT",   "0.20"))  # 20% réserve
 MIN_POLY_ORDER_USD:  float = float(os.getenv("HFT_MIN_ORDER_USD", "1.0"))   # plancher $1
+FIXED_TRADE_USD:     float = float(os.getenv("HFT_FIXED_TRADE_USD", "0.0")) # 0 = Kelly %, >0 = montant fixe
 
 # ============================================================
 # EXÉCUTION HFT
