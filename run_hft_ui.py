@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """
-HFT Bot — Interface terminal « pirate » en temps réel.
+PolyPoly HFT Bot — Interface terminal orange, deux stratégies.
 
 Utilisation :
   python run_hft_ui.py                   # mode papier (pas de vrais ordres)
   python run_hft_ui.py --live            # mode live (nécessite POLYMARKET_API_KEY)
-  python run_hft_ui.py --capital 200     # capital de départ personnalisé
+  python run_hft_ui.py --capital 150     # capital de départ personnalisé
+  python run_hft_ui.py --live --capital 150
 
-Le dashboard riche tourne dans le thread principal.
-Le bot HFT tourne en asyncio dans un thread secondaire.
-L'état partagé (BotState) est mis à jour à chaque tick.
+Deux stratégies en parallèle :
+  • HFT Repricing  : capture le lag Binance→Polymarket (<100ms)
+  • Resolution Snipe : achète YES/NO à 87¢ dans les 90s avant résolution
 """
 
 from __future__ import annotations
@@ -29,17 +30,16 @@ from rich.live import Live
 from hft.bot import HFTBot
 from hft.config_hft import (
     CAPITAL_USD,
-    FORCE_GRAPH_CONVERGENCE_THRESHOLD,
-    MIN_EDGE_PCT,
+    FIXED_TRADE_USD,
 )
 from hft.dashboard import BotState, HFTDashboard
-from hft.feeds.binance_feed import Candle, Tick
+from hft.feeds.binance_feed import Tick
+from hft.signals.resolution_sniper import ResolutionSniper
 
 
-# ── Loguru → BotState sink ─────────────────────────────────────────────────────
+# ── Loguru → BotState sink ────────────────────────────────────────────────────
 
 def _make_log_sink(state: BotState):
-    """Redirige les logs loguru vers le panneau EVENT LOG du dashboard."""
     def _sink(message):
         record = message.record
         level  = record["level"].name[:5]
@@ -49,45 +49,50 @@ def _make_log_sink(state: BotState):
     return _sink
 
 
-# ── Sous-classe HFTBot avec hooks dashboard ───────────────────────────────────
+# ── HFTBotUI ─────────────────────────────────────────────────────────────────
 
 class HFTBotUI(HFTBot):
     """
-    HFTBot enrichi : met à jour BotState à chaque tick et exécution.
-    Le dashboard lit BotState en parallèle sans ralentir le pipeline.
+    HFTBot enrichi :
+      - Met à jour BotState à chaque tick (thread-safe)
+      - Intègre le Resolution Sniper en parallèle du HFT repricing
     """
 
-    def __init__(self, state: BotState) -> None:
+    def __init__(self, state: BotState, trade_size: float) -> None:
         super().__init__()
-        self._state = state
+        self._state      = state
+        self._trade_size = trade_size
+        self._sniper     = ResolutionSniper(trade_size_usd=trade_size)
 
     async def run(self) -> None:
-        # Ajouter le sink loguru → dashboard
         logger.remove()
         logger.add(sys.stderr, level="WARNING", colorize=False,
                    format="{time:HH:mm:ss} | {level:<5} | {message}")
         logger.add(_make_log_sink(self._state), level="INFO",
                    format="{message}")
 
-        self._state.is_live = self.executor._live_mode if hasattr(self.executor, "_live_mode") else False
+        self._state.is_live = getattr(self.executor, "_live_mode", False)
         await super().run()
 
-    # ── Override _on_tick : copie du parent + injections état ────────────────
+    # ── Pipeline tick ─────────────────────────────────────────────────────────
 
     def _on_tick(self, tick: Tick) -> None:
         s = self._state
 
-        # BTC price
         if s.btc_price > 0:
             s.btc_prev_price = s.btc_price
-        s.btc_price   = tick.price
+        s.btc_price      = tick.price
         s.btc_tick_count += 1
-        s.pipeline_stage = 1   # BINANCE
+        s.pipeline_stage  = 1
+
+        # Timer résolution pour affichage dashboard
+        from hft.signals.resolution_sniper import ResolutionSniper
+        s.snipe_seconds_left = ResolutionSniper.seconds_to_resolution()
 
         self._tick_count += 1
         start_ns = time.perf_counter_ns()
 
-        # ── Étape 1 : lag detector ────────────────────────────────────────────
+        # ── 1. Lag detector ────────────────────────────────────────────────────
         self.lag_detector.on_binance_tick(tick.price, tick.timestamp_ms)
 
         if not self.binance.ready():
@@ -99,12 +104,12 @@ class HFTBotUI(HFTBot):
             s.pipeline_stage = 0
             return
 
-        # ── Étape 2 : indicateurs ─────────────────────────────────────────────
+        # ── 2. Indicateurs ────────────────────────────────────────────────────
         s.pipeline_stage = 2
         ind         = self.ind_engine.compute(opens, highs, lows, closes, volumes)
         ind_signals = self.ind_engine.normalize(ind)
 
-        # ── Étape 3 : marché Polymarket ───────────────────────────────────────
+        # ── 3. Marché Polymarket ──────────────────────────────────────────────
         market = self.poly_clob.get_best_market()
         if market:
             self.lag_detector.on_polymarket_price(
@@ -112,14 +117,14 @@ class HFTBotUI(HFTBot):
             )
             with s.lock:
                 q = getattr(market, "question", None) or "BTC Market"
-                s.market_name   = (q[:38] + "…") if len(q) > 40 else q
+                s.market_name     = (q[:38] + "…") if len(q) > 40 else q
                 s.poly_yes_price  = market.yes_price
                 s.poly_spread_pct = market.spread_pct
                 s.poly_liquidity  = market.liquidity_usd
 
         estimated_fair = self.lag_detector.get_estimated_fair_price()
 
-        # ── Étape 4 : force-graph ─────────────────────────────────────────────
+        # ── 4. Force-graph ────────────────────────────────────────────────────
         s.pipeline_stage = 3
         self.aggregator.update(
             graph=self.force_graph,
@@ -140,14 +145,25 @@ class HFTBotUI(HFTBot):
             s.fg_direction     = consensus.direction
             s.fg_contradiction = consensus.contradiction_score
 
-        # Mise à jour lag stats
         lag_stats = self.lag_detector.get_stats()
         with s.lock:
             s.lag_ms               = lag_stats["avg_lag_ms"]
             s.lag_windows_detected = lag_stats["total_windows"]
             s.lag_active           = lag_stats["active_window"]
 
-        # ── Étape 5 : EV+ Gate ───────────────────────────────────────────────
+        # ── SNIPE : vérifier fenêtre de résolution ────────────────────────────
+        if market and len(closes) >= 5 and self.risk.can_trade():
+            snipe_sig = self._sniper.evaluate(
+                btc_price=tick.price,
+                btc_closes_4c=closes[-5:-1],
+                poly_yes_price=market.yes_price,
+            )
+            if snipe_sig:
+                asyncio.ensure_future(
+                    self._execute_snipe_ui(snipe_sig, market)
+                )
+
+        # ── 5. EV+ Gate ───────────────────────────────────────────────────────
         s.pipeline_stage = 4
         if not consensus.is_tradeable:
             s.pipeline_stage = 0
@@ -184,7 +200,7 @@ class HFTBotUI(HFTBot):
             s.pipeline_stage = 0
             return
 
-        # ── Étape 6 : exécution ───────────────────────────────────────────────
+        # ── 6. Exécution HFT ──────────────────────────────────────────────────
         s.pipeline_stage = 5
         self._last_trade_ts = now_ms
         asyncio.ensure_future(
@@ -195,8 +211,9 @@ class HFTBotUI(HFTBot):
         if elapsed_ms > 80:
             logger.debug(f"Pipeline tick: {elapsed_ms:.1f}ms")
 
+    # ── Exécution HFT repricing ───────────────────────────────────────────────
+
     async def _execute_trade_ui(self, signal, market, edge_window) -> None:
-        """Exécute le trade et met à jour le dashboard."""
         s = self._state
         result = await self.executor.execute_directional(
             market=market,
@@ -208,11 +225,11 @@ class HFTBotUI(HFTBot):
         entry = result.price if (result and result.success) else edge_window.poly_old_price
 
         trade = {
-            "direction": "UP"   if signal.direction == "BULL" else "DOWN",
+            "strat":     "HFT",
+            "direction": "UP" if signal.direction == "BULL" else "DOWN",
             "entry":     entry,
-            "exit":      entry,                       # sera mis à jour à la résolution
-            "pnl":       0.0,                         # inconnu avant résolution Polymarket
-            "repriced":  True,
+            "exit":      entry,
+            "pnl":       0.0,
             "btc_move":  edge_window.binance_move_pct * 100,
             "size_usd":  signal.size_usd,
             "status":    "placed" if (result and result.success) else "failed",
@@ -221,57 +238,126 @@ class HFTBotUI(HFTBot):
         if result and result.success:
             with s.lock:
                 s.total_trades += 1
+                s.hft_trades   += 1
                 s.recent_trades.append(trade)
                 s.equity_history.append(s.capital)
                 s.log_lines.append((
                     "TRADE",
-                    f"{'▲' if signal.direction == 'BULL' else '▼'} {signal.direction} "
-                    f"${signal.size_usd:.2f} @ {entry:.4f}  "
+                    f"HFT {'▲' if signal.direction=='BULL' else '▼'} "
+                    f"${signal.size_usd:.0f} @ {entry:.4f}  "
                     f"edge={edge_window.edge_pct*100:.1f}%",
                 ))
         elif result:
             with s.lock:
-                s.log_lines.append(("WARN", f"Trade échoué : {result.error}"))
+                s.log_lines.append(("WARN", f"HFT échoué : {result.error}"))
 
-    # ── Mise à jour periodique capital / stats ────────────────────────────────
+    # ── Exécution Resolution Snipe ────────────────────────────────────────────
+
+    async def _execute_snipe_ui(self, snipe_sig, market) -> None:
+        s = self._state
+
+        # En mode papier : simuler directement
+        if not getattr(self.executor, "_live_mode", False):
+            entry = snipe_sig.entry_price
+            trade = {
+                "strat":     "SNP",
+                "direction": "UP" if snipe_sig.direction == "BULL" else "DOWN",
+                "entry":     entry,
+                "exit":      entry,
+                "pnl":       0.0,
+                "btc_move":  snipe_sig.move_pct * 100,
+                "size_usd":  snipe_sig.size_usd,
+                "status":    "placed",
+            }
+            with s.lock:
+                s.total_trades  += 1
+                s.snipe_trades  += 1
+                s.recent_trades.append(trade)
+                s.equity_history.append(s.capital)
+                s.log_lines.append((
+                    "SNIPE",
+                    f"SNP {'▲' if snipe_sig.direction=='BULL' else '▼'} "
+                    f"${snipe_sig.size_usd:.0f} @ {entry:.3f}  "
+                    f"⏱{snipe_sig.seconds_left:.0f}s  "
+                    f"BTC{snipe_sig.move_pct*100:+.2f}%",
+                ))
+            return
+
+        # En mode live : utiliser l'executor (token YES ou NO selon direction)
+        from hft.risk.risk_manager import TradeSignal
+        fake_signal = TradeSignal(
+            direction=snipe_sig.direction,
+            confidence=0.88,
+            edge_pct=0.13,
+            size_usd=snipe_sig.size_usd,
+            market_id=market.market_id,
+        )
+        result = await self.executor.execute_directional(
+            market=market,
+            signal=fake_signal,
+            edge_window=None,
+        )
+        entry = snipe_sig.entry_price
+
+        trade = {
+            "strat":     "SNP",
+            "direction": "UP" if snipe_sig.direction == "BULL" else "DOWN",
+            "entry":     entry,
+            "exit":      entry,
+            "pnl":       0.0,
+            "btc_move":  snipe_sig.move_pct * 100,
+            "size_usd":  snipe_sig.size_usd,
+            "status":    "placed" if (result and result.success) else "failed",
+        }
+
+        with s.lock:
+            s.total_trades += 1
+            s.snipe_trades += 1
+            s.recent_trades.append(trade)
+            s.equity_history.append(s.capital)
+            if result and result.success:
+                s.log_lines.append((
+                    "SNIPE",
+                    f"SNP {'▲' if snipe_sig.direction=='BULL' else '▼'} "
+                    f"${snipe_sig.size_usd:.0f} @ {entry:.3f}  "
+                    f"⏱{snipe_sig.seconds_left:.0f}s",
+                ))
+            else:
+                s.log_lines.append(("WARN", f"Snipe échoué : {getattr(result, 'error', '?')}"))
+
+    # ── Monitor loop ──────────────────────────────────────────────────────────
 
     async def _monitor_loop(self) -> None:
-        """Override : met à jour BotState en plus du monitoring normal."""
         while self._running:
             await asyncio.sleep(5)
             stats = self.risk.get_stats()
             with self._state.lock:
-                # Capital = capital de départ + P&L journalier (proxy)
-                self._state.daily_pnl = stats.get("daily_pnl", 0.0)
-                self._state.capital   = self._state.capital_start + self._state.daily_pnl
-                self._state.wins      = stats.get("win_rate", 0.0) * max(1, stats.get("daily_trades", 0))
-                self._state.losses    = stats.get("daily_trades", 0) - self._state.wins
+                self._state.daily_pnl  = stats.get("daily_pnl", 0.0)
+                self._state.capital    = self._state.capital_start + self._state.daily_pnl
+                trades = stats.get("daily_trades", 0)
+                wr     = stats.get("win_rate", 0.0)
+                self._state.wins      = int(round(wr * trades))
+                self._state.losses    = trades - self._state.wins
                 self._state.is_halted = stats.get("halted", False)
                 self._state.halt_reason = stats.get("halt_reason", "")
                 if self._state.daily_pnl != 0:
                     self._state.equity_history.append(self._state.capital)
 
 
-# ── Thread bot ─────────────────────────────────────────────────────────────────
+# ── Thread bot ────────────────────────────────────────────────────────────────
 
-_stop_event = threading.Event()
-
-
-def _run_bot_thread(state: BotState) -> None:
-    """Lance le bot HFT dans asyncio (thread secondaire)."""
+def _run_bot_thread(state: BotState, trade_size: float) -> None:
     try:
-        asyncio.run(_async_bot(state))
+        asyncio.run(_async_bot(state, trade_size))
     except Exception as exc:
         with state.lock:
-            state.log_lines.append(("ERROR", f"Bot thread crash: {exc}"))
-            state.is_halted = True
+            state.log_lines.append(("ERROR", f"Bot crash: {exc}"))
+            state.is_halted  = True
             state.halt_reason = str(exc)
 
 
-async def _async_bot(state: BotState) -> None:
-    bot = HFTBotUI(state=state)
-
-    # Gérer le stop propre
+async def _async_bot(state: BotState, trade_size: float) -> None:
+    bot  = HFTBotUI(state=state, trade_size=trade_size)
     loop = asyncio.get_running_loop()
 
     def _cancel():
@@ -280,17 +366,20 @@ async def _async_bot(state: BotState) -> None:
 
     loop.add_signal_handler(signal.SIGINT,  _cancel)
     loop.add_signal_handler(signal.SIGTERM, _cancel)
-
     await bot.run()
 
 
-# ── Main ───────────────────────────────────────────────────────────────────────
+# ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="HFT BTC Polymarket — Dashboard UI")
-    parser.add_argument("--live",    action="store_true", help="Mode live (ordres réels)")
+    parser = argparse.ArgumentParser(description="PolyPoly HFT — Dashboard")
+    parser.add_argument("--live",    action="store_true",
+                        help="Mode live (ordres réels)")
     parser.add_argument("--capital", type=float, default=CAPITAL_USD,
                         help=f"Capital de départ en USD (défaut={CAPITAL_USD})")
+    parser.add_argument("--size",    type=float,
+                        default=FIXED_TRADE_USD if FIXED_TRADE_USD > 0 else 10.0,
+                        help="Taille par trade en USD (défaut=10$)")
     args = parser.parse_args()
 
     if args.live:
@@ -299,7 +388,6 @@ def main() -> None:
             print("ERREUR : POLYMARKET_API_KEY absent du .env — mode live impossible.")
             sys.exit(1)
 
-    # ── État partagé ──────────────────────────────────────────────────────────
     state = BotState(
         capital_start=args.capital,
         capital=args.capital,
@@ -307,16 +395,14 @@ def main() -> None:
     )
     state.equity_history.append(args.capital)
 
-    # ── Lancer le bot en arrière-plan ─────────────────────────────────────────
     bot_thread = threading.Thread(
         target=_run_bot_thread,
-        args=(state,),
+        args=(state, args.size),
         daemon=True,
         name="HFTBotThread",
     )
     bot_thread.start()
 
-    # ── Dashboard dans le thread principal ────────────────────────────────────
     dashboard = HFTDashboard(state)
 
     try:
@@ -329,12 +415,10 @@ def main() -> None:
             while bot_thread.is_alive():
                 live.update(dashboard.render())
                 time.sleep(0.25)
-
     except KeyboardInterrupt:
         pass
     finally:
-        _stop_event.set()
-        print("\nDashboard fermé — le bot s'arrête proprement...")
+        print("\nDashboard fermé — arrêt en cours…")
         bot_thread.join(timeout=5)
         print("Bye.")
 

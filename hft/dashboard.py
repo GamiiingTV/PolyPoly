@@ -1,6 +1,6 @@
 """
-HFT Dashboard — MIROFISH POLYBENCH ENGINE
-Rich-library terminal dashboard for the BTC UP/DOWN binary market bot.
+PolyPoly HFT — Terminal Dashboard v3
+Orange-noir, deux stratégies, plein de kiff.
 """
 
 from __future__ import annotations
@@ -13,33 +13,40 @@ from typing import Optional
 
 from rich import box
 from rich.align import Align
-from rich.columns import Columns
 from rich.layout import Layout
-from rich.live import Live
 from rich.panel import Panel
+from rich.rule import Rule
 from rich.table import Table
 from rich.text import Text
 
-# ---------------------------------------------------------------------------
-# Constants
-# ---------------------------------------------------------------------------
+# ── Palette ───────────────────────────────────────────────────────────────────
 
-ORANGE = "dark_orange"
-BRIGHT_WHITE = "bold bright_white"
-DIM = "dim"
-GREEN = "bold bright_green"
-RED = "bold bright_red"
-YELLOW = "bold yellow"
-CYAN = "bold cyan"
-
-PIPELINE_STAGES = ["BINANCE", "INDICATORS", "FORCE-GRAPH", "EV+ GATE", "EXECUTE"]
+O1    = "orange1"          # orange vif  (titres, accents)
+O3    = "dark_orange"      # orange moyen (barres, labels)
+WHT   = "bold bright_white"
+GRN   = "bold bright_green"
+RED   = "bold bright_red"
+YEL   = "bold yellow"
+CYN   = "bold cyan"
+DIM   = "dim"
+GREY  = "grey50"
+PINK  = "bold magenta"
 
 BLOCKS = " ▁▂▃▄▅▆▇█"
 
-# ---------------------------------------------------------------------------
-# BotState dataclass
-# ---------------------------------------------------------------------------
+PIPELINE_STAGES = ["BINANCE", "INDIC.", "FORCE-G", "EV+GATE", "EXECUTE"]
 
+LOGO = (
+    "  ██████╗  ██████╗ ██╗  ██╗   ██╗██████╗  ██████╗ ██╗  ██╗   ██╗\n"
+    "  ██╔══██╗██╔═══██╗██║  ╚██╗ ██╔╝██╔══██╗██╔═══██╗██║  ╚██╗ ██╔╝\n"
+    "  ██████╔╝██║   ██║██║   ╚████╔╝ ██████╔╝██║   ██║██║   ╚████╔╝ \n"
+    "  ██╔═══╝ ██║   ██║██║    ╚██╔╝  ██╔═══╝ ██║   ██║██║    ╚██╔╝  \n"
+    "  ██║     ╚██████╔╝███████╗██║   ██║     ╚██████╔╝███████╗██║   \n"
+    "  ╚═╝      ╚═════╝ ╚══════╝╚═╝   ╚═╝      ╚═════╝ ╚══════╝╚═╝   "
+)
+
+
+# ── BotState ──────────────────────────────────────────────────────────────────
 
 @dataclass
 class BotState:
@@ -48,19 +55,27 @@ class BotState:
     capital: float = 1000.0
     daily_pnl: float = 0.0
 
-    # Trades
+    # HFT repricing trades
+    hft_trades: int = 0
+    hft_wins: int = 0
+
+    # Snipe trades
+    snipe_trades: int = 0
+    snipe_wins: int = 0
+
+    # Totaux (pour compat rétro)
     total_trades: int = 0
     wins: int = 0
     losses: int = 0
 
     # BTC
     btc_price: float = 0.0
-    btc_prev_price: float = 0.0  # 1 second ago
+    btc_prev_price: float = 0.0
     btc_tick_count: int = 0
 
     # Force-graph
-    fg_field: float = 0.0         # [-1, +1]
-    fg_convergence: float = 0.0   # [0, 1]
+    fg_field: float = 0.0
+    fg_convergence: float = 0.0
     fg_direction: str = "NEUTRAL"
     fg_contradiction: float = 0.0
 
@@ -69,24 +84,22 @@ class BotState:
     lag_windows_detected: int = 0
     lag_active: bool = False
 
-    # Pipeline stage (0=idle, 1=tick, 2=ind, 3=fg, 4=gate, 5=exec)
+    # Pipeline stage 0=idle 1-5=actif
     pipeline_stage: int = 0
 
-    # Market
-    market_name: str = "N/A"
+    # Market Polymarket
+    market_name: str = "Searching…"
     poly_yes_price: float = 0.5
     poly_spread_pct: float = 0.02
     poly_liquidity: float = 0.0
+    snipe_seconds_left: float = 0.0   # secondes avant résolution marché
 
-    # History
+    # Historique
     recent_trades: list = field(default_factory=list)
-    # dicts: {direction, entry, exit, pnl, repriced, btc_move}
     equity_history: list = field(default_factory=list)
-    # list of float capital values
 
     # Logs
-    log_lines: object = field(default_factory=lambda: deque(maxlen=6))
-    # (level, message) tuples
+    log_lines: object = field(default_factory=lambda: deque(maxlen=8))
 
     # Status
     is_live: bool = False
@@ -95,23 +108,27 @@ class BotState:
     start_time: float = field(default_factory=time.time)
     lock: object = field(default_factory=threading.Lock)
 
-    # ------------------------------------------------------------------
-    # Computed properties
-    # ------------------------------------------------------------------
+    # ── Computed ─────────────────────────────────────────────────────────────
 
     @property
     def win_rate(self) -> float:
-        if self.total_trades == 0:
-            return 0.0
-        return self.wins / self.total_trades
+        return self.wins / self.total_trades if self.total_trades else 0.0
+
+    @property
+    def hft_wr(self) -> float:
+        return self.hft_wins / self.hft_trades if self.hft_trades else 0.0
+
+    @property
+    def snipe_wr(self) -> float:
+        return self.snipe_wins / self.snipe_trades if self.snipe_trades else 0.0
 
     @property
     def avg_rr(self) -> float:
-        wins = [t["pnl"] for t in self.recent_trades if t.get("pnl", 0) > 0]
-        losses = [abs(t["pnl"]) for t in self.recent_trades if t.get("pnl", 0) < 0]
-        if not wins or not losses:
+        w = [t["pnl"] for t in self.recent_trades if t.get("pnl", 0) > 0]
+        l = [abs(t["pnl"]) for t in self.recent_trades if t.get("pnl", 0) < 0]
+        if not w or not l:
             return 0.0
-        return (sum(wins) / len(wins)) / (sum(losses) / len(losses))
+        return (sum(w) / len(w)) / (sum(l) / len(l))
 
     @property
     def total_pnl(self) -> float:
@@ -119,76 +136,72 @@ class BotState:
 
     @property
     def total_pnl_pct(self) -> float:
-        if self.capital_start == 0:
-            return 0.0
-        return (self.total_pnl / self.capital_start) * 100.0
+        return (self.total_pnl / self.capital_start * 100) if self.capital_start else 0.0
 
     @property
     def uptime_str(self) -> str:
-        elapsed = int(time.time() - self.start_time)
-        hours = elapsed // 3600
-        minutes = (elapsed % 3600) // 60
-        return f"{hours}h {minutes:02d}m"
+        e = int(time.time() - self.start_time)
+        return f"{e // 3600}h {(e % 3600) // 60:02d}m {e % 60:02d}s"
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
-
-def _sparkline(values: list, width: int = 50) -> str:
-    if len(values) < 2:
-        return "─" * width
+def _spark(values: list, width: int = 56) -> str:
     data = list(values)[-width:]
+    if len(data) < 2:
+        return "─" * width
     mn, mx = min(data), max(data)
     if mn == mx:
         return "─" * width
-    return "".join(
-        BLOCKS[min(8, int((v - mn) / (mx - mn) * 8.99))] for v in data
-    )
+    return "".join(BLOCKS[min(8, int((v - mn) / (mx - mn) * 8.99))] for v in data)
 
 
-def _pct_color(value: float) -> str:
-    if value > 0:
-        return GREEN
-    if value < 0:
-        return RED
-    return DIM
+def _pct_col(v: float) -> str:
+    return GRN if v > 0 else (RED if v < 0 else DIM)
 
 
-def _signed(value: float, decimals: int = 2) -> str:
-    sign = "+" if value >= 0 else ""
-    return f"{sign}{value:.{decimals}f}"
+def _sgn(v: float, d: int = 2) -> str:
+    return f"+{v:.{d}f}" if v >= 0 else f"{v:.{d}f}"
 
 
-def _force_bar(field_val: float, width: int = 20) -> str:
-    """Return a unicode block bar centred at zero."""
-    # field_val in [-1, 1]; positive = BULL, negative = BEAR
-    filled = int(abs(field_val) * width)
-    filled = min(filled, width)
-    empty = width - filled
-    bar = "█" * filled + "░" * empty
-    return bar
+def _wr_col(wr: float) -> str:
+    return GRN if wr >= 0.65 else (YEL if wr >= 0.50 else RED)
 
 
-# ---------------------------------------------------------------------------
-# HFTDashboard
-# ---------------------------------------------------------------------------
+def _bar_orange(ratio: float, width: int = 18) -> Text:
+    """Barre de progression orange pleine."""
+    filled = min(width, int(ratio * width))
+    empty  = width - filled
+    t = Text()
+    t.append("█" * filled, style=O1)
+    t.append("░" * empty,  style=GREY)
+    return t
 
+
+def _force_bar(field_val: float, width: int = 22) -> Text:
+    """Barre BULL/BEAR centrée."""
+    filled = min(width, int(abs(field_val) * width))
+    empty  = width - filled
+    t = Text()
+    if field_val >= 0:
+        t.append("BULL ", style=GRN)
+        t.append("█" * filled, style=GRN)
+        t.append("░" * empty,  style=GREY)
+        t.append(" BEAR", style=GREY)
+    else:
+        t.append("BULL ", style=GREY)
+        t.append("░" * empty,  style=GREY)
+        t.append("█" * filled, style=RED)
+        t.append(" BEAR", style=RED)
+    return t
+
+
+# ── Dashboard ─────────────────────────────────────────────────────────────────
 
 class HFTDashboard:
-    """
-    Rich terminal dashboard for the MIROFISH POLYBENCH HFT engine.
-    Call render() inside a rich.live.Live context.
-    """
-
     def __init__(self, state: BotState) -> None:
         self.state = state
-        self._tick = 0  # internal frame counter for animations
-
-    # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
+        self._tick = 0
 
     def render(self) -> Layout:
         self._tick += 1
@@ -196,31 +209,30 @@ class HFTDashboard:
 
         root = Layout(name="root")
         root.split_column(
-            Layout(name="header", size=4),
+            Layout(name="header", size=5),
             Layout(name="body"),
-            Layout(name="footer", size=4),
+            Layout(name="footer", size=3),
         )
-
         root["body"].split_row(
-            Layout(name="left", ratio=35),
-            Layout(name="right", ratio=65),
+            Layout(name="left",  ratio=38),
+            Layout(name="right", ratio=62),
         )
-
         root["left"].split_column(
-            Layout(name="pnl", size=10),
-            Layout(name="forcegraph", size=8),
-            Layout(name="pipeline", size=7),
+            Layout(name="capital",   size=9),
+            Layout(name="strategies",size=7),
+            Layout(name="forceg",    size=6),
+            Layout(name="pipeline",  size=5),
             Layout(name="logs"),
         )
-
         root["right"].split_column(
-            Layout(name="equity", size=9),
+            Layout(name="equity",  size=8),
             Layout(name="trades"),
         )
 
-        root["header"].update(self._header_panel(s))
-        root["pnl"].update(self._pnl_panel(s))
-        root["forcegraph"].update(self._force_graph_panel(s))
+        root["header"].update(self._header(s))
+        root["capital"].update(self._capital_panel(s))
+        root["strategies"].update(self._strategies_panel(s))
+        root["forceg"].update(self._fg_panel(s))
         root["pipeline"].update(self._pipeline_panel(s))
         root["logs"].update(self._log_panel(s))
         root["equity"].update(self._equity_panel(s))
@@ -229,395 +241,381 @@ class HFTDashboard:
 
         return root
 
-    # ------------------------------------------------------------------
-    # Header
-    # ------------------------------------------------------------------
+    # ── Header ────────────────────────────────────────────────────────────────
 
-    def _header_panel(self, s: BotState) -> Panel:
-        # Status badge
+    def _header(self, s: BotState) -> Panel:
+        # Status badge animé
+        pulse = ("◉", "○")[self._tick % 2]
         if s.is_halted:
-            status_text = Text(" ■ HALTED ", style="bold black on red")
-            status_detail = Text(f"  {s.halt_reason}", style=RED)
+            badge = Text(f" ■ HALTED  {s.halt_reason[:40]} ", style="bold black on red")
         elif s.is_live:
-            pulse = "◉" if self._tick % 2 == 0 else "○"
-            status_text = Text(f" {pulse} LIVE ", style="bold black on bright_green")
-            status_detail = Text(f"  uptime {s.uptime_str}", style=GREEN)
+            badge = Text(f" {pulse} LIVE  uptime {s.uptime_str} ", style="bold black on bright_green")
         else:
-            status_text = Text(" ◌ PAPER ", style="bold black on yellow")
-            status_detail = Text(f"  uptime {s.uptime_str}", style=YELLOW)
+            badge = Text(f" {pulse} PAPER  uptime {s.uptime_str} ", style="bold black on yellow")
 
-        # BTC price and delta
-        btc_delta = s.btc_price - s.btc_prev_price
-        btc_arrow = "▲" if btc_delta >= 0 else "▼"
-        btc_color = GREEN if btc_delta >= 0 else RED
-        btc_text = Text()
-        btc_text.append("BTC  ", style=DIM)
-        btc_text.append(f"${s.btc_price:>10,.2f}  ", style="bold white")
-        btc_text.append(f"{btc_arrow} {abs(btc_delta):.2f}", style=btc_color)
+        # BTC ticker
+        delta     = s.btc_price - s.btc_prev_price
+        arrow     = "▲" if delta >= 0 else "▼"
+        btc_style = GRN if delta >= 0 else RED
 
-        # Ticker tape line
-        lag_color = RED if s.lag_active else GREEN
-        ticker = Text()
-        ticker.append("▌", style=ORANGE)
-        ticker.append(" POLYBENCH ", style=f"bold {ORANGE}")
-        ticker.append("▐  ", style=ORANGE)
-        ticker.append(btc_text)
-        ticker.append("   │   ", style=DIM)
-        ticker.append("YES ", style=DIM)
-        ticker.append(f"{s.poly_yes_price:.3f}", style=CYAN)
-        ticker.append("   │   ", style=DIM)
-        ticker.append("LAG ", style=DIM)
-        ticker.append(f"{s.lag_ms:.0f}ms", style=lag_color)
-        ticker.append("   │   ", style=DIM)
-        ticker.append("WR ", style=DIM)
-        ticker.append(f"{s.win_rate*100:.1f}%", style=_pct_color(s.win_rate - 0.5))
-        ticker.append("   │   ", style=DIM)
-        ticker.append("TICKS ", style=DIM)
-        ticker.append(f"{s.btc_tick_count:,}", style="bold white")
+        line1 = Text()
+        line1.append("  BTC ", style=DIM)
+        line1.append(f"${s.btc_price:>11,.2f} ", style=WHT)
+        line1.append(f"{arrow} {abs(delta):,.2f}  ", style=btc_style)
+        line1.append("│ ", style=GREY)
+        line1.append("YES ", style=DIM)
+        line1.append(f"{s.poly_yes_price:.3f}  ", style=CYN)
+        line1.append("│ ", style=GREY)
+        lag_c = O1 if s.lag_active else GREY
+        line1.append("LAG ", style=DIM)
+        line1.append(f"{s.lag_ms:.0f}ms  ", style=lag_c)
+        line1.append("│ ", style=GREY)
+        line1.append("WR ", style=DIM)
+        line1.append(f"{s.win_rate*100:.1f}%  ", style=_wr_col(s.win_rate))
+        line1.append("│ ", style=GREY)
+        line1.append("TICKS ", style=DIM)
+        line1.append(f"{s.btc_tick_count:,}", style=WHT)
+        line1.append("  ")
+        line1.append_text(badge)
 
-        # Second line: status
         line2 = Text()
-        line2.append(status_text)
-        line2.append(status_detail)
-        line2.append("   ", style=DIM)
-        line2.append("MARKET  ", style=DIM)
-        line2.append(s.market_name, style=f"bold {ORANGE}")
-        line2.append("   FG:", style=DIM)
-        fg_color = GREEN if s.fg_direction == "BULL" else (RED if s.fg_direction == "BEAR" else DIM)
-        line2.append(f" {s.fg_direction}", style=fg_color)
+        line2.append("  MARKET  ", style=DIM)
+        line2.append(s.market_name, style=f"bold {O1}")
+        if s.snipe_seconds_left > 0:
+            snipe_c = RED if s.snipe_seconds_left < 60 else YEL
+            line2.append(f"  ⏱ {s.snipe_seconds_left:.0f}s", style=snipe_c)
+        line2.append("  │  FG ", style=GREY)
+        fg_c = GRN if s.fg_direction == "BULL" else (RED if s.fg_direction == "BEAR" else DIM)
+        arrow2 = "▲" if s.fg_direction == "BULL" else ("▼" if s.fg_direction == "BEAR" else "─")
+        line2.append(f"{arrow2} {s.fg_direction}  ", style=fg_c)
+        line2.append(f"conv {s.fg_convergence*100:.1f}%  ", style=CYN)
+        line2.append("│  SPREAD ", style=GREY)
+        sp_c = GRN if s.poly_spread_pct < 0.025 else (YEL if s.poly_spread_pct < 0.04 else RED)
+        line2.append(f"{s.poly_spread_pct*100:.2f}%  ", style=sp_c)
+        line2.append("│  LIQ ", style=GREY)
+        line2.append(f"${s.poly_liquidity:,.0f}", style=CYN)
 
-        body = Text("\n").join([ticker, line2])
+        body = Text("\n").join([line1, line2])
 
         return Panel(
             body,
-            style=f"bold {ORANGE}",
-            box=box.HEAVY_EDGE,
+            title=Text("◈◈◈  P O L Y P O L Y   H F T   E N G I N E   v 3 . 0  ◈◈◈", style=f"bold {O1}"),
+            style=O3,
+            box=box.DOUBLE_EDGE,
             padding=(0, 1),
         )
 
-    # ------------------------------------------------------------------
-    # PNL panel
-    # ------------------------------------------------------------------
+    # ── Capital ───────────────────────────────────────────────────────────────
 
-    def _pnl_panel(self, s: BotState) -> Panel:
-        pnl = s.total_pnl
-        pnl_pct = s.total_pnl_pct
-        color = _pct_color(pnl)
+    def _capital_panel(self, s: BotState) -> Panel:
+        pnl   = s.total_pnl
+        pnl_c = GRN if pnl >= 0 else RED
 
-        t = Text()
-        t.append("  CAPITAL  ", style=DIM)
-        t.append(f"${s.capital:,.2f}\n", style=BRIGHT_WHITE)
-        t.append("  ALL-TIME  ", style=DIM)
+        # Grande valeur capitale
+        cap_text = Text()
+        cap_text.append(f"  ${s.capital:>12,.2f}", style=f"bold {O1}")
+        cap_text.append("\n")
 
-        sign = "+" if pnl >= 0 else ""
-        t.append(f"  {sign}${pnl:,.2f}  ", style=f"bold {'bright_green' if pnl >= 0 else 'bright_red'} on grey7")
-        t.append(f"  ({sign}{pnl_pct:.2f}%)\n", style=color)
+        # P&L total
+        cap_text.append("  Session total  ", style=DIM)
+        cap_text.append(f"{_sgn(pnl):>10}", style=pnl_c)
+        cap_text.append(f"  ({_sgn(s.total_pnl_pct, 1)}%)", style=pnl_c)
+        cap_text.append("\n")
 
-        t.append("  DAILY P&L  ", style=DIM)
-        daily_color = _pct_color(s.daily_pnl)
-        t.append(f"{_signed(s.daily_pnl)}  ", style=daily_color)
-        t.append("  TRADES ", style=DIM)
-        t.append(f"{s.total_trades}  ", style=BRIGHT_WHITE)
-        t.append("W ", style=GREEN)
-        t.append(f"{s.wins}  ", style=GREEN)
-        t.append("L ", style=RED)
-        t.append(f"{s.losses}\n", style=RED)
+        # Daily P&L
+        cap_text.append("  Journalier     ", style=DIM)
+        cap_text.append(f"{_sgn(s.daily_pnl):>10}", style=_pct_col(s.daily_pnl))
+        cap_text.append("\n")
 
-        t.append("  WIN RATE  ", style=DIM)
-        t.append(f"{s.win_rate*100:.1f}%  ", style=_pct_color(s.win_rate - 0.5))
-        t.append("  R:R  ", style=DIM)
-        t.append(f"{s.avg_rr:.2f}", style=CYAN)
+        # Barre progression vers objectif (+20%)
+        target = s.capital_start * 1.20
+        ratio  = min(1.0, max(0.0, (s.capital - s.capital_start) / (target - s.capital_start))) if target != s.capital_start else 0.0
+        cap_text.append("  Objectif +20%  ", style=DIM)
+        cap_text.append_text(_bar_orange(ratio, width=20))
+        cap_text.append(f"  {ratio*100:.0f}%\n", style=O1)
+
+        # Trades résumé
+        cap_text.append(f"  {s.total_trades} trades  ", style=DIM)
+        cap_text.append(f"✓{s.wins}", style=GRN)
+        cap_text.append("  ", style=DIM)
+        cap_text.append(f"✗{s.losses}", style=RED)
+        cap_text.append(f"  R:R {s.avg_rr:.2f}", style=CYN)
 
         return Panel(
-            t,
-            title=f"[{ORANGE}]◈ P & L[/{ORANGE}]",
-            box=box.HEAVY_EDGE,
-            style="grey7",
+            cap_text,
+            title=Text(f"◈ CAPITAL", style=f"bold {O1}"),
+            box=box.DOUBLE_EDGE,
+            style="on grey7",
             padding=(0, 1),
         )
 
-    # ------------------------------------------------------------------
-    # Force-graph panel
-    # ------------------------------------------------------------------
+    # ── Stratégies ────────────────────────────────────────────────────────────
 
-    def _force_graph_panel(self, s: BotState) -> Panel:
-        field_val = max(-1.0, min(1.0, s.fg_field))
-        conv_pct = s.fg_convergence * 100.0
-        contradiction_pct = s.fg_contradiction * 100.0
-
-        if field_val >= 0:
-            bar = _force_bar(field_val)
-            bar_line = Text()
-            bar_line.append("BULL ", style=GREEN)
-            bar_line.append("[", style=DIM)
-            bar_line.append(bar, style=GREEN)
-            bar_line.append("]", style=DIM)
-            bar_line.append(" BEAR", style=DIM)
-        else:
-            bar = _force_bar(field_val)
-            bar_line = Text()
-            bar_line.append("BULL ", style=DIM)
-            bar_line.append("[", style=DIM)
-            bar_line.append(bar, style=RED)
-            bar_line.append("]", style=DIM)
-            bar_line.append(" BEAR", style=RED)
-
+    def _strategies_panel(self, s: BotState) -> Panel:
         t = Text()
-        t.append_text(bar_line)
-        t.append("\n")
-        t.append("  Field: ", style=DIM)
-        t.append(f"{_signed(field_val, 3)}  ", style=ORANGE)
-        t.append("Conv: ", style=DIM)
-        t.append(f"{conv_pct:.1f}%  ", style=CYAN)
-        t.append("Contradict: ", style=DIM)
-        t.append(f"{contradiction_pct:.1f}%\n", style=YELLOW)
 
-        direction_color = GREEN if s.fg_direction == "BULL" else (RED if s.fg_direction == "BEAR" else DIM)
-        t.append("  Signal: ", style=DIM)
-        arrow = "▲" if s.fg_direction == "BULL" else ("▼" if s.fg_direction == "BEAR" else "─")
-        t.append(f"{arrow}  {s.fg_direction}  ", style=f"bold {direction_color}")
-        lag_color = RED if s.lag_active else GREEN
-        t.append("  Lag Window: ", style=DIM)
-        active_str = "ACTIVE" if s.lag_active else "idle"
-        t.append(f"{active_str}  ", style=lag_color)
-        t.append(f"(×{s.lag_windows_detected})", style=DIM)
-
-        return Panel(
-            t,
-            title=f"[{ORANGE}]◈ FORCE-GRAPH[/{ORANGE}]",
-            box=box.HEAVY_EDGE,
-            style="grey7",
-            padding=(0, 1),
-        )
-
-    # ------------------------------------------------------------------
-    # Pipeline panel
-    # ------------------------------------------------------------------
-
-    def _pipeline_panel(self, s: BotState) -> Panel:
-        stage = s.pipeline_stage  # 0=idle, 1-5 map to PIPELINE_STAGES
-
-        t = Text()
-        for i, name in enumerate(PIPELINE_STAGES, start=1):
-            if stage == 0:
-                style = DIM
-                sym = "○"
-            elif i < stage:
-                style = GREEN
-                sym = "●"
-            elif i == stage:
-                style = f"bold {ORANGE}"
-                sym = "◉"
-            else:
-                style = DIM
-                sym = "○"
-
-            t.append(f" {sym} {name} ", style=style)
-            if i < len(PIPELINE_STAGES):
-                arrow_style = GREEN if (stage > 0 and i < stage) else DIM
-                t.append("→", style=arrow_style)
-
+        # Entêtes
+        t.append(f"  {'':20}", style=DIM)
+        t.append(f"{'HFT':>10}", style=f"bold {O1}")
+        t.append(f"{'SNIPE':>12}", style=f"bold {CYN}")
         t.append("\n")
 
-        # Stage label
-        t.append("  Stage: ", style=DIM)
-        if stage == 0:
-            t.append("IDLE", style=DIM)
-        else:
-            label = PIPELINE_STAGES[stage - 1] if stage <= len(PIPELINE_STAGES) else "DONE"
-            t.append(label, style=f"bold {ORANGE}")
+        # Séparateur
+        t.append("  " + "─" * 40 + "\n", style=GREY)
 
-        t.append("  │  Ticks/s: ", style=DIM)
-        tps = s.btc_tick_count  # cumulative; display raw
-        t.append(f"{tps:,}", style=CYAN)
+        # Trades
+        t.append("  Trades         ", style=DIM)
+        t.append(f"{s.hft_trades:>10}", style=WHT)
+        t.append(f"{s.snipe_trades:>12}\n", style=WHT)
 
-        return Panel(
-            t,
-            title=f"[{ORANGE}]◈ PIPELINE[/{ORANGE}]",
-            box=box.HEAVY_EDGE,
-            style="grey7",
-            padding=(0, 1),
-        )
+        # Win rate
+        t.append("  Win rate       ", style=DIM)
+        t.append(f"{s.hft_wr*100:>9.1f}%", style=_wr_col(s.hft_wr))
+        t.append(f"{s.snipe_wr*100:>11.1f}%\n", style=_wr_col(s.snipe_wr))
 
-    # ------------------------------------------------------------------
-    # Log panel
-    # ------------------------------------------------------------------
-
-    def _log_panel(self, s: BotState) -> Panel:
-        t = Text()
-        level_styles = {
-            "INFO": "cyan",
-            "WARN": "yellow",
-            "ERROR": RED,
-            "TRADE": GREEN,
-            "HALT": f"bold {RED}",
-        }
-        for level, msg in list(s.log_lines):
-            style = level_styles.get(level.upper(), DIM)
-            t.append(f"[{level:5s}] ", style=style)
-            t.append(f"{msg}\n", style="white")
-
-        if not s.log_lines:
-            t.append("  awaiting events…", style=DIM)
+        # P&L calculé depuis recent_trades
+        hft_pnl   = sum(t2["pnl"] for t2 in s.recent_trades if t2.get("strat") == "HFT")
+        snipe_pnl = sum(t2["pnl"] for t2 in s.recent_trades if t2.get("strat") == "SNP")
+        t.append("  P&L session    ", style=DIM)
+        t.append(f"{_sgn(hft_pnl):>10}", style=_pct_col(hft_pnl))
+        t.append(f"{_sgn(snipe_pnl):>12}\n", style=_pct_col(snipe_pnl))
 
         return Panel(
             t,
-            title=f"[{ORANGE}]◈ EVENT LOG[/{ORANGE}]",
-            box=box.HEAVY_EDGE,
-            style="grey7",
+            title=Text("◈ STRATÉGIES  HFT + SNIPE", style=f"bold {O1}"),
+            box=box.DOUBLE_EDGE,
+            style="on grey7",
             padding=(0, 0),
         )
 
-    # ------------------------------------------------------------------
-    # Equity curve panel
-    # ------------------------------------------------------------------
+    # ── Force-graph ───────────────────────────────────────────────────────────
 
-    def _equity_panel(self, s: BotState) -> Panel:
-        history = s.equity_history
-        spark = _sparkline(history, width=60)
-
-        start = history[0] if history else s.capital_start
-        end = history[-1] if history else s.capital
-        delta = end - start
-        delta_color = GREEN if delta >= 0 else RED
-
+    def _fg_panel(self, s: BotState) -> Panel:
         t = Text()
-        t.append("  ", style=DIM)
-        t.append(spark, style=f"{'bright_green' if delta >= 0 else 'bright_red'}")
+        t.append("  ")
+        t.append_text(_force_bar(max(-1.0, min(1.0, s.fg_field))))
         t.append("\n")
-        t.append(f"  Start: ${start:,.2f}  ", style=DIM)
-        t.append(f"Now: ${end:,.2f}  ", style=BRIGHT_WHITE)
-        t.append(f"Δ {_signed(delta)}", style=delta_color)
-        t.append(f"  ({len(history)} samples)", style=DIM)
-
-        # Mini drawdown calculation
-        if len(history) >= 2:
-            peak = max(history)
-            trough = min(history[history.index(peak):]) if history.index(peak) < len(history) - 1 else end
-            drawdown = (trough - peak) / peak * 100 if peak != 0 else 0.0
-        else:
-            drawdown = 0.0
-
-        t.append("\n  Max Drawdown: ", style=DIM)
-        t.append(f"{drawdown:.2f}%", style=RED if drawdown < -1 else DIM)
+        t.append("  Field ", style=DIM)
+        t.append(f"{_sgn(s.fg_field, 3):<8}", style=O1)
+        t.append("Conv ", style=DIM)
+        t.append(f"{s.fg_convergence*100:.1f}%  ", style=CYN)
+        t.append("Contra ", style=DIM)
+        t.append(f"{s.fg_contradiction*100:.1f}%", style=YEL)
+        t.append("\n")
+        lag_c = O1 if s.lag_active else GREY
+        active = "◉ ACTIVE" if s.lag_active else "○ idle"
+        t.append("  LAG WINDOW  ", style=DIM)
+        t.append(f"{active}  ", style=lag_c)
+        t.append(f"×{s.lag_windows_detected} detected", style=DIM)
 
         return Panel(
             t,
-            title=f"[{ORANGE}]◈ EQUITY CURVE[/{ORANGE}]",
-            box=box.HEAVY_EDGE,
-            style="grey7",
+            title=Text("◈ FORCE-GRAPH", style=f"bold {O1}"),
+            box=box.DOUBLE_EDGE,
+            style="on grey7",
             padding=(0, 1),
         )
 
-    # ------------------------------------------------------------------
-    # Trades table panel
-    # ------------------------------------------------------------------
+    # ── Pipeline ──────────────────────────────────────────────────────────────
+
+    def _pipeline_panel(self, s: BotState) -> Panel:
+        stage = s.pipeline_stage
+        t = Text()
+        t.append("  ")
+        for i, name in enumerate(PIPELINE_STAGES, 1):
+            if stage == 0:
+                sym, sty = "○", DIM
+            elif i < stage:
+                sym, sty = "●", GRN
+            elif i == stage:
+                sym, sty = "◉", f"bold {O1}"
+            else:
+                sym, sty = "○", DIM
+            t.append(f"{sym}{name} ", style=sty)
+            if i < len(PIPELINE_STAGES):
+                t.append("→", style=GRN if (stage > 0 and i < stage) else GREY)
+
+        t.append("\n  ", style=DIM)
+        if stage == 0:
+            t.append("IDLE — en attente de signal", style=DIM)
+        else:
+            t.append(PIPELINE_STAGES[stage - 1], style=f"bold {O1}")
+            t.append(" en cours…", style=DIM)
+
+        return Panel(
+            t,
+            title=Text("◈ PIPELINE", style=f"bold {O1}"),
+            box=box.DOUBLE_EDGE,
+            style="on grey7",
+            padding=(0, 1),
+        )
+
+    # ── Logs ──────────────────────────────────────────────────────────────────
+
+    def _log_panel(self, s: BotState) -> Panel:
+        level_styles = {
+            "INFO":  CYN,
+            "WARN":  YEL,
+            "ERROR": RED,
+            "TRADE": f"bold {O1}",
+            "SNIPE": f"bold {CYN}",
+            "HALT":  RED,
+            "DEBUG": DIM,
+        }
+        t = Text()
+        lines = list(s.log_lines)
+        if not lines:
+            t.append("  en attente d'événements…", style=DIM)
+        for level, msg in lines:
+            sty = level_styles.get(level.upper(), DIM)
+            t.append(f" [{level[:5]:5s}] ", style=sty)
+            t.append(f"{msg}\n", style="white")
+
+        return Panel(
+            t,
+            title=Text("◈ EVENT LOG", style=f"bold {O1}"),
+            box=box.DOUBLE_EDGE,
+            style="on grey7",
+            padding=(0, 0),
+        )
+
+    # ── Equity curve ──────────────────────────────────────────────────────────
+
+    def _equity_panel(self, s: BotState) -> Panel:
+        hist = s.equity_history
+        spark = _spark(hist, width=62)
+
+        start = hist[0] if hist else s.capital_start
+        end   = hist[-1] if hist else s.capital
+        delta = end - start
+        dc    = GRN if delta >= 0 else RED
+
+        # Drawdown
+        if len(hist) >= 2:
+            pk = max(hist)
+            idx_pk = hist.index(pk)
+            tr = min(hist[idx_pk:]) if idx_pk < len(hist) - 1 else end
+            dd = (tr - pk) / pk * 100 if pk else 0.0
+        else:
+            dd = 0.0
+
+        t = Text()
+        t.append("  ")
+        t.append(spark, style=GRN if delta >= 0 else RED)
+        t.append("\n")
+        t.append(f"  Départ ${start:,.2f}  ", style=DIM)
+        t.append(f"Actuel ${end:,.2f}  ", style=WHT)
+        t.append(f"Δ {_sgn(delta)}$  ({_sgn(delta/start*100 if start else 0,1)}%)", style=dc)
+        t.append("\n")
+        t.append(f"  Max drawdown : ", style=DIM)
+        t.append(f"{dd:.2f}%  ", style=RED if dd < -1 else GREY)
+        t.append(f"({len(hist)} points)", style=DIM)
+
+        return Panel(
+            t,
+            title=Text("◈ COURBE D'ÉQUITÉ", style=f"bold {O1}"),
+            box=box.DOUBLE_EDGE,
+            style="on grey7",
+            padding=(0, 1),
+        )
+
+    # ── Trades table ──────────────────────────────────────────────────────────
 
     def _trades_panel(self, s: BotState) -> Panel:
-        table = Table(
-            box=box.SIMPLE_HEAVY,
-            style="grey7",
-            header_style=f"bold {ORANGE}",
+        tbl = Table(
+            box=box.SIMPLE_HEAD,
+            style="on grey7",
+            header_style=f"bold {O1}",
             show_edge=False,
             expand=True,
             padding=(0, 1),
         )
+        tbl.add_column("#",      justify="right",  width=4,  style=DIM)
+        tbl.add_column("STRAT",  justify="center", width=6)
+        tbl.add_column("DIR",    justify="center", width=6)
+        tbl.add_column("ENTRÉE", justify="right",  width=8)
+        tbl.add_column("SORTIE", justify="right",  width=8)
+        tbl.add_column("BTC Δ",  justify="right",  width=8)
+        tbl.add_column("MISE",   justify="right",  width=7)
+        tbl.add_column("P&L",    justify="right",  width=10)
+        tbl.add_column("",       justify="center", width=3)
 
-        table.add_column("#", justify="right", style=DIM, width=4)
-        table.add_column("DIR", justify="center", width=6)
-        table.add_column("ENTRY", justify="right", width=10)
-        table.add_column("EXIT", justify="right", width=10)
-        table.add_column("BTC Δ", justify="right", width=9)
-        table.add_column("P&L", justify="right", width=10)
-        table.add_column("REPR", justify="center", width=5)
-        table.add_column("✓/✗", justify="center", width=4)
+        trades = list(s.recent_trades)[-10:]
+        total  = len(s.recent_trades)
 
-        trades = list(s.recent_trades)[-8:]
-        total = len(s.recent_trades)
+        for i, tr in enumerate(reversed(trades), 1):
+            idx    = total - i + 1
+            strat  = tr.get("strat", "HFT")
+            direct = tr.get("direction", "?")
+            entry  = tr.get("entry",  0.0)
+            exit_  = tr.get("exit",   0.0)
+            pnl    = tr.get("pnl",    0.0)
+            btcmv  = tr.get("btc_move", 0.0)
+            size   = tr.get("size_usd", 0.0)
 
-        for i, trade in enumerate(reversed(trades), start=1):
-            idx = total - i + 1
-            direction = trade.get("direction", "?")
-            entry = trade.get("entry", 0.0)
-            exit_ = trade.get("exit", 0.0)
-            pnl = trade.get("pnl", 0.0)
-            repriced = trade.get("repriced", False)
-            btc_move = trade.get("btc_move", 0.0)
+            strat_col = O1 if strat == "HFT" else CYN
+            dir_col   = GRN if direct in ("UP", "BULL") else RED
+            pnl_col   = GRN if pnl >= 0 else RED
+            result    = "✓" if pnl >= 0 else "✗"
+            result_c  = "bright_green" if pnl >= 0 else "bright_red"
+            row_s     = "on grey11" if i % 2 == 0 else ""
+            arrow     = "▲" if direct in ("UP", "BULL") else "▼"
 
-            dir_style = GREEN if direction == "UP" else RED
-            pnl_style = GREEN if pnl >= 0 else RED
-            result_sym = "[bright_green]✓[/bright_green]" if pnl >= 0 else "[bright_red]✗[/bright_red]"
-            row_style = "on grey11" if i % 2 == 0 else ""
-
-            table.add_row(
+            tbl.add_row(
                 str(idx),
-                Text(f"{'▲' if direction=='UP' else '▼'} {direction}", style=dir_style),
-                f"${entry:.3f}",
-                f"${exit_:.3f}",
-                Text(f"{_signed(btc_move, 1)}", style=GREEN if btc_move >= 0 else RED),
-                Text(f"{_signed(pnl, 2)}", style=pnl_style),
-                Text("R" if repriced else "─", style=ORANGE if repriced else DIM),
-                Text("✓" if pnl >= 0 else "✗", style="bright_green" if pnl >= 0 else "bright_red"),
-                style=row_style,
+                Text(strat,              style=f"bold {strat_col}"),
+                Text(f"{arrow}{direct}", style=dir_col),
+                f"{entry:.3f}",
+                f"{exit_:.3f}",
+                Text(f"{_sgn(btcmv,1)}%", style=GRN if btcmv >= 0 else RED),
+                f"${size:.0f}",
+                Text(f"{_sgn(pnl)}$",   style=pnl_col),
+                Text(result,            style=result_c),
+                style=row_s,
             )
 
         if not trades:
-            table.add_row("─", "─", "─", "─", "─", "─", "─", "─", style=DIM)
+            tbl.add_row("─", "─", "─", "─", "─", "─", "─", "─", "─", style=DIM)
 
         return Panel(
-            table,
-            title=f"[{ORANGE}]◈ RECENT TRADES  (last {len(trades)} of {total})[/{ORANGE}]",
-            box=box.HEAVY_EDGE,
-            style="grey7",
+            tbl,
+            title=Text(f"◈ TRADES RÉCENTS  ({total} total)", style=f"bold {O1}"),
+            box=box.DOUBLE_EDGE,
+            style="on grey7",
             padding=(0, 0),
         )
 
-    # ------------------------------------------------------------------
-    # Footer
-    # ------------------------------------------------------------------
+    # ── Footer ────────────────────────────────────────────────────────────────
 
     def _footer_panel(self, s: BotState) -> Panel:
-        # Edge / EV stats
-        edge_style = GREEN if s.win_rate >= 0.55 else (YELLOW if s.win_rate >= 0.50 else RED)
         ev = (s.win_rate * s.avg_rr) - (1 - s.win_rate) if s.avg_rr > 0 else 0.0
-        ev_style = GREEN if ev > 0 else RED
-
-        # Conviction gate threshold display
-        conv_gate_pct = s.fg_convergence * 100.0
-        gate_met = s.fg_convergence >= 0.65
-        gate_style = GREEN if gate_met else DIM
-        gate_label = "OPEN" if gate_met else "CLOSED"
-
-        # Spread / liquidity
-        spread_style = GREEN if s.poly_spread_pct < 0.03 else (YELLOW if s.poly_spread_pct < 0.05 else RED)
 
         t = Text()
-        t.append("  EDGE ", style=DIM)
-        t.append(f"{s.win_rate*100:.1f}%  ", style=edge_style)
-        t.append("│  EV ", style=DIM)
-        t.append(f"{_signed(ev, 3)}  ", style=ev_style)
-        t.append("│  CONV GATE ", style=DIM)
-        t.append(f"{gate_label} ({conv_gate_pct:.1f}%)  ", style=gate_style)
-        t.append("│  SPREAD ", style=DIM)
-        t.append(f"{s.poly_spread_pct*100:.2f}%  ", style=spread_style)
-        t.append("│  LIQUIDITY ", style=DIM)
-        t.append(f"${s.poly_liquidity:,.0f}  ", style=CYAN)
-        t.append("│  LAG WINDOWS ", style=DIM)
-        t.append(f"×{s.lag_windows_detected}", style=ORANGE)
-        t.append("\n")
-
-        t.append("  MARKET: ", style=DIM)
-        t.append(f"{s.market_name}  ", style=f"bold {ORANGE}")
-        t.append("YES ", style=DIM)
-        t.append(f"{s.poly_yes_price:.4f}  ", style=CYAN)
-        t.append("NO ", style=DIM)
-        t.append(f"{1 - s.poly_yes_price:.4f}  ", style=CYAN)
-        t.append("│  TICKS PROCESSED: ", style=DIM)
-        t.append(f"{s.btc_tick_count:,}", style=BRIGHT_WHITE)
+        t.append("  EV ", style=DIM)
+        t.append(f"{_sgn(ev, 3)}  ", style=_pct_col(ev))
+        t.append("│ ", style=GREY)
+        t.append("CONV GATE ", style=DIM)
+        gate_ok = s.fg_convergence >= 0.65
+        t.append(f"{'OPEN' if gate_ok else 'CLOSED'} ({s.fg_convergence*100:.1f}%)  ",
+                 style=GRN if gate_ok else GREY)
+        t.append("│ ", style=GREY)
+        t.append("SPREAD ", style=DIM)
+        sp_c = GRN if s.poly_spread_pct < 0.025 else (YEL if s.poly_spread_pct < 0.04 else RED)
+        t.append(f"{s.poly_spread_pct*100:.2f}%  ", style=sp_c)
+        t.append("│ ", style=GREY)
+        t.append("LIQ ", style=DIM)
+        t.append(f"${s.poly_liquidity:,.0f}  ", style=CYN)
+        t.append("│ ", style=GREY)
+        t.append("LAG WINDOWS ", style=DIM)
+        t.append(f"×{s.lag_windows_detected}  ", style=O1)
+        t.append("│ ", style=GREY)
+        t.append("SNIPE ⏱ ", style=DIM)
+        snipe_c = RED if s.snipe_seconds_left < 60 and s.snipe_seconds_left > 0 else GREY
+        t.append(f"{s.snipe_seconds_left:.0f}s", style=snipe_c)
 
         return Panel(
             t,
-            style=f"bold {ORANGE}",
-            box=box.HEAVY_EDGE,
+            style=O3,
+            box=box.DOUBLE_EDGE,
             padding=(0, 1),
         )
