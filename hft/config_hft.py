@@ -22,6 +22,14 @@ RISK_PER_TRADE_USD: float = CAPITAL_USD * RISK_PER_TRADE_PCT
 DAILY_LOSS_LIMIT_USD: float = CAPITAL_USD * DAILY_RISK_LIMIT_PCT
 HARD_STOP_USD: float = CAPITAL_USD * HARD_STOP_PCT
 
+# ── Compound automatique ──────────────────────────────────────────────────────
+# Chaque gain augmente le capital actif → positions suivantes plus grandes.
+# RESERVE_PCT du capital est intouchable (protection contre la ruine).
+# MIN_POLY_ORDER_USD : plancher minimum d'un ordre Polymarket.
+COMPOUND_ENABLED:    bool  = os.getenv("HFT_COMPOUND_ENABLED", "true").lower() == "true"
+RESERVE_PCT:         float = float(os.getenv("HFT_RESERVE_PCT",   "0.20"))  # 20% réserve
+MIN_POLY_ORDER_USD:  float = float(os.getenv("HFT_MIN_ORDER_USD", "1.0"))   # plancher $1
+
 # ============================================================
 # EXÉCUTION HFT
 # ============================================================

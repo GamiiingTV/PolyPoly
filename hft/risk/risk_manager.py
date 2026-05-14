@@ -33,6 +33,9 @@ from hft.config_hft import (
     MIN_LIQUIDITY_USD,
     MAX_SPREAD_PCT,
     FORCE_GRAPH_CONVERGENCE_THRESHOLD,
+    COMPOUND_ENABLED,
+    RESERVE_PCT,
+    MIN_POLY_ORDER_USD,
 )
 
 
@@ -89,12 +92,13 @@ class RiskManager:
     """
 
     def __init__(self, capital: float = CAPITAL_USD) -> None:
-        self.capital = capital
-        self._daily_stats = self._new_daily_stats()
+        self.capital       = capital
+        self._peak_capital = capital          # ATH capital pour drawdown compound
+        self._daily_stats  = self._new_daily_stats()
         self._open_trades: dict[str, TradeRecord] = {}
         self._trade_history: list[TradeRecord] = []
-        self._halted = False
-        self._halt_reason = ""
+        self._halted       = False
+        self._halt_reason  = ""
         self._last_reset_date = self._today()
 
     # ── Évaluation signal ─────────────────────────────────────────────────────
@@ -174,33 +178,68 @@ class RiskManager:
 
     def _compute_position_size(self, confidence: float, edge_pct: float) -> float:
         """
-        Position sizing Kelly-ajusté, plafonné à RISK_PER_TRADE_USD.
+        Position sizing Kelly-ajusté avec compound et réserve.
 
-        Plus la confiance est haute, plus on mise (jusqu'au plafond).
+        Si COMPOUND_ENABLED :
+          - Le capital actif = capital total × (1 - RESERVE_PCT)
+          - La réserve est intouchable même si le capital augmente
+          - Les positions grossissent automatiquement avec chaque gain
         """
-        # Base = RISK_PER_TRADE_PCT du capital
-        base = self.capital * RISK_PER_TRADE_PCT
+        # Capital actif (hors réserve si compound activé)
+        if COMPOUND_ENABLED:
+            trading_capital = self.capital * (1.0 - RESERVE_PCT)
+        else:
+            trading_capital = self.capital
 
-        # Scale par la confiance (entre 0.65 et 1.0 → facteur 0.5x à 1.0x)
+        # Base = RISK_PER_TRADE_PCT du capital actif
+        base = trading_capital * RISK_PER_TRADE_PCT
+
+        # Scale par la confiance (entre 0.65 et 1.0 → facteur 0.3x à 1.0x)
         conf_scale = (confidence - FORCE_GRAPH_CONVERGENCE_THRESHOLD) / (
             1.0 - FORCE_GRAPH_CONVERGENCE_THRESHOLD
         )
         conf_scale = max(0.3, min(1.0, conf_scale))
 
-        # Scale par l'edge (entre 0.3% et 0.8% → facteur 0.5x à 1.0x)
+        # Scale par l'edge (entre 0.3% et 0.8% → facteur 0.3x à 1.0x)
         edge_scale = min(1.0, edge_pct / 0.005)
         edge_scale = max(0.3, edge_scale)
 
         size = base * conf_scale * edge_scale
 
-        # Plafonné à RISK_PER_TRADE_USD
-        size = min(size, RISK_PER_TRADE_USD)
+        # Plancher minimum Polymarket (sinon ordre refusé)
+        if size < MIN_POLY_ORDER_USD and size > 0:
+            size = MIN_POLY_ORDER_USD
 
-        # Vérifier qu'on ne dépasse pas la limite quotidienne restante
-        remaining_daily = DAILY_LOSS_LIMIT_USD + self._daily_stats.pnl
-        size = min(size, remaining_daily * 0.5)   # On ne risque que 50% du reste
+        # Plafond dynamique basé sur le capital actuel
+        max_size = trading_capital * RISK_PER_TRADE_PCT * 2.0   # 2× la base max
+        size = min(size, max_size)
+
+        # Limite quotidienne restante
+        daily_limit = self.capital * DAILY_RISK_LIMIT_PCT
+        remaining   = daily_limit + self._daily_stats.pnl
+        size = min(size, max(0.0, remaining * 0.5))
 
         return max(0.0, round(size, 2))
+
+    def update_capital(self, new_capital: float) -> None:
+        """
+        Met à jour le capital (compound).
+
+        À appeler après résolution d'un trade ou fin de session.
+        Le capital augmente avec les gains → positions futures plus grosses.
+        """
+        if not COMPOUND_ENABLED:
+            return
+        old = self.capital
+        self.capital = max(0.0, new_capital)
+        self._peak_capital = max(self._peak_capital, self.capital)
+        if self.capital != old:
+            reserve = self.capital * RESERVE_PCT
+            trading = self.capital * (1.0 - RESERVE_PCT)
+            logger.info(
+                f"Compound : capital {old:.2f}$ → {self.capital:.2f}$ "
+                f"(réserve=${reserve:.2f} actif=${trading:.2f})"
+            )
 
     # ── Enregistrement des trades ─────────────────────────────────────────────
 
@@ -248,6 +287,11 @@ class RiskManager:
         else:
             self._daily_stats.losses += 1
 
+        # ── Compound : mettre à jour le capital actif ─────────────────────────
+        if COMPOUND_ENABLED:
+            self.capital = max(0.0, self.capital + pnl)
+            self._peak_capital = max(self._peak_capital, self.capital)
+
         # Mise à jour du drawdown
         if self._daily_stats.pnl > self._daily_stats.peak_pnl:
             self._daily_stats.peak_pnl = self._daily_stats.pnl
@@ -255,8 +299,9 @@ class RiskManager:
         if drawdown > self._daily_stats.max_drawdown:
             self._daily_stats.max_drawdown = drawdown
 
-        # Hard stop sur un trade unique
-        if pnl <= -HARD_STOP_USD:
+        # Hard stop dynamique (basé sur capital courant si compound)
+        hard_stop = self.capital * HARD_STOP_PCT if COMPOUND_ENABLED else HARD_STOP_USD
+        if pnl <= -hard_stop:
             logger.error(f"Hard stop déclenché: P&L={pnl:.2f}$ sur {order_id}")
             self._halt(f"Hard stop: perte de {pnl:.2f}$ sur un trade")
 
