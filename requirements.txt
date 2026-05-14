@@ -62,3 +62,13 @@ pydantic>=2.7.0
 colorama>=0.4.6
 rich>=13.7.0
 pytz>=2024.1
+
+# ============================================================
+# HFT BTC Polymarket Bot — Dépendances supplémentaires
+# ============================================================
+
+# --- Performance async (boucle 2-4x plus rapide) ---
+uvloop>=0.19.0; sys_platform != "win32"
+
+# --- Signaux TradingView (scraping public, sans clé) ---
+tradingview-ta>=3.3.0
