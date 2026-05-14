@@ -309,8 +309,14 @@ class RiskManager:
         if drawdown > self._daily_stats.max_drawdown:
             self._daily_stats.max_drawdown = drawdown
 
-        # Hard stop dynamique (basé sur capital courant si compound)
-        hard_stop = self.capital * HARD_STOP_PCT if COMPOUND_ENABLED else HARD_STOP_USD
+        # Hard stop dynamique
+        # En mode fixe, le max loss théorique = la mise ($5) — pas besoin d'un seuil plus bas.
+        if FIXED_TRADE_USD > 0:
+            hard_stop = FIXED_TRADE_USD
+        elif COMPOUND_ENABLED:
+            hard_stop = self.capital * HARD_STOP_PCT
+        else:
+            hard_stop = HARD_STOP_USD
         if pnl <= -hard_stop:
             logger.error(f"Hard stop déclenché: P&L={pnl:.2f}$ sur {order_id}")
             self._halt(f"Hard stop: perte de {pnl:.2f}$ sur un trade")
