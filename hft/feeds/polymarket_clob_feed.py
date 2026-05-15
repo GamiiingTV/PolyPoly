@@ -24,10 +24,27 @@ from hft.config_hft import (
     POLY_WS_URL,
     CLOB_REST_URL,
     GAMMA_API_URL,
-    BTC_MARKET_KEYWORDS,
+    BTC_TERMS,
+    SHORT_TERM_TERMS,
     MAX_RESOLUTION_WINDOW_SEC,
     MARKET_REFRESH_SEC,
+    GAMMA_MARKETS_LIMIT,
 )
+
+
+def _is_btc_short_term(question: str, description: str, slug: str) -> bool:
+    """
+    Vrai si la combinaison (question/description/slug) parle de BTC ET d'un
+    horizon court (5min/10min/horaire). On normalise tirets→espaces pour matcher
+    aussi bien "btc-updown-5m" que "BTC UpDown 5m".
+    """
+    blob = " ".join((question, description, slug)).lower()
+    blob_norm = blob.replace("-", " ").replace("_", " ")
+    has_btc = any(t in blob_norm for t in BTC_TERMS)
+    if not has_btc:
+        return False
+    # Pour "updown" / "up-down" on teste les deux formes
+    return any(t in blob or t in blob_norm for t in SHORT_TERM_TERMS)
 
 
 # ── Structures ────────────────────────────────────────────────────────────────
@@ -174,35 +191,25 @@ class PolymarketCLOBFeed:
     # ── Recherche des marchés BTC 5M ─────────────────────────────────────────
 
     async def _refresh_markets(self) -> None:
-        """Cherche les marchés BTC 5M actifs sur Polymarket."""
+        """Cherche les marchés BTC court-terme actifs sur Polymarket."""
         try:
-            resp = await self._http.get(
-                f"{GAMMA_API_URL}/markets",
-                params={
-                    "active": "true",
-                    "closed": "false",
-                    "order": "volume24hr",
-                    "ascending": "false",
-                    "limit": 500,
-                },
-            )
-            resp.raise_for_status()
-            raw_markets = resp.json()
-            if isinstance(raw_markets, dict):
-                raw_markets = raw_markets.get("markets", [])
+            raw_markets = await self._fetch_candidate_markets()
 
             found = 0
+            seen_btc = 0
+            rejected_window = 0
+            rejected_no_tokens = 0
+            sample_rejected: list[tuple[str, float]] = []
             valid_market_ids: set[str] = set()
             now_utc = datetime.now(timezone.utc)
             for raw in raw_markets:
-                question = (raw.get("question") or "").lower()
-                description = (raw.get("description") or "").lower()
-                slug = (raw.get("slug") or "").lower()
+                question = raw.get("question") or ""
+                description = raw.get("description") or ""
+                slug = raw.get("slug") or ""
 
-                is_btc = any(kw in question or kw in description or kw in slug
-                             for kw in BTC_MARKET_KEYWORDS)
-                if not is_btc:
+                if not _is_btc_short_term(question, description, slug):
                     continue
+                seen_btc += 1
 
                 # Filtre court-terme : marché doit résoudre dans <= 1h
                 # (sinon c'est un marché long-terme qui matche par accident)
@@ -217,6 +224,11 @@ class PolymarketCLOBFeed:
                         continue
                     # Skip si > 1h ou déjà résolu il y a > 60s
                     if sec_to_resolve > 3600 or sec_to_resolve < -60:
+                        rejected_window += 1
+                        if len(sample_rejected) < 3:
+                            sample_rejected.append(
+                                (question[:60] or slug[:60], sec_to_resolve / 60)
+                            )
                         continue
                 else:
                     # Pas de date = on skip (trop risqué)
@@ -229,6 +241,7 @@ class PolymarketCLOBFeed:
                     except Exception:
                         token_ids = []
                 if len(token_ids) < 2:
+                    rejected_no_tokens += 1
                     continue
 
                 market_id = raw.get("id", "")
@@ -291,13 +304,85 @@ class PolymarketCLOBFeed:
                 if self._ws:
                     await self._subscribe_all()
             else:
-                logger.warning(
-                    "Polymarket: aucun marché BTC court-terme actif "
-                    "(résolution <1h) — réessai dans 30s"
+                detail = (
+                    f"{seen_btc} candidats BTC vus, "
+                    f"{rejected_window} hors fenêtre <1h, "
+                    f"{rejected_no_tokens} sans clobTokenIds"
                 )
+                logger.warning(
+                    f"Polymarket: 0 marché BTC court-terme retenu ({detail}) "
+                    f"— réessai dans {MARKET_REFRESH_SEC}s"
+                )
+                for q, mins in sample_rejected:
+                    logger.info(f"  rejeté ({mins:+.1f}min): {q}")
 
         except Exception as e:
             logger.warning(f"Polymarket refresh marchés: {e}")
+
+    async def _fetch_candidate_markets(self) -> list[dict]:
+        """
+        Combine plusieurs requêtes Gamma pour maximiser la couverture :
+          1. /markets ordonnés par fin proche (capture les 5min low-volume)
+          2. /markets top volume (capture les marchés liquides classiques)
+          3. /events filtrés sur slug btc-updown-* (capture les séries récurrentes)
+        Dédupliqué par market id.
+        """
+        seen: dict[str, dict] = {}
+
+        async def _fetch(url: str, params: dict) -> list[dict]:
+            try:
+                r = await self._http.get(url, params=params)
+                r.raise_for_status()
+                data = r.json()
+                if isinstance(data, dict):
+                    data = data.get("markets") or data.get("data") or []
+                return data if isinstance(data, list) else []
+            except Exception as e:
+                logger.debug(f"Gamma {url} params={params}: {e}")
+                return []
+
+        # 1) Top volume — large limite
+        for m in await _fetch(
+            f"{GAMMA_API_URL}/markets",
+            {
+                "active": "true", "closed": "false",
+                "order": "volume24hr", "ascending": "false",
+                "limit": GAMMA_MARKETS_LIMIT,
+            },
+        ):
+            if mid := m.get("id"):
+                seen[mid] = m
+
+        # 2) Trié par fin proche — chope les 5min qui n'ont pas encore de volume
+        for m in await _fetch(
+            f"{GAMMA_API_URL}/markets",
+            {
+                "active": "true", "closed": "false",
+                "order": "endDate", "ascending": "true",
+                "limit": GAMMA_MARKETS_LIMIT,
+            },
+        ):
+            if mid := m.get("id"):
+                seen.setdefault(mid, m)
+
+        # 3) Events pour les séries btc-updown / btc-hourly
+        events = await _fetch(
+            f"{GAMMA_API_URL}/events",
+            {
+                "active": "true", "closed": "false",
+                "order": "endDate", "ascending": "true",
+                "limit": 200,
+            },
+        )
+        for ev in events:
+            slug = (ev.get("slug") or "").lower()
+            if not (slug.startswith("btc-") or "bitcoin" in slug):
+                continue
+            for m in ev.get("markets") or []:
+                if mid := m.get("id"):
+                    seen.setdefault(mid, m)
+
+        return list(seen.values())
 
     async def _market_refresh_loop(self) -> None:
         while self._running:

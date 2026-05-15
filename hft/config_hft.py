@@ -81,17 +81,28 @@ POLY_WS_URL: str = "wss://ws-subscriptions-clob.polymarket.com/ws/market"
 CLOB_REST_URL: str = "https://clob.polymarket.com"
 GAMMA_API_URL: str = "https://gamma-api.polymarket.com"
 
-# Mots-clés pour trouver les marchés BTC 5M UP/DOWN
+# Détection des marchés BTC court-terme (5min/10min/horaires).
+# On exige UN terme BTC + UN terme "court-terme" (matching dans question/slug).
+BTC_TERMS: list[str] = ["btc", "bitcoin"]
+SHORT_TERM_TERMS: list[str] = [
+    "updown", "up-down", "up or down", "up/down",
+    "higher", "lower",
+    "5m", "5 m", "5min", "5 min", "five min",
+    "10m", "10 m", "10min", "10 min",
+    "hourly", "1h", "1 hour", "one hour",
+]
+# Legacy : conservé pour compat — non utilisé dans le nouveau matching.
 BTC_MARKET_KEYWORDS: list[str] = [
     "will btc", "will bitcoin",
-    "bitcoin higher", "bitcoin lower",
-    "btc higher", "btc lower",
     "btc up", "btc down",
-    "5 min", "5min", "five min",
+    "btc-updown", "btc-up", "btc-down",
+    "5min", "5 min",
 ]
 # Durée de résolution max pour un marché "5 minutes" (en secondes)
 MAX_RESOLUTION_WINDOW_SEC: int = 600  # 10 minutes max
 MARKET_REFRESH_SEC: int = 30          # Re-chercher les marchés toutes les 30s
+# Limite Gamma API (max ~1000 par requête)
+GAMMA_MARKETS_LIMIT: int = 1000
 
 # ============================================================
 # CRYPTOQUANT
