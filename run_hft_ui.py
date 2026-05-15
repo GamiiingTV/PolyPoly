@@ -365,10 +365,14 @@ def _run_bot_thread(state: BotState, trade_size: float) -> None:
     try:
         asyncio.run(_async_bot(state, trade_size))
     except Exception as exc:
+        import traceback
+        tb = traceback.format_exc()
         with state.lock:
             state.log_lines.append(("ERROR", f"Bot crash: {exc}"))
             state.is_halted  = True
             state.halt_reason = str(exc)
+        sys.stderr.write(f"\n[BOT THREAD CRASH]\n{tb}\n")
+        sys.stderr.flush()
 
 
 async def _async_bot(state: BotState, trade_size: float) -> None:
@@ -379,8 +383,13 @@ async def _async_bot(state: BotState, trade_size: float) -> None:
         for task in asyncio.all_tasks(loop):
             task.cancel()
 
-    loop.add_signal_handler(signal.SIGINT,  _cancel)
-    loop.add_signal_handler(signal.SIGTERM, _cancel)
+    for sig in (getattr(signal, "SIGINT", None), getattr(signal, "SIGTERM", None)):
+        if sig is None:
+            continue
+        try:
+            loop.add_signal_handler(sig, _cancel)
+        except (NotImplementedError, RuntimeError, ValueError):
+            pass
     await bot.run()
 
 
