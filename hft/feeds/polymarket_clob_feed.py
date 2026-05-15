@@ -13,6 +13,7 @@ import json
 import time
 from collections import deque
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Optional
 
 import httpx
@@ -191,22 +192,50 @@ class PolymarketCLOBFeed:
                 raw_markets = raw_markets.get("markets", [])
 
             found = 0
+            valid_market_ids: set[str] = set()
+            now_utc = datetime.now(timezone.utc)
             for raw in raw_markets:
                 question = (raw.get("question") or "").lower()
                 description = (raw.get("description") or "").lower()
+                slug = (raw.get("slug") or "").lower()
 
-                is_btc = any(kw in question or kw in description
+                is_btc = any(kw in question or kw in description or kw in slug
                              for kw in BTC_MARKET_KEYWORDS)
                 if not is_btc:
                     continue
 
+                # Filtre court-terme : marché doit résoudre dans <= 1h
+                # (sinon c'est un marché long-terme qui matche par accident)
+                end_date_str = raw.get("endDate") or raw.get("end_date_iso") or ""
+                if end_date_str:
+                    try:
+                        end_dt = datetime.fromisoformat(
+                            end_date_str.replace("Z", "+00:00")
+                        )
+                        sec_to_resolve = (end_dt - now_utc).total_seconds()
+                    except Exception:
+                        continue
+                    # Skip si > 1h ou déjà résolu il y a > 60s
+                    if sec_to_resolve > 3600 or sec_to_resolve < -60:
+                        continue
+                else:
+                    # Pas de date = on skip (trop risqué)
+                    continue
+
                 token_ids = raw.get("clobTokenIds", [])
+                if isinstance(token_ids, str):
+                    try:
+                        token_ids = json.loads(token_ids)
+                    except Exception:
+                        token_ids = []
                 if len(token_ids) < 2:
                     continue
 
                 market_id = raw.get("id", "")
                 if not market_id:
                     continue
+
+                valid_market_ids.add(market_id)
 
                 # Construire ou mettre à jour le marché
                 if market_id not in self._markets:
@@ -241,16 +270,31 @@ class PolymarketCLOBFeed:
 
                 found += 1
 
+            # Purger les marchés expirés (plus dans la liste valide)
+            stale = [mid for mid in self._markets if mid not in valid_market_ids]
+            for mid in stale:
+                old = self._markets.pop(mid, None)
+                if old:
+                    self._token_to_market.pop(old.token_id_yes, None)
+                    self._token_to_market.pop(old.token_id_no, None)
+            if stale:
+                logger.info(f"Polymarket: {len(stale)} marchés expirés purgés")
+
             if found:
                 logger.info(
-                    f"Polymarket: {found} marchés BTC 5M trouvés "
+                    f"Polymarket: {found} marchés BTC court-terme trouvés "
                     f"({len(self._markets)} total)"
                 )
+                for m in list(self._markets.values())[:5]:
+                    logger.info(f"  → {m.question[:80]}")
                 # Souscrire via WebSocket si connecté
                 if self._ws:
                     await self._subscribe_all()
             else:
-                logger.warning("Polymarket: aucun marché BTC 5M actif trouvé")
+                logger.warning(
+                    "Polymarket: aucun marché BTC court-terme actif "
+                    "(résolution <1h) — réessai dans 30s"
+                )
 
         except Exception as e:
             logger.warning(f"Polymarket refresh marchés: {e}")
