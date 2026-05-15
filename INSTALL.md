@@ -2,14 +2,20 @@
 
 ## Ce que fait le bot
 
-Deux stratégies automatiques sur les marchés BTC UP/DOWN 5 minutes de Polymarket :
+Deux stratégies + 4 sources de signal sur les marchés BTC UP/DOWN 5 min Polymarket :
 
 | Stratégie | Description | WR simulé |
 |---|---|---|
 | **HFT Repricing** | Détecte le lag Binance→Polymarket, entre avant le repricing | ~64-75% |
 | **Resolution Snipe** | Achète YES/NO à 87¢ dans les 90s avant résolution | ~80-91% |
 
-**Capital recommandé : $150 minimum — Trade size : $10**
+**Signaux supplémentaires (v4) :**
+- **Funding rate Binance Perpetuals** : détecte les sentiment extrêmes (contrarian)
+- **Open Interest delta 5min** : flux institutionnels (build-up / unwind)
+- **Whale detection** : trades > 1 BTC ($100k+) sur Binance, pression rolling 30s
+- **Kelly adaptive sizing** : taille de trade optimisée selon ton win rate réel
+
+**Capital recommandé : $150 minimum — Trade size de départ : $10**
 
 ---
 
@@ -65,10 +71,16 @@ ANTHROPIC_API_KEY=sk-ant-XXXXXXXX
 
 ```env
 HFT_CAPITAL_USD=150.0          # Ton dépôt réel
-HFT_FIXED_TRADE_USD=10.0       # $10 par trade
+HFT_FIXED_TRADE_USD=10.0       # Base burn-in $10/trade
+HFT_USE_KELLY=true             # Kelly adaptatif après 20 trades
+HFT_KELLY_MAX_PCT=0.10         # Cap 10% capital par trade
 HFT_DAILY_RISK_LIMIT=0.17      # Stop à -$25/jour
 HFT_COMPOUND_ENABLED=true      # Gains réinvestis automatiquement
 ```
+
+> 🔥 **Kelly adaptatif** : pendant les 20 premiers trades, mise = $10 fixe.
+> Après, la taille s'ajuste à ton WR réel. Bonus de 1.25× après 5 gains,
+> pénalité de 0.60× après 3 pertes. Le capital double → la mise double.
 
 ---
 
@@ -128,6 +140,11 @@ python run_hft_ui.py --live --capital 150 --size 10
 | `⏱ 45s` | Secondes avant résolution du marché actuel |
 | `HFT ▲` | Trade HFT repricing en direction BULL |
 | `SNP ▲` | Resolution snipe en direction BULL |
+| `FUNDING +0.012% → BEAR` | Trop de longs payent les shorts → signal baissier |
+| `OI Δ5m +0.85% (build-up)` | Open interest grossit → confluence avec mouvement |
+| `WHALES BUY 3.2 / SELL 1.1` | Trades >$100k détectés sur Binance (rolling 30s) |
+| `🔥 WIN×5` | 5 gains consécutifs → mise +25% sur le prochain |
+| `❄ LOSS×3` | 3 pertes consécutives → mise -40% sur le prochain |
 
 ---
 

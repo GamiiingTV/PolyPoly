@@ -30,6 +30,7 @@ COMPOUND_ENABLED:    bool  = os.getenv("HFT_COMPOUND_ENABLED", "true").lower() =
 RESERVE_PCT:         float = float(os.getenv("HFT_RESERVE_PCT",   "0.20"))  # 20% réserve
 MIN_POLY_ORDER_USD:  float = float(os.getenv("HFT_MIN_ORDER_USD", "1.0"))   # plancher $1
 FIXED_TRADE_USD:     float = float(os.getenv("HFT_FIXED_TRADE_USD", "0.0")) # 0 = Kelly %, >0 = montant fixe
+USE_KELLY:           bool  = os.getenv("HFT_USE_KELLY", "false").lower() == "true"
 
 # ============================================================
 # EXÉCUTION HFT

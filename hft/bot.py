@@ -36,6 +36,7 @@ from hft.config_hft import (
     MIN_EDGE_PCT,
 )
 from hft.feeds.binance_feed import BinanceFeed, Tick, Candle
+from hft.feeds.binance_perp_feed import BinancePerpFeed
 from hft.feeds.polymarket_clob_feed import PolymarketCLOBFeed, BTCMarket
 from hft.feeds.cryptoquant_feed import CryptoQuantFeed
 from hft.signals.indicators import IndicatorEngine
@@ -73,6 +74,7 @@ class HFTBot:
     def __init__(self) -> None:
         # ── Feeds ──────────────────────────────────────────────────────────────
         self.binance = BinanceFeed()
+        self.binance_perp = BinancePerpFeed()
         self.poly_clob = PolymarketCLOBFeed()
         self.cryptoquant = CryptoQuantFeed()
         self.tv = TradingViewSignals()
@@ -111,6 +113,7 @@ class HFTBot:
 
         # Démarrer le session HTTP de l'executor
         await self.executor.start()
+        await self.binance_perp.start()
         self._running = True
 
         # Lancer tous les feeds et la boucle principale en parallèle
@@ -132,6 +135,7 @@ class HFTBot:
     async def stop(self) -> None:
         self._running = False
         self.binance.stop()
+        await self.binance_perp.stop()
         self.poly_clob.stop()
         self.cryptoquant.stop()
         self.tv.stop()
@@ -186,6 +190,7 @@ class HFTBot:
             spot_price=tick.price,
             poly_yes_price=market.yes_price if market else 0.5,
             estimated_true_prob=estimated_fair,
+            perp=self.binance_perp.get(),
         )
 
         # 8. Calculer le consensus force-graph

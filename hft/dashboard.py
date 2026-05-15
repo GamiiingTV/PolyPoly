@@ -94,6 +94,21 @@ class BotState:
     poly_liquidity: float = 0.0
     snipe_seconds_left: float = 0.0   # secondes avant résolution marché
 
+    # Dérivés Binance Perpetuals
+    funding_rate: float = 0.0          # taux brut
+    funding_signal: float = 0.0        # [-1, +1] (contrarian normalisé)
+    oi_change_pct: float = 0.0         # variation OI sur 5 min (%)
+    whale_buy_btc: float = 0.0         # whale BUY 30s
+    whale_sell_btc: float = 0.0        # whale SELL 30s
+    whale_pressure: float = 0.0        # [-1, +1]
+
+    # Kelly sizing
+    kelly_size: float = 10.0
+    kelly_fraction: float = 0.0
+    kelly_streak: int = 0
+    kelly_burn_in: bool = True
+    kelly_rr: float = 0.0
+
     # Historique
     recent_trades: list = field(default_factory=list)
     equity_history: list = field(default_factory=list)
@@ -220,11 +235,13 @@ class HFTDashboard:
         root["left"].split_column(
             Layout(name="capital",   size=9),
             Layout(name="strategies",size=7),
+            Layout(name="kelly",     size=6),
             Layout(name="forceg",    size=6),
             Layout(name="pipeline",  size=5),
             Layout(name="logs"),
         )
         root["right"].split_column(
+            Layout(name="derivs",  size=8),
             Layout(name="equity",  size=8),
             Layout(name="trades"),
         )
@@ -232,9 +249,11 @@ class HFTDashboard:
         root["header"].update(self._header(s))
         root["capital"].update(self._capital_panel(s))
         root["strategies"].update(self._strategies_panel(s))
+        root["kelly"].update(self._kelly_panel(s))
         root["forceg"].update(self._fg_panel(s))
         root["pipeline"].update(self._pipeline_panel(s))
         root["logs"].update(self._log_panel(s))
+        root["derivs"].update(self._derivs_panel(s))
         root["equity"].update(self._equity_panel(s))
         root["trades"].update(self._trades_panel(s))
         root["footer"].update(self._footer_panel(s))
@@ -386,6 +405,108 @@ class HFTDashboard:
             box=box.DOUBLE_EDGE,
             style="on grey7",
             padding=(0, 0),
+        )
+
+    # ── Kelly Sizer ───────────────────────────────────────────────────────────
+
+    def _kelly_panel(self, s: BotState) -> Panel:
+        t = Text()
+        size_c = O1
+        # Streak indicator
+        if s.kelly_streak >= 3:
+            streak_str = f"🔥 WIN×{s.kelly_streak}"
+            streak_c   = GRN
+        elif s.kelly_streak <= -3:
+            streak_str = f"❄ LOSS×{abs(s.kelly_streak)}"
+            streak_c   = RED
+        else:
+            streak_str = f"{s.kelly_streak:+d}"
+            streak_c   = DIM
+
+        t.append("  Prochaine mise  ", style=DIM)
+        t.append(f"${s.kelly_size:>6.2f}", style=f"bold {size_c}")
+        t.append("\n")
+
+        if s.kelly_burn_in:
+            t.append("  ", style=DIM)
+            t.append("BURN-IN ", style=YEL)
+            t.append("— mise fixe jusqu'à 20 trades", style=DIM)
+            t.append("\n")
+        else:
+            t.append("  Kelly fraction  ", style=DIM)
+            t.append(f"{s.kelly_fraction*100:>5.2f}%  ", style=CYN)
+            t.append("R:R ", style=DIM)
+            t.append(f"{s.kelly_rr:.2f}", style=CYN)
+            t.append("\n")
+
+        t.append("  Streak  ", style=DIM)
+        t.append(streak_str, style=f"bold {streak_c}")
+
+        return Panel(
+            t,
+            title=Text("◈ KELLY ADAPTIVE", style=f"bold {O1}"),
+            box=box.DOUBLE_EDGE,
+            style="on grey7",
+            padding=(0, 1),
+        )
+
+    # ── Dérivés Binance Perpetuals ────────────────────────────────────────────
+
+    def _derivs_panel(self, s: BotState) -> Panel:
+        t = Text()
+
+        # Funding rate avec interprétation
+        funding_pct = s.funding_rate * 100
+        if s.funding_signal > 0.3:
+            funding_label = "BULL contrarian"
+            f_c = GRN
+        elif s.funding_signal < -0.3:
+            funding_label = "BEAR (longs over)"
+            f_c = RED
+        else:
+            funding_label = "neutre"
+            f_c = DIM
+
+        t.append("  FUNDING  ", style=DIM)
+        t.append(f"{funding_pct:+.4f}%  ", style=WHT)
+        t.append(f"→ {funding_label}", style=f_c)
+        t.append("\n")
+
+        # Open Interest
+        oi_c = GRN if s.oi_change_pct > 0.5 else (RED if s.oi_change_pct < -0.5 else DIM)
+        t.append("  OPEN INT. ", style=DIM)
+        t.append(f"Δ5m {_sgn(s.oi_change_pct, 2)}%  ", style=oi_c)
+        if abs(s.oi_change_pct) > 0.5:
+            interpret = "build-up" if s.oi_change_pct > 0 else "unwind"
+            t.append(f"({interpret})", style=DIM)
+        t.append("\n")
+
+        # Whales
+        total_w = s.whale_buy_btc + s.whale_sell_btc
+        t.append("  WHALES 30s  ", style=DIM)
+        t.append(f"BUY ", style=DIM)
+        t.append(f"{s.whale_buy_btc:.2f}", style=GRN)
+        t.append(" / ", style=DIM)
+        t.append(f"SELL ", style=DIM)
+        t.append(f"{s.whale_sell_btc:.2f}", style=RED)
+        t.append("  ($", style=DIM)
+        t.append(f"{total_w * s.btc_price / 1000:.0f}k", style=CYN)
+        t.append(")\n")
+
+        # Whale pressure bar
+        t.append("  Pressure   ", style=DIM)
+        if s.whale_pressure >= 0:
+            t.append_text(_force_bar(s.whale_pressure, width=18))
+        else:
+            t.append_text(_force_bar(s.whale_pressure, width=18))
+        t.append(f"  {_sgn(s.whale_pressure, 2)}", style=O1)
+
+        return Panel(
+            t,
+            title=Text("◈ DÉRIVÉS BTC PERP  ·  funding · OI · whales", style=f"bold {O1}"),
+            box=box.DOUBLE_EDGE,
+            style="on grey7",
+            padding=(0, 1),
         )
 
     # ── Force-graph ───────────────────────────────────────────────────────────

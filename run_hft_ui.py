@@ -329,17 +329,32 @@ class HFTBotUI(HFTBot):
 
     async def _monitor_loop(self) -> None:
         while self._running:
-            await asyncio.sleep(5)
+            await asyncio.sleep(2)
             stats = self.risk.get_stats()
+            perp  = self.binance_perp.get()
             with self._state.lock:
-                self._state.daily_pnl  = stats.get("daily_pnl", 0.0)
-                self._state.capital    = self._state.capital_start + self._state.daily_pnl
-                trades = stats.get("daily_trades", 0)
-                wr     = stats.get("win_rate", 0.0)
-                self._state.wins      = int(round(wr * trades))
-                self._state.losses    = trades - self._state.wins
-                self._state.is_halted = stats.get("halted", False)
-                self._state.halt_reason = stats.get("halt_reason", "")
+                self._state.daily_pnl    = stats.get("daily_pnl", 0.0)
+                self._state.capital      = self._state.capital_start + self._state.daily_pnl
+                self._state.wins         = stats.get("wins", 0)
+                self._state.losses       = stats.get("losses", 0)
+                self._state.is_halted    = stats.get("halted", False)
+                self._state.halt_reason  = stats.get("halt_reason", "")
+
+                # Kelly stats
+                self._state.kelly_size     = stats.get("kelly_size", 10.0)
+                self._state.kelly_fraction = stats.get("kelly_fraction", 0.0)
+                self._state.kelly_streak   = stats.get("kelly_streak", 0)
+                self._state.kelly_burn_in  = stats.get("kelly_burn_in", True)
+                self._state.kelly_rr       = stats.get("kelly_rr", 0.0)
+
+                # Dérivés Binance Perpetuals
+                self._state.funding_rate   = perp.funding_rate
+                self._state.funding_signal = perp.funding_rate_signal
+                self._state.oi_change_pct  = perp.oi_change_pct_5m
+                self._state.whale_buy_btc  = perp.whale_buy_btc
+                self._state.whale_sell_btc = perp.whale_sell_btc
+                self._state.whale_pressure = perp.whale_pressure
+
                 if self._state.daily_pnl != 0:
                     self._state.equity_history.append(self._state.capital)
 

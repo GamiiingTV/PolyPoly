@@ -37,7 +37,9 @@ from hft.config_hft import (
     RESERVE_PCT,
     MIN_POLY_ORDER_USD,
     FIXED_TRADE_USD,
+    USE_KELLY,
 )
+from hft.risk.kelly_sizing import KellySizer, TradeOutcome
 
 
 # ── Structures ────────────────────────────────────────────────────────────────
@@ -101,6 +103,9 @@ class RiskManager:
         self._halted       = False
         self._halt_reason  = ""
         self._last_reset_date = self._today()
+        # Kelly sizer (utilisé si USE_KELLY=true et burn-in passé)
+        base_size = FIXED_TRADE_USD if FIXED_TRADE_USD > 0 else 10.0
+        self._kelly = KellySizer(capital=capital, base_size=base_size)
 
     # ── Évaluation signal ─────────────────────────────────────────────────────
 
@@ -187,6 +192,14 @@ class RiskManager:
           - La réserve est intouchable même si le capital augmente
           - Les positions grossissent automatiquement avec chaque gain
         """
+        # ── Mode Kelly adaptatif ──────────────────────────────────────────────
+        if USE_KELLY:
+            size = self._kelly.suggest_size(self.capital)
+            daily_limit = self.capital * DAILY_RISK_LIMIT_PCT
+            remaining   = daily_limit + self._daily_stats.pnl
+            size = min(size, max(0.0, remaining * 0.5))
+            return max(0.0, round(size, 2))
+
         # ── Mode montant fixe ─────────────────────────────────────────────────
         if FIXED_TRADE_USD > 0:
             size = FIXED_TRADE_USD
@@ -297,6 +310,9 @@ class RiskManager:
         else:
             self._daily_stats.losses += 1
 
+        # Feed Kelly sizer pour adaptation
+        self._kelly.record(TradeOutcome(pnl=pnl, size_usd=trade.size_usd))
+
         # ── Compound : mettre à jour le capital actif ─────────────────────────
         if COMPOUND_ENABLED:
             self.capital = max(0.0, self.capital + pnl)
@@ -381,12 +397,15 @@ class RiskManager:
             if self._daily_stats.trades > 0
             else 0.0
         )
+        k = self._kelly.get_stats()
         return {
             "capital": self.capital,
             "daily_pnl": self._daily_stats.pnl,
             "daily_pnl_pct": self._daily_stats.pnl / self.capital * 100,
             "daily_trades": self._daily_stats.trades,
             "win_rate": win_rate,
+            "wins": self._daily_stats.wins,
+            "losses": self._daily_stats.losses,
             "max_drawdown": self._daily_stats.max_drawdown,
             "open_positions": len(self._open_trades),
             "halted": self._halted,
@@ -395,4 +414,9 @@ class RiskManager:
             "daily_limit_usd": DAILY_LOSS_LIMIT_USD,
             "hard_stop_usd": HARD_STOP_USD,
             "remaining_daily_budget": DAILY_LOSS_LIMIT_USD + self._daily_stats.pnl,
+            "kelly_size":     k.suggested_size,
+            "kelly_fraction": k.kelly_fraction,
+            "kelly_streak":   k.streak,
+            "kelly_burn_in":  k.using_burn_in,
+            "kelly_rr":       k.rr_ratio,
         }

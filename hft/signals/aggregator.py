@@ -17,6 +17,7 @@ from hft.signals.indicators import IndicatorSet, IndicatorEngine
 from hft.signals.tradingview_signals import TVSignals
 from hft.feeds.cryptoquant_feed import ExchangeFlowData
 from hft.feeds.polymarket_clob_feed import BTCMarket
+from hft.feeds.binance_perp_feed import PerpData
 
 
 class SignalAggregator:
@@ -42,6 +43,7 @@ class SignalAggregator:
         spot_price: float,
         poly_yes_price: float,
         estimated_true_prob: float,
+        perp: Optional[PerpData] = None,
     ) -> None:
         """
         Injecte toutes les données dans le force-graph.
@@ -94,20 +96,34 @@ class SignalAggregator:
             graph.set_by_name("exchange_inflow",  cq.inflow_signal)
             graph.set_by_name("exchange_outflow", cq.outflow_signal)
             graph.set_by_name("net_flow",         cq.net_position_change)
-            graph.set_by_name("funding_rate",     -cq.funding_rate * 0.5)  # funding élevé = bear
-            # Long/short ratio contrarian : trop de longs → signal baissier
             ls_signal = max(-1.0, min(1.0, (1.0 - cq.long_short_ratio) * 0.5))
             graph.set_by_name("long_short_ratio", ls_signal)
         else:
             graph.set_by_name("exchange_inflow",  0.0)
             graph.set_by_name("exchange_outflow", 0.0)
             graph.set_by_name("net_flow",         0.0)
-            graph.set_by_name("funding_rate",     0.0)
             graph.set_by_name("long_short_ratio", 0.0)
 
-        graph.set_by_name("whale_activity",  0.0)   # rempli par CLOB si dispo
-        graph.set_by_name("oi_change",       max(-1.0, min(1.0, cq.open_interest_change_pct / 5.0)) if not cq.stale else 0.0)
-        graph.set_by_name("spot_perp_premium", 0.0)  # à câbler avec futures feed
+        # ── Binance Perpetuals : funding + OI + whale (prioritaire sur cq) ────
+        if perp is not None and not perp.stale:
+            graph.set_by_name("funding_rate",      perp.funding_rate_signal)
+            graph.set_by_name("oi_change",         perp.oi_signal)
+            graph.set_by_name("whale_activity",    perp.whale_pressure)
+            # Spot-perp premium : si mark price diverge significativement
+            if perp.mark_price > 0 and spot_price > 0:
+                premium = (spot_price - perp.mark_price) / perp.mark_price
+                graph.set_by_name("spot_perp_premium",
+                                  max(-1.0, min(1.0, premium / 0.002)))
+            else:
+                graph.set_by_name("spot_perp_premium", 0.0)
+        else:
+            graph.set_by_name("funding_rate",
+                              -cq.funding_rate * 0.5 if not cq.stale else 0.0)
+            graph.set_by_name("oi_change",
+                              max(-1.0, min(1.0, cq.open_interest_change_pct / 5.0))
+                              if not cq.stale else 0.0)
+            graph.set_by_name("whale_activity",   0.0)
+            graph.set_by_name("spot_perp_premium", 0.0)
         graph.set_by_name("volume_breakout",   ind_signals.get("volume_ratio", 0))
         graph.set_by_name("taker_buy_ratio",   ind_signals.get("volume_ratio", 0))
 
