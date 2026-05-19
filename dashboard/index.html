@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dye DAM — Dashboard Entretien</title>
+  <title>Dye DAM — Dashboard Entretien v3</title>
   <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
@@ -34,14 +34,22 @@
         <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>
         Guide
       </button>
+      <button class="nav-btn" data-section="terrain" aria-pressed="false">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+        Terrain
+      </button>
+      <button class="nav-btn" data-section="schema" aria-pressed="false">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        Schéma
+      </button>
       <button class="nav-btn" data-section="diagnostic" aria-pressed="false">
         <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
         Diagnostic
         <span class="nav-badge" id="diag-badge" hidden>!</span>
       </button>
-      <button class="nav-btn" data-section="pieces" aria-pressed="false">
-        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/></svg>
-        Pièces
+      <button class="nav-btn" data-section="stats" aria-pressed="false">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+        Stats
       </button>
       <button class="nav-btn" data-section="carnet" aria-pressed="false">
         <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/></svg>
@@ -50,16 +58,22 @@
     </nav>
 
     <!-- Ball counter widget -->
-    <div class="ball-widget" id="ball-widget" aria-label="Compteur de billes">
-      <div class="bw-track">
-        <span class="bw-label">Billes</span>
-        <button class="bw-edit" id="bw-edit-btn" aria-label="Modifier le compteur">✏️</button>
+    <div class="header-right">
+      <div class="profile-badge" id="profile-badge" hidden>
+        <span class="profile-badge-dot"></span>
+        <span id="profile-badge-name">Profil</span>
       </div>
-      <div class="bw-count" id="bw-count" aria-live="polite">0</div>
-      <div class="bw-bar" role="progressbar" aria-label="Progression vers prochain entretien" aria-valuemin="0" aria-valuemax="5000" aria-valuenow="0" id="bw-progress">
-        <div class="bw-fill" id="bw-fill"></div>
+      <div class="ball-widget" id="ball-widget" aria-label="Compteur de billes">
+        <div class="bw-track">
+          <span class="bw-label">Billes</span>
+          <button class="bw-edit" id="bw-edit-btn" aria-label="Modifier le compteur">✏️</button>
+        </div>
+        <div class="bw-count" id="bw-count" aria-live="polite">0</div>
+        <div class="bw-bar" role="progressbar" aria-label="Progression vers prochain entretien" aria-valuemin="0" aria-valuemax="5000" aria-valuenow="0" id="bw-progress">
+          <div class="bw-fill" id="bw-fill"></div>
+        </div>
+        <div class="bw-next" id="bw-next">→ entretien dans 5 000</div>
       </div>
-      <div class="bw-next" id="bw-next">→ entretien dans 5 000</div>
     </div>
   </div>
 </header>
@@ -83,6 +97,133 @@
       <button class="btn-primary" id="ball-save-btn">Enregistrer</button>
     </div>
     <button class="modal-close" aria-label="Fermer">✕</button>
+  </div>
+</div>
+
+<!-- ===== PROFILE MODAL ===== -->
+<div class="modal-overlay" id="profile-modal" hidden role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
+  <div class="modal modal--wide">
+    <h2 id="profile-modal-title">Profil de configuration</h2>
+    <div class="form-grid">
+      <div class="form-row">
+        <label for="pm-name">Nom du profil</label>
+        <input type="text" id="pm-name" placeholder="Ex: Speedball Dim"/>
+      </div>
+      <div class="form-row">
+        <label for="pm-type">Type</label>
+        <select id="pm-type">
+          <option value="speedball">Speedball</option>
+          <option value="woodsball">Woodsball</option>
+          <option value="training">Entraînement</option>
+          <option value="custom">Personnalisé</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="pm-fps">FPS cible</label>
+        <input type="number" id="pm-fps" min="200" max="350" placeholder="285"/>
+      </div>
+      <div class="form-row">
+        <label for="pm-psi">PSI régulateur</label>
+        <input type="number" id="pm-psi" min="100" max="300" placeholder="170"/>
+      </div>
+      <div class="form-row">
+        <label for="pm-mode">Mode de tir</label>
+        <select id="pm-mode">
+          <option value="Semi">Semi-auto</option>
+          <option value="Ramp">Ramp</option>
+          <option value="Full-Auto">Full-Auto</option>
+          <option value="Burst">Burst</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="pm-feed">Alimentation</label>
+        <input type="text" id="pm-feed" placeholder="Chargeur, MAG+Chargeur…"/>
+      </div>
+      <div class="form-row form-row--full">
+        <label for="pm-notes">Notes</label>
+        <textarea id="pm-notes" rows="2" placeholder="Notes additionnelles…"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="pm-cancel">Annuler</button>
+      <button class="btn-primary" id="pm-save">Enregistrer</button>
+    </div>
+    <input type="hidden" id="pm-edit-id"/>
+    <button class="modal-close" aria-label="Fermer">✕</button>
+  </div>
+</div>
+
+<!-- ===== INSTALLED PART MODAL ===== -->
+<div class="modal-overlay" id="part-install-modal" hidden role="dialog" aria-modal="true" aria-labelledby="pim-title">
+  <div class="modal">
+    <h2 id="pim-title">Ajouter pièce installée</h2>
+    <div class="form-grid">
+      <div class="form-row form-row--full">
+        <label for="pim-part">Pièce</label>
+        <select id="pim-part">
+          <option value="bolt-orings">Bolt O-rings (×3)</option>
+          <option value="battery-cr2">Batterie CR2</option>
+          <option value="barrel-oring">O-ring Canon</option>
+          <option value="reg-orings">O-ring Régulateur</option>
+          <option value="full-kit">Kit complet O-rings</option>
+          <option value="custom">Autre…</option>
+        </select>
+      </div>
+      <div class="form-row form-row--full" id="pim-custom-row" hidden>
+        <label for="pim-custom-name">Nom de la pièce</label>
+        <input type="text" id="pim-custom-name" placeholder="Ex: Solénoïde"/>
+      </div>
+      <div class="form-row">
+        <label for="pim-date">Date d'installation</label>
+        <input type="date" id="pim-date"/>
+      </div>
+      <div class="form-row">
+        <label for="pim-balls">Billes au compteur</label>
+        <input type="number" id="pim-balls" placeholder="Auto"/>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="pim-cancel">Annuler</button>
+      <button class="btn-primary" id="pim-save">Enregistrer</button>
+    </div>
+    <button class="modal-close" aria-label="Fermer">✕</button>
+  </div>
+</div>
+
+<!-- ===== SCHEMA PART PANEL ===== -->
+<div class="modal-overlay" id="schema-panel-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="schema-panel-title">
+  <div class="modal modal--schema">
+    <h2 id="schema-panel-title">Composant</h2>
+    <div id="schema-panel-body"></div>
+    <button class="modal-close" aria-label="Fermer">✕</button>
+  </div>
+</div>
+
+<!-- ===== TERRAIN OVERLAY ===== -->
+<div class="modal-overlay terrain-overlay" id="terrain-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="terrain-overlay-title">
+  <div class="terrain-overlay-inner">
+    <button class="modal-close terrain-overlay-close" aria-label="Fermer mode terrain">✕</button>
+    <h2 id="terrain-overlay-title" class="terrain-overlay-title">Mode Terrain</h2>
+    <div class="terrain-overlay-counter">
+      <div class="terrain-giant-count" id="overlay-ball-count">0</div>
+      <div class="terrain-overlay-adds">
+        <button class="terrain-add-btn" data-add="50">+50</button>
+        <button class="terrain-add-btn" data-add="100">+100</button>
+        <button class="terrain-add-btn" data-add="200">+200</button>
+      </div>
+    </div>
+    <div class="terrain-overlay-timer">
+      <div class="terrain-timer-display" id="overlay-timer-display">00:00:00</div>
+      <div class="terrain-timer-controls">
+        <button class="terrain-ctrl-btn" id="overlay-timer-start">▶ Start</button>
+        <button class="terrain-ctrl-btn" id="overlay-timer-pause">⏸ Pause</button>
+        <button class="terrain-ctrl-btn" id="overlay-timer-reset">↺ Reset</button>
+      </div>
+    </div>
+    <div class="terrain-overlay-actions">
+      <button class="terrain-overlay-big-btn" id="overlay-checklist-btn">📋 Checklist</button>
+      <button class="terrain-overlay-big-btn" id="overlay-diag-btn">🔧 Diagnostic</button>
+    </div>
   </div>
 </div>
 
@@ -191,7 +332,7 @@
         <div class="step-header">
           <span class="step-num" aria-hidden="true">01</span>
           <div class="step-meta">
-            <h2 class="step-title">Sécurité & Préparation</h2>
+            <h2 class="step-title">Sécurité &amp; Préparation</h2>
             <span class="step-est">⏱ ~2 min</span>
           </div>
           <div class="step-check" aria-hidden="true"></div>
@@ -215,14 +356,28 @@
           </svg>
         </div>
         <div class="step-body">
+          <div class="step-location">📍 <strong>Où agir :</strong> Partez de l'arrière du lanceur — la grosse pièce cylindrique vissée en bas à l'arrière, c'est la bouteille de gaz. Juste au-dessus, il y a la coupole transparente (le chargeur). En dessous, à l'avant, se trouve le magasin rectangulaire (le MAG).</div>
           <ol class="step-list">
-            <li>Retirez le chargeur ou le magasin MAG.</li>
-            <li>Dévissez entièrement la bouteille HPA ou CO₂.</li>
-            <li>Pointez en zone sûre, tirez 2–3× pour purger le gaz résiduel.</li>
-            <li>Posez sur tapis de démontage, canon à gauche.</li>
+            <li>
+              <strong>Retirez le chargeur de billes.</strong>
+              <span class="step-detail">Si vous avez un chargeur électrique (la grosse coupole transparente posée sur le dessus), tirez-le simplement vers le haut — il se détache sans outil. Si vous avez un magasin rectangulaire sous l'avant du lanceur (<span class="term" title="MAG = Magazine, le chargeur à billes sous le lanceur">MAG</span>), appuyez sur le bouton de déverrouillage sur son côté et tirez-le vers le bas.</span>
+            </li>
+            <li>
+              <strong>Dévissez la bouteille de gaz (<span class="term" title="HPA = High Pressure Air = bouteille d'air comprimé haute pression (jusqu'à 3000 PSI / 207 bars)">HPA</span>) ou la cartouche CO₂.</strong>
+              <span class="step-detail">C'est la grosse pièce ronde et longue vissée en bas à l'arrière du lanceur — souvent verte, noire ou en fibre de carbone. Tournez-la dans le sens antihoraire (sens inverse des aiguilles d'une montre, comme pour ouvrir un bocal) jusqu'à ce qu'elle se décroche. Posez-la à part sur votre tapis.</span>
+            </li>
+            <li>
+              <strong>Purgez le gaz résiduel qui reste dans les canaux internes.</strong>
+              <span class="step-detail">Pointez le lanceur vers le bas ou vers le sol, loin de vous et de toute personne. Appuyez sur la gâchette 4 à 5 fois de suite. Les premières pressions peuvent produire un léger "pschitt" — c'est tout à fait normal, c'est le gaz résiduel coincé dans les micro-canaux qui s'échappe. Recommencez jusqu'à ne plus entendre aucun bruit.</span>
+            </li>
+            <li>
+              <strong>Installez le lanceur sur votre tapis de travail, canon (le tube avant) orienté à gauche.</strong>
+              <span class="step-detail">Placez immédiatement un petit récipient (pot de yaourt vide, boîte à pilules, plateau magnétique) à portée de main pour y poser les petites vis au fur et à mesure. Sans ça, vous en perdrez une dès la première étape.</span>
+            </li>
           </ol>
-          <div class="tip-box">💡 <strong>Conseil :</strong> Tapis magnétique recommandé — les petites vis sont invisibles sur une table normale.</div>
-          <div class="warn-box">⚠️ <strong>Sécurité :</strong> Ne poursuivez pas si le marqueur est encore sous pression.</div>
+          <div class="step-verify">✅ <strong>Comment savoir que c'est bon :</strong> Appuyez encore une fois sur la gâchette — vous ne devez plus entendre le moindre "pschitt" ni sentir de souffle d'air. Si vous entendez encore quelque chose, appuyez 5 fois de plus. Le lanceur est dépressurisé seulement quand la gâchette est silencieuse.</div>
+          <div class="tip-box">💡 <strong>Conseil :</strong> Un tapis magnétique (vendu en quincaillerie ou en modélisme, ~10€) retient automatiquement les petites vis en métal et évite qu'elles roulent par terre.</div>
+          <div class="warn-box">⚠️ <strong>Sécurité absolue :</strong> Ne passez jamais à l'étape suivante si le lanceur est encore sous pression. En cas de doute, recommencez la purge (gâchette ×5 supplémentaires).</div>
         </div>
         <div class="step-footer">
           <div class="step-tools"><span class="tool">🧲 Tapis</span><span class="tool">🥤 Pot à vis</span></div>
@@ -255,8 +410,6 @@
             <defs><marker id="ar2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#06d6a0"/></marker></defs>
             <rect x="192" y="65" width="105" height="65" rx="6" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.5"/>
             <rect x="189" y="77" width="12" height="15" rx="3" fill="#0d4f3c" stroke="#06d6a0" stroke-width="1.5"/>
-            <line x1="191" y1="79" x2="199" y2="79" stroke="#06d6a0" stroke-width=".8"/><line x1="191" y1="82" x2="199" y2="82" stroke="#06d6a0" stroke-width=".8"/>
-            <line x1="191" y1="85" x2="199" y2="85" stroke="#06d6a0" stroke-width=".8"/><line x1="191" y1="88" x2="199" y2="88" stroke="#06d6a0" stroke-width=".8"/>
             <text x="20" y="107" font-family="sans-serif" font-size="9" fill="#457b9d">Canon Dye Ultralite 14"</text>
             <path d="M140 67 A18 18 0 0 1 158 84" fill="none" stroke="#ffd166" stroke-width="1.8" stroke-dasharray="3,2"/>
             <polygon points="140,67 133,72 143,74" fill="#ffd166"/>
@@ -267,12 +420,23 @@
           </svg>
         </div>
         <div class="step-body">
+          <div class="step-location">📍 <strong>Où agir :</strong> Le canon, c'est le long tube qui dépasse à l'avant du lanceur — il mesure environ 35 cm. Il se visse à l'avant du corps principal. Le joint torique (une petite bague en caoutchouc) se trouve à la base du canon, là où il entre dans le corps.</div>
           <ol class="step-list">
-            <li>Saisissez le canon fermement, tournez ¼ tour antihoraire.</li>
-            <li>Tirez vers l'avant pour dégager.</li>
-            <li>Récupérez l'O-ring à la base — placez-le dans un sachet.</li>
+            <li>
+              <strong>Saisissez le canon à deux mains et tournez-le d'un quart de tour dans le sens antihoraire.</strong>
+              <span class="step-detail">Un quart de tour = 90°, soit exactement un côté d'une horloge imaginaire. Le canon a un filetage spécial (<span class="term" title="Filetage Autococker ⅞-14 UNS : standard de l'industrie paintball, compatible avec la majorité des canons du marché">Autococker ⅞"</span>) qui se déverrouille rapidement. Vous sentirez un léger déclic quand c'est déverrouillé.</span>
+            </li>
+            <li>
+              <strong>Tirez le canon droit vers l'avant pour le dégager du corps.</strong>
+              <span class="step-detail">Ne le tordez pas ni ne le penchez — tirez en ligne droite, dans l'axe du canon. S'il résiste légèrement, vérifiez que vous avez bien fait le quart de tour antihoraire complet avant de forcer.</span>
+            </li>
+            <li>
+              <strong>Récupérez immédiatement le petit joint en caoutchouc (<span class="term" title="Joint torique = bague ronde en caoutchouc qui assure l'étanchéité — aussi appelé O-ring">joint torique</span>) à la base du canon.</strong>
+              <span class="step-detail">Ce petit anneau noir (environ 5 mm de diamètre, 1 mm d'épaisseur) peut tomber sur le tapis ou rester dans l'orifice du corps. Cherchez-le attentivement et placez-le dans un petit sachet ou pot — si vous le perdez, le canon fuira à la remise en pression.</span>
+            </li>
           </ol>
-          <div class="tip-box">💡 Filetage <strong>Autococker ⅞-14 UNS</strong> — si ça résiste, vérifiez l'alignement avant de forcer.</div>
+          <div class="step-verify">✅ <strong>Comment savoir que c'est bon :</strong> Le canon doit être sorti proprement, et vous devez tenir le petit joint torique en main (ou l'avoir vu rester dans l'orifice du corps). Regardez dans l'orifice du corps avec une lampe pour vérifier que le joint n'est pas resté coincé et tordu.</div>
+          <div class="tip-box">💡 Si le canon résiste après le quart de tour, ne forcez pas — vérifiez l'alignement et recommencez la rotation. Le filetage Autococker est délicat si on tire en biais.</div>
         </div>
         <div class="step-footer">
           <div class="step-tools"><span class="tool">👐 Mains</span><span class="tool">🔴 O-ring #006</span></div>
@@ -319,13 +483,27 @@
           </svg>
         </div>
         <div class="step-body">
+          <div class="step-location">📍 <strong>Où agir :</strong> Le percuteur (<span class="term" title="Bolt OOPS = le piston interne qui propulse la bille dans le canon — 'bolt' en anglais">bolt</span>) se trouve à l'intérieur du corps principal du lanceur, dans un long tunnel horizontal qui traverse de l'arrière vers l'avant. Pour y accéder, il faut d'abord retirer le <span class="term" title="Back cap = le bouchon vissé à l'arrière du corps du lanceur, qui retient le bolt à l'intérieur">capuchon arrière</span> (la petite pièce plate vissée sur la face arrière du corps, juste au-dessus de la poignée).</div>
           <ol class="step-list">
-            <li>Dévissez les 2 vis Allen 3mm du back cap.</li>
-            <li>Glissez le back cap vers l'arrière, posez-le.</li>
-            <li>Saisissez le bolt handle, tirez vers l'arrière pour extraire.</li>
-            <li>Récupérez les <strong>3 O-rings</strong> du bolt — notez leurs positions.</li>
+            <li>
+              <strong>Repérez les 2 petites vis sur le capuchon arrière (la face plate à l'arrière du corps).</strong>
+              <span class="step-detail">Ces vis sont minuscules — elles font 3 mm de diamètre et ont une empreinte hexagonale. Vous aurez besoin d'une <span class="term" title="Clé hexagonale (ou clé Allen) = clé en forme de L avec une section hexagonale, utilisée pour les vis à tête creuse">clé hexagonale</span> de 3 mm (aussi appelée "clé Allen 3mm"). Ne confondez pas avec les vis plus grosses sur les côtés du corps — ce sont les vis de fixation du grip, elles viennent plus tard.</span>
+            </li>
+            <li>
+              <strong>Dévissez les 2 vis avec la clé 3mm, en tournant dans le sens antihoraire.</strong>
+              <span class="step-detail">Dévissez progressivement en alternant les deux vis (une demi-tour sur l'une, puis l'autre) pour ne pas contraindre la pièce. Posez les deux vis dans votre pot à vis. Glissez ensuite le capuchon arrière vers l'arrière et retirez-le — il peut être légèrement serré, c'est normal.</span>
+            </li>
+            <li>
+              <strong>Saisissez la petite poignée du percuteur (le bolt handle) et tirez-le vers l'arrière pour l'extraire.</strong>
+              <span class="step-detail">Le bolt handle, c'est le petit bouton ou levier qui dépasse sur le côté ou l'arrière du percuteur. Tirez lentement et en ligne droite. Le percuteur sort d'un seul bloc avec son système interne (<span class="term" title="Système OOPS = One Piece Spool : le percuteur et son système de propulsion interne forment une seule pièce indémontable">système OOPS</span>) — ne cherchez pas à le démonter davantage.</span>
+            </li>
+            <li>
+              <strong>Récupérez les 3 joints toriques sur le percuteur sorti — notez bien leur position.</strong>
+              <span class="step-detail">Regardez attentivement le percuteur : vous verrez 3 petites rainures circulaires avec chacune un joint en caoutchouc noir. Photographiez le percuteur avant de toucher quoi que ce soit pour vous souvenir de la position exacte de chaque joint (ils n'ont pas tous le même diamètre). Glissez-les délicatement hors de leurs rainures avec le bout d'un cure-dent si nécessaire.</span>
+            </li>
           </ol>
-          <div class="tip-box">💡 Système <strong>OOPS</strong> (One Piece Spool) — bolt et spool ne se séparent pas.</div>
+          <div class="step-verify">✅ <strong>Comment savoir que c'est bon :</strong> Vous devez avoir en main : le capuchon arrière, ses 2 vis, le percuteur complet avec ses 3 joints toriques identifiés. Regardez dans le tunnel arrière du corps avec une lampe — il doit être vide et propre.</div>
+          <div class="tip-box">💡 <strong>Photo indispensable :</strong> Prenez une photo des 3 joints toriques sur le percuteur avant de les retirer — ils ont chacun une position précise et les confondre peut causer des fuites.</div>
         </div>
         <div class="step-footer">
           <div class="step-tools"><span class="tool">🔩 Allen 3mm</span><span class="tool">🟢 O-rings ×3</span></div>
@@ -370,13 +548,27 @@
           </svg>
         </div>
         <div class="step-body">
+          <div class="step-location">📍 <strong>Où agir :</strong> La poignée (<span class="term" title="Grip frame = la partie que vous tenez en main, qui contient la gâchette, les boutons et l'électronique">grip frame</span>) est la partie que vous tenez en main pour tirer. Elle est fixée sous le corps principal du lanceur par 2 vis sur les côtés. L'électrovanne (<span class="term" title="Solénoïde / électrovanne = la pièce électronique qui ouvre et ferme le passage de gaz pour tirer une bille — c'est le 'cerveau' pneumatique du lanceur">solénoïde</span>) se trouve sur le dessus de la poignée, à l'avant. Un câble fin la relie au circuit électronique.</div>
           <ol class="step-list">
-            <li>Repérez les 2 vis Allen 5/32" reliant le grip au corps.</li>
-            <li><strong>Débranchez d'abord</strong> le connecteur solénoïde (prenez le plastique, pas le fil).</li>
-            <li>Dévissez les 2 vis, tirez le grip vers le bas.</li>
+            <li>
+              <strong>Avant tout, photographiez le câblage avec votre téléphone.</strong>
+              <span class="step-detail">Prenez une photo bien nette des fils connectés à l'électrovanne, depuis le dessus et depuis le côté. Cette photo sera votre référence au remontage — un mauvais branchement peut empêcher le lanceur de tirer ou griller l'électronique.</span>
+            </li>
+            <li>
+              <strong>Débranchez délicatement le connecteur de l'électrovanne.</strong>
+              <span class="step-detail">Le connecteur, c'est le petit embout plastique à l'extrémité du câble qui s'enfiche dans l'électrovanne. Pincez le corps plastique du connecteur entre le pouce et l'index et tirez doucement dans l'axe du câble. <strong>Ne tirez jamais sur le câble lui-même</strong> — vous arracheriez le fil de son connecteur, ce qui est une réparation coûteuse.</span>
+            </li>
+            <li>
+              <strong>Repérez les 2 vis sur les côtés du corps qui retiennent la poignée.</strong>
+              <span class="step-detail">Ces vis utilisent une clé hexagonale de 5/32 de pouce (environ 4 mm). Elles se trouvent une de chaque côté du lanceur, à la jonction entre le corps et la poignée. Dévissez-les en alternant (une demi-tour à gauche, une demi-tour à droite) pour ne pas contraindre l'assemblage.</span>
+            </li>
+            <li>
+              <strong>Tirez la poignée vers le bas pour la séparer du corps.</strong>
+              <span class="step-detail">La poignée peut nécessiter une légère pression de chaque côté pour se décoller — c'est souvent un joint d'étanchéité qui colle légèrement. Tirez doucement et régulièrement sans tordre. Posez la poignée sur le tapis, côté électronique vers le haut.</span>
+            </li>
           </ol>
-          <div class="tip-box">💡 Photographiez le câblage avant de débrancher.</div>
-          <div class="warn-box">⚠️ Le câble solénoïde est fragile — saisissez le connecteur, jamais le fil.</div>
+          <div class="step-verify">✅ <strong>Comment savoir que c'est bon :</strong> La poignée est séparée du corps et posée à part. Le câble de l'électrovanne est débranché proprement et le connecteur est intact (pas de fil arraché). Vérifiez sur votre photo que vous vous souvenez de quel côté se branche le connecteur.</div>
+          <div class="warn-box">⚠️ Le câble de l'électrovanne est la pièce la plus fragile de tout le lanceur. Une seule traction mal placée sur le fil et vous avez une réparation à 40-60€. Toujours saisir le connecteur plastique, jamais le fil.</div>
         </div>
         <div class="step-footer">
           <div class="step-tools"><span class="tool">🔩 Allen 5/32"</span><span class="tool">📸 Photo câblage</span></div>
@@ -420,12 +612,23 @@
           </svg>
         </div>
         <div class="step-body">
+          <div class="step-location">📍 <strong>Où agir :</strong> L'électrovanne (<span class="term" title="Solénoïde = électrovanne 3 voies qui commande l'ouverture et la fermeture du gaz à chaque tir">solénoïde</span>) est une petite pièce noire rectangulaire vissée sur le dessus du corps principal, vers l'avant-centre. Elle est facilement reconnaissable : c'est la seule pièce avec un câble électrique qui en sort. Elle est retenue par 4 toutes petites vis — les plus petites de tout le lanceur.</div>
           <ol class="step-list">
-            <li>Repérez les 4 vis M2 (Allen 1.5mm) maintenant le solénoïde.</li>
-            <li>Dévissez en croix — alternez pour ne pas tordre la platine.</li>
-            <li>Soulevez le solénoïde de son rail, déposez PCB vers le haut.</li>
+            <li>
+              <strong>Repérez les 4 micro-vis M2 qui maintiennent l'électrovanne sur le corps.</strong>
+              <span class="step-detail">Ces vis font 2 mm de diamètre — elles sont minuscules. Vous aurez besoin d'une clé hexagonale de 1,5 mm, aussi fine qu'un cure-dent épais. Cherchez-les aux 4 coins de l'électrovanne. Si vous en voyez une sous une étiquette, décollage délicatement le bord de l'étiquette pour accéder à la vis (ne l'arrachez pas entièrement, vous en aurez besoin pour retrouver le numéro de série).</span>
+            </li>
+            <li>
+              <strong>Dévissez les 4 vis en croix, en alternant : haut-gauche, bas-droite, haut-droite, bas-gauche.</strong>
+              <span class="step-detail">Cette technique en croix évite de tordre la platine de l'électrovanne. Faites chaque vis de 2 à 3 tours seulement avant de passer à la suivante, jusqu'à ce que les 4 soient dévissées. Posez ces minuscules vis dans un compartiment séparé de votre pot à vis — elles sont très difficiles à retrouver si elles tombent.</span>
+            </li>
+            <li>
+              <strong>Soulevez l'électrovanne délicatement, en la maintenant à plat.</strong>
+              <span class="step-detail">L'électrovanne peut avoir de petits joints en dessous qui collent légèrement. Soulevez-la doucement et à plat — ne la penchez pas, sous peine de casser les petits tuyaux d'air internes. Déposez-la sur le tapis, face avec les inscriptions (le <span class="term" title="PCB = la carte électronique verte qui se trouve à l'intérieur ou à l'extérieur de l'électrovanne">circuit imprimé</span>) vers le haut.</span>
+            </li>
           </ol>
-          <div class="tip-box">💡 Vérifiez sous l'étiquette de série — il y a parfois une vis cachée.</div>
+          <div class="step-verify">✅ <strong>Comment savoir que c'est bon :</strong> L'électrovanne est posée à plat sur le tapis, ses 4 vis sont en sécurité dans le pot. Regardez l'emplacement sur le corps — vous devez voir les 4 petits trous de vis et éventuellement les mini-canaux d'air. Il ne doit rester aucune vis dans les trous.</div>
+          <div class="tip-box">💡 Les 4 vis M2 de l'électrovanne sont les pièces les plus facilement perdues de tout le démontage. Certains propriétaires les collent temporairement sur un bout de scotch numéroté pendant le nettoyage.</div>
         </div>
         <div class="step-footer">
           <div class="step-tools"><span class="tool">🔩 Allen 1.5mm</span><span class="tool">⚡ Anti-statique</span></div>
@@ -473,12 +676,27 @@
           </svg>
         </div>
         <div class="step-body">
+          <div class="step-location">📍 <strong>Où agir :</strong> Le régulateur de pression est une pièce cylindrique ronde (ressemblant à un gros boulon ou une bobine) vissée sous l'avant du corps principal, entre le corps et l'adaptateur de bouteille (<span class="term" title="ASA = Adaptateur de Bouteille (Air Source Adapter) : la pièce sur laquelle vous vissez la bouteille de gaz">ASA</span>). Il réduit la pression de votre bouteille (environ 200 bars) à une pression de travail basse (environ 11-12 bars) pour ne pas casser les billes.</div>
           <ol class="step-list">
-            <li>Utilisez la clé à sangle Dye, tournez antihoraire.</li>
-            <li>Récupérez les 2 O-rings d'étanchéité (entrée + sortie).</li>
-            <li>N'ouvrez pas l'intérieur — pièce calibrée usine.</li>
+            <li>
+              <strong>Procurez-vous la clé à sangle spéciale Dye (fournie avec le lanceur) ou une clé à sangle universelle.</strong>
+              <span class="step-detail">Le régulateur est rond — vous ne pouvez pas l'attraper avec une clé plate ordinaire. La clé à sangle (une bande qui s'enroule autour de la pièce ronde) est l'outil prévu. Si vous n'en avez pas, un chiffon antidérapant épais peut fonctionner pour les régulateurs pas trop serrés.</span>
+            </li>
+            <li>
+              <strong>Enroulez la sangle autour du régulateur et tournez dans le sens antihoraire pour dévisser.</strong>
+              <span class="step-detail">Tenez le corps du lanceur de l'autre main pour éviter qu'il ne tourne avec. Le régulateur peut être serré — appliquez une force régulière sans à-coup. Quand il commence à tourner librement, vous pouvez le finir à la main.</span>
+            </li>
+            <li>
+              <strong>Récupérez les 2 joints toriques d'étanchéité autour du régulateur.</strong>
+              <span class="step-detail">Un joint se trouve à l'entrée du régulateur (côté bouteille, en bas) et un à la sortie (côté corps, en haut). Ils peuvent rester sur le régulateur ou rester dans les logements du corps — cherchez-les soigneusement. Ces joints empêchent la fuite de gaz à haute pression.</span>
+            </li>
+            <li>
+              <strong>N'ouvrez pas le régulateur et ne le démontez pas davantage.</strong>
+              <span class="step-detail">Le régulateur est une pièce de précision calibrée en usine (<span class="term" title="PSI = Pound per Square Inch = unité de pression. 165-175 PSI ≈ 11-12 bars de pression de sortie">165–175 PSI de sortie</span>, soit environ 11-12 bars). Le démonter sans équipement spécialisé risque de modifier irrémédiablement la pression de sortie, ce qui affecterait la vitesse des billes et pourrait dépasser les limites légales du terrain.</span>
+            </li>
           </ol>
-          <div class="tip-box">💡 Pression de sortie standard : <strong>165–175 PSI</strong>. Ne modifiez pas sans chronographe.</div>
+          <div class="step-verify">✅ <strong>Comment savoir que c'est bon :</strong> Le régulateur est sorti en un seul bloc et vous tenez ses 2 joints toriques. L'emplacement sur le corps du lanceur doit montrer 2 orifices propres (entrée et sortie de gaz).</div>
+          <div class="tip-box">💡 La pression de sortie standard est 165–175 PSI (11–12 bars). Ne la modifiez pas sans utiliser un appareil de mesure de vitesse (chronographe) — une pression trop haute dépasse souvent les 300 FPS autorisés sur les terrains.</div>
         </div>
         <div class="step-footer">
           <div class="step-tools"><span class="tool">🔧 Clé sangle</span><span class="tool">🔴 O-rings ×2</span></div>
@@ -497,7 +715,7 @@
         <div class="step-header">
           <span class="step-num" aria-hidden="true">07</span>
           <div class="step-meta">
-            <h2 class="step-title">Nettoyage & Inspection</h2>
+            <h2 class="step-title">Nettoyage &amp; Inspection</h2>
             <span class="step-est">⏱ ~10 min</span>
           </div>
           <div class="step-check" aria-hidden="true"></div>
@@ -526,13 +744,27 @@
           </svg>
         </div>
         <div class="step-body">
+          <div class="step-location">📍 <strong>Où agir :</strong> C'est l'étape la plus importante pour la longévité du lanceur. Vous allez nettoyer et inspecter toutes les pièces démontées posées sur votre tapis : le corps principal, le canon, le percuteur, le régulateur et l'électrovanne. Les zones critiques sont les rainures des joints toriques, les canaux d'air internes et les surfaces glissantes du percuteur.</div>
           <ol class="step-list">
-            <li>Dégraissant sur corps, canon, bolt — essuyez immédiatement.</li>
-            <li>Inspectez tous les O-rings — remplacez si fissurés, déformés, durcis.</li>
-            <li>Vérifiez le canal d'air avec lampe — aucun débris.</li>
-            <li>Fine couche de <strong>Dye Slick Lube</strong> sur O-rings bolt et surfaces glissantes.</li>
+            <li>
+              <strong>Nettoyez chaque pièce avec un chiffon en microfibre légèrement humide ou un dégraissant doux.</strong>
+              <span class="step-detail">Essuyez toutes les surfaces extérieures. Pour le canon, passez un écouvillon propre (ou un chiffon fin roulé sur un cure-dent) dans le tube pour enlever les résidus de billes éclatées et la peinture. N'utilisez <strong>jamais de solvants forts</strong> (acétone, WD-40, white spirit) — ils détruisent les joints en caoutchouc et font gonfler les pièces.</span>
+            </li>
+            <li>
+              <strong>Inspectez chaque joint torique à la loupe ou sous une bonne lumière.</strong>
+              <span class="step-detail">Un joint torique en bon état est lisse, souple, et garde sa forme ronde. Remplacez-le immédiatement s'il présente : des fissures ou craquelures visibles, des déformations (il n'est plus parfaitement rond), une surface dure et peu souple (vieillissement), ou des entailles. Les joints défectueux sont la cause n°1 des fuites de gaz.</span>
+            </li>
+            <li>
+              <strong>Inspectez le canal interne du corps du lanceur avec une petite lampe de poche.</strong>
+              <span class="step-detail">Pointez la lampe dans le tunnel où coulisse le percuteur. La surface doit être lisse, légèrement brillante et exempte de débris (morceaux de billes, peinture séchée, sable). Si vous voyez des dépôts, utilisez un écouvillon sec pour nettoyer.</span>
+            </li>
+            <li>
+              <strong>Appliquez une fine couche de lubrifiant spécial paintball (Dye Slick Lube ou équivalent) sur les joints toriques et les surfaces glissantes.</strong>
+              <span class="step-detail">Le Dye Slick Lube est une graisse silicone transparente. Mettez-en une toute petite quantité (une noisette de la taille d'un petit pois) dans le creux de votre doigt, et enduisez chaque joint torique et le corps du percuteur. Trop de lubrifiant attire la poussière et peut obstruer les canaux d'air — moins c'est mieux.</span>
+            </li>
           </ol>
-          <div class="warn-box">⚠️ Jamais de WD-40, huile moteur ou graisse pétrolière — gonfle les joints NBR.</div>
+          <div class="step-verify">✅ <strong>Comment savoir que c'est bon :</strong> Toutes les pièces sont propres et sèches (pas de résidus de peinture visibles). Tous les joints toriques ont été inspectés et les endommagés ont été remplacés. Chaque joint est légèrement brillant de lubrifiant. Le canal interne du corps est propre et exempt de débris.</div>
+          <div class="warn-box">⚠️ <strong>Jamais ces produits :</strong> WD-40 (détruit les joints en 24h), huile moteur, graisse pétrolière, huile végétale — tous gonflent ou dissolvent les joints en caoutchouc NBR du lanceur. Utilisez uniquement un lubrifiant silicone à base de silicone pure (Dye Slick Lube, Sly Lube, ou lubrifiant silicone générique).</div>
         </div>
         <div class="step-footer">
           <div class="step-tools"><span class="tool">🧴 Dégraissant</span><span class="tool">🧹 Microfibre</span><span class="tool">🟢 Lube</span></div>
@@ -579,14 +811,31 @@
           </svg>
         </div>
         <div class="step-body">
+          <div class="step-location">📍 <strong>Ordre de remontage :</strong> Le remontage se fait dans l'ordre inverse du démontage. L'ordre est important — ne montez pas la poignée avant l'électrovanne, ni le canon avant que le percuteur soit en place. Suivez exactement les étapes ci-dessous.</div>
           <ol class="step-list">
-            <li><strong>① Régulateur</strong> — sens horaire, O-rings lubrifiés, main + ¼ tour.</li>
-            <li><strong>② Solénoïde</strong> — aligner rail, 4× M2 en croix à 8 in-lb, reconnecter.</li>
-            <li><strong>③ Grip Frame</strong> — brancher solénoïde, 2× 5/32" à 20 in-lb.</li>
-            <li><strong>④ Bolt + Back Cap</strong> — graisser bolt, 2× Allen 3mm à 15 in-lb.</li>
-            <li><strong>⑤ Canon</strong> — O-ring lubrifié, visser à la main jusqu'au contact doux.</li>
+            <li>
+              <strong>① Remontez d'abord le régulateur de pression sous le corps.</strong>
+              <span class="step-detail">Assurez-vous que ses 2 joints toriques sont bien en place et légèrement lubrifiés. Vissez à la main dans le sens horaire jusqu'à ce que vous sentiez une résistance, puis serrez avec la clé à sangle d'un quart de tour supplémentaire. Ne serrez pas à fond — le régulateur doit être snug (bien serré) mais pas bloqué.</span>
+            </li>
+            <li>
+              <strong>② Replacez l'électrovanne sur le dessus du corps.</strong>
+              <span class="step-detail">Alignez les 4 trous de vis de l'électrovanne avec les 4 trous filetés du corps. Insérez les 4 micro-vis M2 à la main d'abord, sans les serrer, pour vérifier que l'électrovanne est bien alignée. Puis serrez-les en croix (haut-gauche, bas-droite, haut-droite, bas-gauche) avec la clé hexagonale 1,5mm. Le couple de serrage recommandé est faible — environ <span class="term" title="8 in-lb ≈ 0,9 N·m : un serrage léger, juste assez pour que la vis ne bouge plus mais sans forcer">8 in-lb (environ 0,9 N·m)</span> — ne serrez pas trop fort, vous risquez de casser les petites vis.</span>
+            </li>
+            <li>
+              <strong>③ Reposez la poignée et rebranchez l'électrovanne.</strong>
+              <span class="step-detail">Commencez par brancher le connecteur de l'électrovanne en vous aidant de votre photo prise lors du démontage. Le connecteur ne peut s'insérer que dans un sens — ne forcez pas si ça résiste. Une fois branché, remontez la poignée contre le corps et vissez les 2 vis latérales en alternant, avec la clé hexagonale 5/32". Couple recommandé : environ <span class="term" title="20 in-lb ≈ 2,3 N·m : serrage modéré, comme serrer fermement une vis de meubles en kit">20 in-lb (environ 2,3 N·m)</span>.</span>
+            </li>
+            <li>
+              <strong>④ Réintroduisez le percuteur dans le tunnel arrière du corps.</strong>
+              <span class="step-detail">Remettez d'abord les 3 joints toriques sur le percuteur dans les positions exactes de votre photo. Lubrifiez légèrement le corps du percuteur. Insérez-le doucement dans le tunnel par l'arrière, en ligne droite, jusqu'à ce qu'il soit complètement rentré. Reposez le capuchon arrière et vissez ses 2 vis avec la clé 3mm. Couple recommandé : <span class="term" title="15 in-lb ≈ 1,7 N·m : serrage moyen, ferme mais sans forcer">15 in-lb (environ 1,7 N·m)</span>.</span>
+            </li>
+            <li>
+              <strong>⑤ Remettez le canon en dernier.</strong>
+              <span class="step-detail">Replacez le joint torique à la base du canon dans sa rainure (s'il était sorti), lubrifiez-le légèrement. Insérez le canon dans l'orifice avant du corps, alignez et tournez d'un quart de tour dans le sens horaire jusqu'au verrou. Le canon est bien en place quand il ne bouge plus et qu'il est aligné avec l'axe du lanceur.</span>
+            </li>
           </ol>
-          <div class="tip-box">💡 Test final : HPA 400 PSI d'abord — écouter les fuites avant de monter en pression.</div>
+          <div class="step-verify">✅ <strong>Test final obligatoire — Ne sautez pas cette étape :</strong> Vissez la bouteille de gaz. Ouvrez-la progressivement (un demi-tour seulement) et écoutez attentivement pendant 30 secondes. Aucun sifflement = pas de fuite. Tournez encore un demi-tour et ré-écoutez. Si vous entendez un sifflement, localisez la fuite (régulateur ? Canon ? Poignée ?) et dévissez immédiatement la bouteille pour corriger. Seulement quand tout est silencieux, ouvrez la bouteille complètement et testez le tir.</div>
+          <div class="tip-box">💡 <strong>Commencez toujours le test de pression à basse pression</strong> en n'ouvrant la bouteille qu'à moitié. Si une pièce n'est pas bien remontée, cela vous laisse le temps d'entendre la fuite et de couper le gaz avant que la pression ne monte trop haut.</div>
         </div>
         <div class="step-footer">
           <div class="step-tools"><span class="tool">🔩 Allen 5/32" + 3mm</span><span class="tool">📏 Dynamométrique</span></div>
@@ -604,6 +853,105 @@
   </section>
 
   <!-- ===========================
+       SECTION : TERRAIN
+       =========================== -->
+  <section id="section-terrain" class="guide-section" aria-labelledby="terrain-title">
+    <div class="terrain-layout">
+
+      <!-- LEFT: Checklist avant-partie -->
+      <div class="terrain-left">
+        <h1 id="terrain-title" class="page-title">Checklist <em>Avant-Partie</em></h1>
+
+        <div class="checklist-panel" role="form" aria-label="Checklist avant-partie">
+          <div class="checklist-items" id="checklist-items">
+            <!-- Generated by JS -->
+          </div>
+          <div class="checklist-score-wrap">
+            <div class="checklist-score" id="checklist-score">
+              <span class="cs-num" id="cs-num">0/10</span>
+              <span class="cs-verdict" id="cs-verdict">—</span>
+            </div>
+          </div>
+          <div class="checklist-actions">
+            <button class="btn-secondary" id="checklist-reset">↺ Reset</button>
+            <button class="btn-primary" id="checklist-save">💾 Sauvegarder</button>
+          </div>
+        </div>
+
+        <div class="checklist-history" id="checklist-history">
+          <h3 class="history-title">Historique des checklists</h3>
+          <div id="checklist-history-list"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Mode Terrain -->
+      <div class="terrain-right">
+        <h2 class="terrain-right-title">Mode <em>Terrain</em></h2>
+
+        <!-- Giant ball counter -->
+        <div class="terrain-counter-card">
+          <div class="terrain-label">Billes tirées</div>
+          <div class="terrain-giant-count" id="terrain-ball-count">0</div>
+          <div class="terrain-adds">
+            <button class="terrain-add-btn" data-add="50">+50</button>
+            <button class="terrain-add-btn" data-add="100">+100</button>
+            <button class="terrain-add-btn" data-add="200">+200</button>
+            <button class="terrain-add-btn" data-add="500">+500</button>
+          </div>
+        </div>
+
+        <!-- Game timer -->
+        <div class="terrain-timer-card">
+          <div class="terrain-label">Chrono de partie</div>
+          <div class="terrain-timer-display" id="game-timer-display">00:00:00</div>
+          <div class="terrain-timer-controls">
+            <button class="terrain-ctrl-btn" id="game-timer-start">▶ Start</button>
+            <button class="terrain-ctrl-btn" id="game-timer-pause">⏸ Pause</button>
+            <button class="terrain-ctrl-btn" id="game-timer-reset">↺ Reset</button>
+          </div>
+        </div>
+
+        <!-- Quick diagnostic -->
+        <div class="terrain-diag-card">
+          <div class="terrain-label">Diagnostic rapide</div>
+          <div class="terrain-diag-btns" id="terrain-diag-btns">
+            <!-- Generated by JS -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===========================
+       SECTION : SCHEMA
+       =========================== -->
+  <section id="section-schema" class="guide-section" aria-labelledby="schema-title">
+    <div class="schema-header">
+      <h1 id="schema-title" class="page-title">Schéma <em>Explosé</em></h1>
+      <div class="schema-toggle" role="group" aria-label="Vue">
+        <button class="schema-toggle-btn active" id="schema-view-diagram" aria-pressed="true">Vue explosée</button>
+        <button class="schema-toggle-btn" id="schema-view-list" aria-pressed="false">Liste pièces</button>
+      </div>
+    </div>
+
+    <div id="schema-diagram-view">
+      <div class="schema-svg-wrap" id="schema-svg-wrap" aria-label="Schéma explosé Dye DAM, cliquez sur un composant">
+        <!-- SVG generated by JS -->
+      </div>
+      <p class="schema-hint">Cliquez sur un numéro pour afficher les détails du composant.</p>
+    </div>
+
+    <div id="schema-list-view" hidden>
+      <div class="search-bar-wrap">
+        <label for="parts-search" class="sr-only">Rechercher une pièce</label>
+        <input type="search" id="parts-search" class="search-bar" placeholder="🔍 Rechercher une pièce…" aria-label="Rechercher dans la nomenclature"/>
+      </div>
+      <div class="parts-grid" id="parts-grid" role="list" aria-label="Pièces du Dye DAM"></div>
+    </div>
+  </section>
+
+  <!-- ===========================
        SECTION : DIAGNOSTIC
        =========================== -->
   <section id="section-diagnostic" class="guide-section" aria-labelledby="diag-title">
@@ -613,32 +961,124 @@
     </div>
 
     <div class="diag-container">
-      <!-- Breadcrumb -->
       <nav class="diag-breadcrumb" id="diag-breadcrumb" aria-label="Fil d'ariane diagnostic">
         <span class="bc-item bc-item--root" data-node="root">Accueil</span>
       </nav>
-
-      <!-- Tree view -->
       <div class="diag-panel" id="diag-panel" role="region" aria-live="polite" aria-label="Arbre de diagnostic"></div>
-
-      <!-- Result panel (hidden until diagnosis reached) -->
       <div class="diag-result" id="diag-result" hidden role="region" aria-label="Résultat du diagnostic"></div>
     </div>
   </section>
 
   <!-- ===========================
-       SECTION : PIÈCES
+       SECTION : STATS
        =========================== -->
-  <section id="section-pieces" class="guide-section" aria-labelledby="pieces-title">
-    <h1 id="pieces-title" class="page-title">Nomenclature <em>& Pièces</em></h1>
+  <section id="section-stats" class="guide-section" aria-labelledby="stats-title">
+    <h1 id="stats-title" class="page-title">Statistiques <em>&amp; Config</em></h1>
 
-    <div class="search-bar-wrap">
-      <label for="parts-search" class="sr-only">Rechercher une pièce</label>
-      <input type="search" id="parts-search" class="search-bar" placeholder="🔍 Rechercher une pièce…" aria-label="Rechercher dans la nomenclature"/>
+    <!-- Stat cards -->
+    <div class="stats-cards" role="list" aria-label="Statistiques globales">
+      <div class="stat-card" role="listitem">
+        <div class="stat-card-icon">🎯</div>
+        <div class="stat-card-val" id="sc-balls">0</div>
+        <div class="stat-card-label">Billes tirées</div>
+      </div>
+      <div class="stat-card" role="listitem">
+        <div class="stat-card-icon">🔧</div>
+        <div class="stat-card-val" id="sc-entretiens">0</div>
+        <div class="stat-card-label">Entretiens</div>
+      </div>
+      <div class="stat-card" role="listitem">
+        <div class="stat-card-icon">📊</div>
+        <div class="stat-card-val" id="sc-fps-avg">—</div>
+        <div class="stat-card-label">FPS moyen</div>
+      </div>
+      <div class="stat-card" role="listitem">
+        <div class="stat-card-icon">📅</div>
+        <div class="stat-card-val" id="sc-days">—</div>
+        <div class="stat-card-label">J. depuis entretien</div>
+      </div>
     </div>
 
-    <div class="parts-grid" id="parts-grid" role="list" aria-label="Pièces du Dye DAM">
-      <!-- (inchangé — généré par JS depuis DATA) -->
+    <!-- Configuration profiles -->
+    <div class="stats-section">
+      <div class="stats-section-header">
+        <h2 class="stats-section-title">Profils de Configuration</h2>
+        <button class="btn-add-fps" id="btn-add-profile" aria-label="Ajouter un profil">+ Profil</button>
+      </div>
+      <div class="profiles-grid" id="profiles-grid">
+        <!-- Generated by JS -->
+      </div>
+    </div>
+
+    <!-- Installed parts tracking -->
+    <div class="stats-section">
+      <div class="stats-section-header">
+        <h2 class="stats-section-title">Suivi des Pièces Installées</h2>
+        <button class="btn-add-fps" id="btn-add-installed-part" aria-label="Ajouter une pièce">+ Pièce</button>
+      </div>
+      <div class="installed-parts-wrap">
+        <table class="installed-parts-table" id="installed-parts-table" aria-label="Pièces installées">
+          <thead>
+            <tr>
+              <th>Pièce</th>
+              <th>Date install</th>
+              <th>Billes depuis</th>
+              <th>Intervalle rec.</th>
+              <th>Statut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="installed-parts-body">
+            <!-- Generated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Technical references -->
+    <div class="stats-section">
+      <h2 class="stats-section-title">Références Techniques</h2>
+
+      <div class="accordion" id="accordion-orings">
+        <button class="accordion-btn" aria-expanded="false" aria-controls="acc-body-orings">
+          <span>Table des O-rings</span>
+          <svg class="accordion-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+        <div class="accordion-body" id="acc-body-orings" hidden>
+          <table class="ref-table" aria-label="O-rings Dye DAM">
+            <thead><tr><th>Position</th><th>Taille</th><th>Qté</th></tr></thead>
+            <tbody>
+              <tr><td>O-ring Canon</td><td>#006</td><td>1</td></tr>
+              <tr><td>Bolt avant</td><td>#008</td><td>1</td></tr>
+              <tr><td>Bolt milieu</td><td>#009</td><td>1</td></tr>
+              <tr><td>Bolt arrière</td><td>#011</td><td>1</td></tr>
+              <tr><td>Régulateur entrée</td><td>#010</td><td>1</td></tr>
+              <tr><td>Régulateur sortie</td><td>#012</td><td>1</td></tr>
+              <tr><td>ASA</td><td>#014</td><td>1</td></tr>
+              <tr><td>Solénoïde</td><td>#006</td><td>2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="accordion" id="accordion-torques">
+        <button class="accordion-btn" aria-expanded="false" aria-controls="acc-body-torques">
+          <span>Couples de serrage</span>
+          <svg class="accordion-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+        <div class="accordion-body" id="acc-body-torques" hidden>
+          <table class="ref-table" aria-label="Couples de serrage Dye DAM">
+            <thead><tr><th>Pièce</th><th>Taille clé</th><th>Couple</th></tr></thead>
+            <tbody>
+              <tr><td>Back cap</td><td>Allen 3mm</td><td>15 in-lb</td></tr>
+              <tr><td>Grip frame</td><td>Allen 5/32"</td><td>20 in-lb</td></tr>
+              <tr><td>Solénoïde</td><td>Allen 1.5mm</td><td>8 in-lb</td></tr>
+              <tr><td>Rail Picatinny</td><td>Allen 3/32"</td><td>10 in-lb</td></tr>
+              <tr><td>Régulateur</td><td>Clé sangle</td><td>Main + 1/4t</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -652,7 +1092,10 @@
     <div class="fps-panel">
       <div class="fps-header">
         <h2>Suivi Chronographe</h2>
-        <button class="btn-add-fps" id="btn-add-fps" aria-label="Ajouter une mesure FPS">+ Mesure</button>
+        <div style="display:flex;gap:.5rem;align-items:center;">
+          <button class="btn-add-fps" id="btn-export-pdf" aria-label="Exporter en PDF">📄 Exporter PDF</button>
+          <button class="btn-add-fps" id="btn-add-fps" aria-label="Ajouter une mesure FPS">+ Mesure</button>
+        </div>
       </div>
       <div class="fps-chart-wrap">
         <svg id="fps-chart" viewBox="0 0 600 120" preserveAspectRatio="none" aria-label="Historique FPS" role="img"></svg>
@@ -685,7 +1128,6 @@
         <button class="btn-add-log" id="btn-add-log" aria-label="Ajouter une entrée">+ Entrée</button>
       </div>
 
-      <!-- Add entry form -->
       <div class="log-form" id="log-form" hidden>
         <h3>Nouvelle entrée</h3>
         <div class="form-grid">
@@ -718,15 +1160,20 @@
         </div>
       </div>
 
-      <!-- Log list -->
       <div class="log-list" id="log-list" role="list" aria-label="Journal d'entretien" aria-live="polite"></div>
     </div>
   </section>
 
 </main>
 
+<!-- ===== FLOATING TERRAIN BUTTON ===== -->
+<button class="float-terrain-btn" id="float-terrain-btn" aria-label="Ouvrir le mode terrain">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+  <span>Terrain</span>
+</button>
+
 <!-- ===== FOOTER ===== -->
-<footer class="site-footer" role="contentinfo">
+<footer class="site-footer print-footer" role="contentinfo">
   <div class="footer-inner">
     <p>Dye DAM · Guide d'entretien non officiel · Usage éducatif</p>
     <p class="footer-note">⚠️ Respectez les règles de sécurité — limite légale 300 FPS / bille .68 calibre.</p>

@@ -50,73 +50,73 @@ const TREE = {
   no_power: {
     diag: true, sev: 'easy',
     title: 'Batterie CR2 déchargée',
-    cause: 'Dans 90% des cas, il s\'agit de la batterie CR2 vide. Le solénoïde ne s\'active plus.',
-    steps: ['Ouvrez le compartiment batterie (face gauche du grip)', 'Remplacez la batterie CR2 3V lithium', 'Allumez — la LED verte doit clignoter 3×', 'Si toujours rien : vérifiez le connecteur solénoïde (Étape 4 du guide)'],
-    fixStep: 4, parts: ['Batterie CR2 3V']
+    cause: 'Dans 90% des cas c\'est la batterie CR2 vide. L\'électrovanne (qui commande le gaz à chaque tir) ne reçoit plus de courant.',
+    steps: ['Ouvrez le compartiment batterie sur la face gauche de la poignée — il s\'ouvre généralement en appuyant sur un bouton ou en dévissant un couvercle', 'Remplacez la batterie CR2 3V lithium (une petite pile cylindrique, différente des piles AA ou AAA classiques)', 'Allumez le lanceur — la LED verte doit clignoter 3 fois pour confirmer le bon fonctionnement', 'Si toujours rien après remplacement : vérifiez que le connecteur de l\'électrovanne est bien branché (voir Étape 4 du guide)'],
+    fixStep: 4, parts: ['Batterie CR2 3V lithium']
   },
   spool_jam: {
-    q: 'Depuis combien de temps n\'avez-vous pas lubrifié le bolt ?',
+    q: 'Depuis combien de temps n\'avez-vous pas lubrifié le percuteur interne ?',
     opts: [
-      { label: 'Moins de 5 000 billes', icon: '✅', next: 'spool_jam_other' },
+      { label: 'Moins de 5 000 billes tirées', icon: '✅', next: 'spool_jam_other' },
       { label: 'Plus de 5 000 billes (ou je ne sais pas)', icon: '⚠️', next: 'spool_lubrication' },
     ]
   },
   spool_lubrication: {
     diag: true, sev: 'easy',
-    title: 'Bolt encrassé — Lubrification nécessaire',
-    cause: 'Le bolt OOPS se déplace à sec, créant des micro-frictions qui empêchent le cycle complet.',
-    steps: ['Retirez le back cap (2× vis Allen 3mm)', 'Sortez le bolt, nettoyez les O-rings', 'Appliquez Dye Slick Lube sur chaque O-ring', 'Réinsérez et testez à basse pression'],
-    fixStep: 3, parts: ['Dye Slick Lube', 'O-ring #009 (si endommagé)']
+    title: 'Percuteur encrassé — Lubrification nécessaire',
+    cause: 'Le percuteur interne (bolt OOPS) glisse à sec, ce qui crée des micro-frictions qui empêchent le cycle complet de tir.',
+    steps: ['Retirez le capuchon arrière (2× vis clé hexagonale 3mm, face arrière du corps)', 'Sortez le percuteur, nettoyez ses 3 joints toriques avec un chiffon', 'Appliquez Dye Slick Lube sur chaque joint torique (une toute fine couche suffit)', 'Réinsérez le percuteur et testez à basse pression'],
+    fixStep: 3, parts: ['Dye Slick Lube', 'Joint torique #009 (si endommagé)']
   },
   spool_jam_other: {
     diag: true, sev: 'medium',
-    title: 'Obstruction — Bille fragmentée dans le bolt',
-    cause: 'Un fragment de bille ou corps étranger bloque la chambre d\'alimentation.',
-    steps: ['Déconnectez la source de gaz immédiatement', 'Retirez le canon et inspectez le corps', 'Retirez le bolt, inspectez le canal d\'air', 'Nettoyez avec chiffon propre + air comprimé', 'Vérifiez la qualité des billes (.68 calibre recommandé)'],
+    title: 'Obstruction — Débris ou fragment de bille coincé',
+    cause: 'Un fragment de bille cassée ou un corps étranger bloque la chambre d\'alimentation, empêchant le percuteur de revenir en position.',
+    steps: ['Déconnectez la bouteille de gaz immédiatement (dévissez-la)', 'Retirez le canon (quart de tour antihoraire) et inspectez le corps avec une lampe', 'Sortez le percuteur (capuchon arrière + 2 vis), inspectez le canal interne', 'Nettoyez avec un chiffon en microfibre propre + air comprimé si disponible', 'Vérifiez la qualité des billes (calibre .68 standard recommandé)'],
     fixStep: 3, parts: ['Chiffon microfibre', 'Air comprimé']
   },
   low_pressure: {
     diag: true, sev: 'medium',
-    title: 'Pression insuffisante — Régulateur ou HPA',
-    cause: 'Le gaz arrive mais pas en pression suffisante pour propulser la bille.',
-    steps: ['Vérifiez le niveau HPA (pression > 1000 PSI minimum)', 'Désassemblez et réassemblez le régulateur', 'Vérifiez les O-rings entrée/sortie régulateur', 'Mesurez la pression de sortie : doit être 160–175 PSI'],
-    fixStep: 6, parts: ['O-ring #010', 'O-ring #012']
+    title: 'Pression insuffisante — Bouteille vide ou régulateur',
+    cause: 'Le gaz arrive mais pas assez fort pour propulser la bille correctement. Votre bouteille d\'air comprimé est peut-être presque vide, ou le régulateur de pression a un problème.',
+    steps: ['Vérifiez le niveau de votre bouteille de gaz (la pression doit dépasser 70 bars / 1000 PSI minimum)', 'Si la bouteille est pleine : démontez et remontez le régulateur de pression (Étape 6)', 'Vérifiez les 2 joints toriques d\'étanchéité du régulateur (entrée et sortie)', 'La pression de sortie du régulateur doit être de 160–175 PSI (11–12 bars) — mesurable avec un chronographe au terrain'],
+    fixStep: 6, parts: ['Joint torique #010', 'Joint torique #012']
   },
   gas_leak: {
-    q: 'D\'où provient la fuite ?',
+    q: 'D\'où provient la fuite de gaz ?',
     opts: [
-      { label: 'Au niveau du canon (avant)', icon: '🔫', next: 'leak_barrel' },
-      { label: 'Au régulateur / ASA (arrière)', icon: '⚙️', next: 'leak_reg' },
-      { label: 'Au niveau du corps / grip', icon: '🏠', next: 'leak_body' },
+      { label: 'À l\'avant, autour du canon', icon: '🔫', next: 'leak_barrel' },
+      { label: 'À l\'arrière, au niveau de la bouteille de gaz ou du régulateur', icon: '⚙️', next: 'leak_reg' },
+      { label: 'Au milieu, sur le corps ou la poignée', icon: '🏠', next: 'leak_body' },
       { label: 'Partout / je ne suis pas sûr', icon: '🤷', next: 'leak_test' },
     ]
   },
   leak_barrel: {
     diag: true, sev: 'easy',
-    title: 'O-ring du canon usé ou manquant',
-    cause: 'Le joint torique à la base du canon ne fait plus l\'étanchéité.',
-    steps: ['Retirez le canon (antihoraire)', 'Inspectez l\'O-ring à la base (fissuré ? absent ?)', 'Remplacez par un O-ring #006 lubrifié', 'Revissez à la main jusqu\'au contact'],
-    fixStep: 2, parts: ['O-ring #006']
+    title: 'Joint torique du canon usé ou manquant',
+    cause: 'Le petit joint en caoutchouc (joint torique) à la base du canon ne fait plus l\'étanchéité — le gaz s\'échappe autour du canon.',
+    steps: ['Retirez le canon : saisissez-le, tournez d\'un quart de tour antihoraire, tirez vers l\'avant', 'Inspectez le petit joint torique noir à la base du canon (fissuré ? absent ? déformé ?)', 'Remplacez-le par un joint torique #006 légèrement lubrifié', 'Revissez le canon à la main jusqu\'à sentir le contact doux — pas besoin d\'outil'],
+    fixStep: 2, parts: ['Joint torique #006']
   },
   leak_reg: {
     diag: true, sev: 'medium',
-    title: 'O-ring du régulateur endommagé',
-    cause: 'Les joints d\'étanchéité du régulateur sont usés ou compressés.',
-    steps: ['Dépressurisez complètement', 'Dévissez le régulateur (clé à sangle)', 'Remplacez les 2 O-rings (entrée + sortie)', 'Lubrifiez avant réassemblage', 'Re-testez avec HPA à 400 PSI'],
-    fixStep: 6, parts: ['O-ring #010', 'O-ring #012']
+    title: 'Joints toriques du régulateur endommagés',
+    cause: 'Les joints d\'étanchéité du régulateur de pression (la pièce ronde vissée sous l\'arrière du corps) sont usés ou compressés — le gaz s\'échappe à haute pression.',
+    steps: ['Dépressurisez complètement : dévissez la bouteille de gaz, appuyez sur la gâchette plusieurs fois', 'Dévissez le régulateur avec la clé à sangle (sens antihoraire)', 'Remplacez les 2 joints toriques d\'étanchéité (un à l\'entrée, un à la sortie)', 'Lubrifiez les joints avec du Dye Slick Lube avant le remontage', 'Revissez et faites un test en ouvrant la bouteille à moitié pour vérifier l\'étanchéité'],
+    fixStep: 6, parts: ['Joint torique #010', 'Joint torique #012']
   },
   leak_body: {
     diag: true, sev: 'medium',
-    title: 'O-ring bolt — fuite interne',
-    cause: 'Un ou plusieurs O-rings du bolt laissent passer le gaz vers l\'extérieur.',
-    steps: ['Démontez back cap + bolt', 'Inspectez les 3 O-rings sous bonne lumière', 'Remplacez tout O-ring fissuré ou aplati', 'Lubrifiez les 3 O-rings', 'Réinsérez et testez'],
-    fixStep: 3, parts: ['O-ring #008', 'O-ring #009', 'O-ring #011']
+    title: 'Joints toriques du percuteur — fuite interne',
+    cause: 'Un ou plusieurs joints toriques du percuteur interne (bolt) laissent passer le gaz vers l\'extérieur du corps.',
+    steps: ['Retirez le capuchon arrière (capuchon plat à l\'arrière du corps, 2 vis clé hexagonale 3mm)', 'Sortez le percuteur (tirez vers l\'arrière par sa petite poignée)', 'Inspectez les 3 joints toriques sous une bonne lumière — remplacez tout joint fissuré, aplati ou durci', 'Lubrifiez les 3 joints toriques avec Dye Slick Lube', 'Réinsérez le percuteur et testez'],
+    fixStep: 3, parts: ['Joint torique #008', 'Joint torique #009', 'Joint torique #011']
   },
   leak_test: {
     diag: true, sev: 'info',
-    title: 'Test de détection — méthode eau savonneuse',
-    cause: 'Pour localiser précisément une fuite, utilisez la méthode eau + savon.',
-    steps: ['Mélangez eau + liquide vaisselle dans un vaporisateur', 'Connectez HPA à basse pression (300 PSI)', 'Vaporisez sur chaque joint : canon, régulateur, back cap', 'Les bulles apparaissent à l\'endroit exact de la fuite', 'Consultez le diagnostic correspondant'],
+    title: 'Localisation de fuite — méthode eau savonneuse',
+    cause: 'Pour trouver précisément d\'où vient la fuite, la méthode eau + savon est la plus simple et efficace.',
+    steps: ['Mélangez quelques gouttes de liquide vaisselle dans un vaporisateur d\'eau', 'Vissez la bouteille de gaz et ouvrez-la lentement à moitié seulement', 'Vaporisez sur chaque joint : autour du canon, autour du régulateur, sur le capuchon arrière, sur la poignée', 'Des bulles apparaissent exactement à l\'endroit de la fuite', 'Revissez la bouteille et consultez la section correspondante dans ce diagnostic'],
     fixStep: null, parts: ['Eau savonneuse', 'Vaporisateur']
   },
   irregular: {
@@ -130,17 +130,17 @@ const TREE = {
   },
   fps_high: {
     diag: true, sev: 'warning',
-    title: '⚠️ Vitesse excessive — Réglage immédiat requis',
-    cause: 'Au-delà de 300 FPS, vous risquez des blessures graves et une disqualification de terrain.',
-    steps: ['Accédez au menu électronique (hold gâchette 5 sec en OFF)', 'Naviguez vers le réglage de vélocité', 'Réduisez par incréments de 5 FPS, chronographiez à chaque fois', 'Objectif : 280–290 FPS avec bille .68 standard', 'Si le réglage électro ne suffit pas : ajustez le régulateur'],
+    title: '⚠️ Vitesse trop élevée — Réglage immédiat requis',
+    cause: 'Au-delà de 300 FPS (pieds par seconde, la vitesse des billes), vous risquez des blessures graves et une disqualification du terrain. La limite légale sur la plupart des terrains est 280–300 FPS.',
+    steps: ['Accédez au menu électronique du lanceur (maintenez la gâchette appuyée 5 sec alors que le lanceur est éteint)', 'Naviguez dans le menu vers le réglage de vélocité (vitesse de tir)', 'Réduisez par petits crans de 5 FPS et mesurez à chaque fois au chronographe du terrain', 'Objectif : 280–290 FPS avec des billes .68 standard', 'Si le réglage électronique ne suffit pas : ajustez le régulateur de pression (Étape 6)'],
     fixStep: null, parts: []
   },
   fps_low: {
     diag: true, sev: 'medium',
-    title: 'Vélocité insuffisante — Batterie ou O-ring',
-    cause: 'Batterie faible (solénoïde lent) ou O-ring bolt usé (fuite interne de gaz).',
-    steps: ['Commencez par remplacer la batterie CR2', 'Si inchangé : démontez bolt + inspectez O-rings', 'Vérifiez la pression bouteille HPA (> 1500 PSI recommandé)', 'Nettoyez et relubrifiez le bolt complet'],
-    fixStep: 3, parts: ['Batterie CR2', 'Kit O-rings bolt']
+    title: 'Vitesse insuffisante — Batterie ou joints toriques',
+    cause: 'Batterie faible (l\'électrovanne réagit trop lentement) ou joints toriques du percuteur usés (fuite interne de gaz qui réduit la puissance de propulsion).',
+    steps: ['Commencez par remplacer la batterie CR2 3V lithium (cause la plus fréquente)', 'Si ça ne change rien : démontez le percuteur (capuchon arrière + 2 vis) et inspectez ses 3 joints toriques', 'Vérifiez que votre bouteille de gaz n\'est pas presque vide (niveau recommandé : plus de 100 bars / 1500 PSI)', 'Nettoyez et relubrifiez complètement le percuteur et ses joints'],
+    fixStep: 3, parts: ['Batterie CR2', 'Kit joints toriques percuteur']
   },
   double_ball: {
     diag: true, sev: 'medium',
@@ -168,8 +168,8 @@ const TREE = {
   led_red: {
     diag: true, sev: 'easy',
     title: 'Batterie faible — Remplacement immédiat',
-    cause: 'LED rouge = tension batterie < 2.4V. Le solénoïde ne s\'active plus correctement.',
-    steps: ['Remplacez la batterie CR2 3V lithium', 'Utilisez exclusivement des CR2 lithium (pas alcaline)', 'La LED doit passer au vert après remplacement', 'Autonomie normale : ~50 000 billes'],
+    cause: 'LED rouge = batterie presque vide (tension sous 2,4V). L\'électrovanne ne s\'active plus correctement, ce qui peut causer des ratés ou des tirs incohérents.',
+    steps: ['Remplacez la batterie CR2 3V lithium (attention : CR2, pas CR123 ni AA)', 'Utilisez uniquement des piles CR2 lithium — les versions alcalines ne durent pas et ne fournissent pas assez de puissance par temps froid', 'Après remplacement, la LED doit passer au vert — c\'est le signe que tout va bien', 'Autonomie normale d\'une pile CR2 lithium : environ 40 000 à 60 000 billes'],
     fixStep: null, parts: ['Batterie CR2 3V Lithium']
   },
   led_green_issue: {
@@ -181,9 +181,9 @@ const TREE = {
   },
   no_led: {
     diag: true, sev: 'medium',
-    title: 'Alimentation coupée — Batterie ou solénoïde',
-    cause: 'Absence totale d\'alimentation : batterie morte, connecteur débranché ou court-circuit.',
-    steps: ['Remplacez en priorité la batterie CR2', 'Ouvrez le grip, vérifiez le connecteur solénoïde', 'Inspectez le PCB pour traces de corrosion', 'Si corrosion : nettoyez à l\'alcool isopropylique 99%'],
+    title: 'Alimentation coupée — Batterie ou connecteur débranché',
+    cause: 'Aucune LED = pas d\'alimentation électrique du tout. Causes possibles : batterie complètement morte, connecteur électrique débranché, ou court-circuit dû à de l\'humidité.',
+    steps: ['Remplacez en priorité la batterie CR2 3V lithium', 'Ouvrez la poignée (2 vis latérales) et vérifiez que le connecteur de l\'électrovanne est bien enfoncé dans son socket', 'Inspectez la carte électronique (la plaquette verte) pour des traces de dépôts blancs ou brunâtres (signe de corrosion due à l\'humidité)', 'Si vous voyez de la corrosion : nettoyez délicatement avec un coton-tige imbibé d\'alcool isopropylique à 99%'],
     fixStep: 4, parts: ['Batterie CR2', 'Alcool isopropylique 99%']
   },
   led_orange: {
@@ -203,9 +203,9 @@ const TREE = {
   },
   clang: {
     diag: true, sev: 'easy',
-    title: 'Bolt sec — Lubrification insuffisante',
-    cause: 'Le bolt percute les parois à sec. Symptôme classique après longue inactivité.',
-    steps: ['Démontez le bolt (back cap + 2 vis)', 'Appliquez Dye Lube généreusement sur les O-rings', 'Réinsérez, testez — le son doit devenir sourd et régulier'],
+    title: 'Percuteur à sec — Lubrification insuffisante',
+    cause: 'Le percuteur interne (bolt) frappe les parois du tunnel sans lubrifiant. Bruit métallique fort = percuteur complètement à sec. Symptôme classique après une longue période sans utilisation.',
+    steps: ['Démontez le percuteur : retirez le capuchon arrière (2 vis hexagonales 3mm sur la face arrière du corps)', 'Sortez le percuteur, appliquez Dye Slick Lube généreusement sur les 3 joints toriques et sur le corps du percuteur', 'Réinsérez et testez — après lubrification, le bruit de tir doit devenir plus sourd et régulier'],
     fixStep: 3, parts: ['Dye Slick Lube']
   },
   hiss: {
@@ -218,9 +218,9 @@ const TREE = {
   rattle: {
     diag: true, sev: 'easy',
     title: 'Vis desserrée',
-    cause: 'Une vis s\'est desserrée après les vibrations répétées du tir.',
-    steps: ['Vérifiez toutes les vis Allen avec vos clés', 'Resserrez légèrement sans forcer (aluminium !)', 'Priorité : back cap, grip frame, rail Picatinny'],
-    fixStep: 8, parts: ['Clés Allen set']
+    cause: 'Une vis s\'est desserrée à cause des vibrations répétées du tir. Normal après une journée de jeu intensive.',
+    steps: ['Vérifiez toutes les vis hexagonales du lanceur avec vos clés (3mm, 5/32", 1,5mm)', 'Resserrez légèrement sans forcer — le corps est en aluminium et se dénature facilement si on serre trop', 'Priorité aux zones les plus sollicitées : le capuchon arrière, la poignée, et le rail de montage supérieur'],
+    fixStep: 8, parts: ['Jeu de clés hexagonales']
   },
   feed: {
     q: 'Quel est le problème d\'alimentation ?',
