@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dye DAM — Guide Démontage & Montage</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ===== SKIP LINK ===== -->
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <div class="header-logo">
+        <svg class="logo-icon" viewBox="0 0 40 40" aria-hidden="true">
+          <rect x="2" y="15" width="30" height="10" rx="3" fill="#e63946"/>
+          <rect x="28" y="17" width="10" height="6" rx="2" fill="#c1121f"/>
+          <rect x="8" y="8" width="4" height="7" rx="1" fill="#457b9d"/>
+          <rect x="10" y="25" width="6" height="8" rx="1" fill="#1d3557"/>
+          <circle cx="6" cy="20" r="2" fill="#ffd166"/>
+        </svg>
+        <div>
+          <span class="logo-title">Dye DAM</span>
+          <span class="logo-sub">Dual Feed Assault Marker</span>
+        </div>
+      </div>
+      <nav class="header-nav" aria-label="Navigation principale">
+        <button class="nav-btn active" data-section="demontage" aria-pressed="true">
+          <span aria-hidden="true">🔧</span> Démontage
+        </button>
+        <button class="nav-btn" data-section="montage" aria-pressed="false">
+          <span aria-hidden="true">⚙️</span> Montage
+        </button>
+        <button class="nav-btn" data-section="pieces" aria-pressed="false">
+          <span aria-hidden="true">📋</span> Pièces
+        </button>
+        <button class="nav-btn" data-section="entretien" aria-pressed="false">
+          <span aria-hidden="true">🛠️</span> Entretien
+        </button>
+      </nav>
+      <div class="header-badge">
+        <span class="badge-label">Niveau</span>
+        <span class="badge-value">Intermédiaire</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-inner">
+      <div class="hero-text">
+        <h1 id="hero-title">Guide Complet<br><em>Dye DAM</em></h1>
+        <p class="hero-desc">Démontage, montage et entretien professionnel du lanceur paintball Dye Assault Matrix. Suivez chaque étape avec précision pour maintenir votre marqueur en parfait état de fonctionnement.</p>
+        <div class="hero-stats" role="list" aria-label="Statistiques du guide">
+          <div class="stat" role="listitem">
+            <span class="stat-num" aria-label="12 étapes">12</span>
+            <span class="stat-label">Étapes</span>
+          </div>
+          <div class="stat" role="listitem">
+            <span class="stat-num" aria-label="45 minutes estimées">~45</span>
+            <span class="stat-label">Minutes</span>
+          </div>
+          <div class="stat" role="listitem">
+            <span class="stat-num" aria-label="3 outils nécessaires">3</span>
+            <span class="stat-label">Outils</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual" aria-label="Illustration du Dye DAM">
+        <svg class="dam-illustration" viewBox="0 0 520 280" role="img" aria-label="Vue latérale du Dye DAM">
+          <defs>
+            <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2d3561"/>
+              <stop offset="100%" stop-color="#1a1f3a"/>
+            </linearGradient>
+            <linearGradient id="barrelGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#1a1f3a"/>
+              <stop offset="100%" stop-color="#3d4585"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- Canon / Barrel -->
+          <rect x="20" y="108" width="200" height="18" rx="4" fill="url(#barrelGrad)" stroke="#3d4585" stroke-width="1"/>
+          <rect x="20" y="110" width="200" height="4" rx="2" fill="#4a5299" opacity="0.5"/>
+          <circle cx="24" cy="117" r="6" fill="#111" stroke="#333" stroke-width="1"/>
+          <!-- Corps principal / Main body -->
+          <rect x="215" y="95" width="180" height="90" rx="8" fill="url(#bodyGrad)" stroke="#3d4585" stroke-width="1.5"/>
+          <!-- Ligne de détail haut -->
+          <rect x="215" y="98" width="180" height="6" rx="3" fill="#3d4585" opacity="0.6"/>
+          <!-- Poignée / Grip -->
+          <path d="M280 185 L280 245 Q280 260 295 260 L320 260 Q335 260 335 245 L335 185 Z" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.5"/>
+          <!-- Détails poignée -->
+          <rect x="285" y="195" width="45" height="4" rx="2" fill="#2d3561" opacity="0.8"/>
+          <rect x="285" y="205" width="45" height="4" rx="2" fill="#2d3561" opacity="0.8"/>
+          <rect x="285" y="215" width="45" height="4" rx="2" fill="#2d3561" opacity="0.8"/>
+          <rect x="285" y="225" width="45" height="4" rx="2" fill="#2d3561" opacity="0.8"/>
+          <!-- Gâchette / Trigger -->
+          <path d="M295 185 L290 215 L300 215 L305 185 Z" fill="#e63946" stroke="#c1121f" stroke-width="1"/>
+          <!-- Garde gâchette -->
+          <path d="M275 183 Q275 225 280 230 Q307 235 335 230 Q340 225 340 183" fill="none" stroke="#3d4585" stroke-width="2"/>
+          <!-- Chargeur / Hopper mount -->
+          <rect x="330" y="65" width="40" height="35" rx="5" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.5"/>
+          <rect x="335" y="70" width="30" height="25" rx="3" fill="#111" stroke="#222" stroke-width="1"/>
+          <!-- Régulateur / Regulator -->
+          <circle cx="435" cy="140" r="22" fill="#1a1f3a" stroke="#457b9d" stroke-width="2"/>
+          <circle cx="435" cy="140" r="14" fill="#0d1117" stroke="#2d6a8f" stroke-width="1.5"/>
+          <circle cx="435" cy="140" r="6" fill="#457b9d" filter="url(#glow)"/>
+          <!-- Alimentation gaz / ASA -->
+          <rect x="420" y="158" width="30" height="18" rx="4" fill="#1a1f3a" stroke="#457b9d" stroke-width="1.5"/>
+          <!-- Ligne Picatinny rail top -->
+          <rect x="220" y="90" width="170" height="8" rx="2" fill="#252b50" stroke="#3d4585" stroke-width="1"/>
+          <rect x="225" y="91" width="10" height="6" rx="1" fill="#1a1f3a"/>
+          <rect x="240" y="91" width="10" height="6" rx="1" fill="#1a1f3a"/>
+          <rect x="255" y="91" width="10" height="6" rx="1" fill="#1a1f3a"/>
+          <rect x="270" y="91" width="10" height="6" rx="1" fill="#1a1f3a"/>
+          <rect x="285" y="91" width="10" height="6" rx="1" fill="#1a1f3a"/>
+          <rect x="300" y="91" width="10" height="6" rx="1" fill="#1a1f3a"/>
+          <rect x="315" y="91" width="10" height="6" rx="1" fill="#1a1f3a"/>
+          <rect x="330" y="91" width="10" height="6" rx="1" fill="#1a1f3a"/>
+          <rect x="345" y="91" width="10" height="6" rx="1" fill="#1a1f3a"/>
+          <rect x="360" y="91" width="10" height="6" rx="1" fill="#1a1f3a"/>
+          <!-- Crosse / Stock -->
+          <path d="M393 100 L460 105 L465 175 L393 183 Z" fill="#141828" stroke="#2d3561" stroke-width="1.5"/>
+          <rect x="400" y="108" width="55" height="12" rx="3" fill="#1a1f3a" opacity="0.5"/>
+          <rect x="400" y="158" width="55" height="12" rx="3" fill="#1a1f3a" opacity="0.5"/>
+          <!-- Logo DYE -->
+          <text x="240" y="150" font-family="Arial Black, sans-serif" font-size="22" font-weight="900" fill="#e63946" opacity="0.9" letter-spacing="2">DYE</text>
+          <text x="240" y="168" font-family="Arial, sans-serif" font-size="10" fill="#457b9d" letter-spacing="3">D·A·M</text>
+          <!-- Points lumineux status -->
+          <circle cx="360" cy="110" r="4" fill="#06d6a0" filter="url(#glow)" class="status-dot"/>
+          <!-- Vis Allen -->
+          <circle cx="230" cy="120" r="3" fill="#2d3561" stroke="#4a5299" stroke-width="1"/>
+          <circle cx="390" cy="120" r="3" fill="#2d3561" stroke="#4a5299" stroke-width="1"/>
+          <circle cx="390" cy="160" r="3" fill="#2d3561" stroke="#4a5299" stroke-width="1"/>
+          <circle cx="230" cy="160" r="3" fill="#2d3561" stroke="#4a5299" stroke-width="1"/>
+        </svg>
+        <div class="hero-labels" aria-hidden="true">
+          <span class="part-label" style="top:8%;left:12%">Canon</span>
+          <span class="part-label" style="top:18%;left:48%">Rail Picatinny</span>
+          <span class="part-label" style="top:8%;left:70%">Chargeur</span>
+          <span class="part-label" style="top:55%;left:75%">Régulateur</span>
+          <span class="part-label" style="top:78%;left:55%">Poignée</span>
+          <span class="part-label" style="top:38%;left:86%">Crosse</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TOOLBAR ===== -->
+  <div class="toolbar" role="toolbar" aria-label="Contrôles du guide">
+    <div class="toolbar-inner">
+      <div class="progress-wrap">
+        <span class="progress-label" id="progress-label">Étape <span id="current-step">1</span> / <span id="total-steps">8</span></span>
+        <div class="progress-bar" role="progressbar" aria-labelledby="progress-label" aria-valuenow="1" aria-valuemin="1" aria-valuemax="8" id="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width:12.5%"></div>
+        </div>
+      </div>
+      <div class="toolbar-controls">
+        <button class="ctrl-btn" id="btn-prev" aria-label="Étape précédente" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="ctrl-btn" id="btn-next" aria-label="Étape suivante">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="ctrl-btn ctrl-btn--accent" id="btn-play" aria-label="Lecture automatique" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="currentColor" id="play-icon"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN ===== -->
+  <main id="main-content" class="main">
+
+    <!-- SECTION DEMONTAGE -->
+    <section id="section-demontage" class="guide-section active" aria-labelledby="demontage-title">
+      <h2 id="demontage-title" class="section-title">
+        <span class="section-icon" aria-hidden="true">🔧</span>
+        Démontage du Dye DAM
+      </h2>
+      <p class="section-intro">Suivez les étapes dans l'ordre exact. Posez chaque pièce sur une surface propre et rangez les vis dans un récipient pour éviter toute perte.</p>
+
+      <div class="steps-grid" id="steps-container" role="list" aria-label="Étapes de démontage">
+
+        <!-- ÉTAPE 1 -->
+        <article class="step-card active" data-step="1" role="listitem" aria-label="Étape 1 : Sécurité et préparation">
+          <div class="step-header">
+            <div class="step-badge" aria-hidden="true">01</div>
+            <div class="step-meta">
+              <h3 class="step-title">Sécurité & Préparation</h3>
+              <span class="step-duration">⏱ 2 min</span>
+            </div>
+            <span class="step-status" aria-label="Étape non complétée">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+            </span>
+          </div>
+          <div class="step-visual">
+            <svg viewBox="0 0 320 180" role="img" aria-label="Illustration : retrait de la source de gaz">
+              <defs>
+                <linearGradient id="tableGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#1e2030"/>
+                  <stop offset="100%" stop-color="#141620"/>
+                </linearGradient>
+              </defs>
+              <rect width="320" height="180" fill="#0d0f1a"/>
+              <!-- Table -->
+              <rect x="10" y="140" width="300" height="10" rx="3" fill="#1e2030" stroke="#2d3561" stroke-width="1"/>
+              <!-- DAM simplifié -->
+              <rect x="50" y="80" width="140" height="55" rx="6" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.5"/>
+              <rect x="30" y="93" width="25" height="14" rx="3" fill="#252b50" stroke="#3d4585" stroke-width="1"/>
+              <rect x="165" y="85" width="40" height="45" rx="4" fill="#141828"/>
+              <!-- Bouteille CO2 / HPA -->
+              <ellipse cx="240" cy="110" rx="28" ry="18" fill="#0d4f3c" stroke="#06d6a0" stroke-width="2"/>
+              <rect x="212" y="100" width="56" height="20" rx="4" fill="#0d4f3c" stroke="#06d6a0" stroke-width="1.5"/>
+              <text x="228" y="113" font-family="monospace" font-size="9" fill="#06d6a0" text-anchor="middle">HPA</text>
+              <!-- Flèche de retrait -->
+              <line x1="210" y1="110" x2="180" y2="110" stroke="#e63946" stroke-width="3" stroke-dasharray="5,3" marker-end="url(#arrowRed)"/>
+              <defs>
+                <marker id="arrowRed" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                  <polygon points="0 0, 10 3.5, 0 7" fill="#e63946"/>
+                </marker>
+              </defs>
+              <!-- Warning badge -->
+              <rect x="230" y="30" width="75" height="32" rx="6" fill="#e63946" opacity="0.15" stroke="#e63946" stroke-width="1"/>
+              <text x="243" y="47" font-family="sans-serif" font-size="10" fill="#e63946" font-weight="bold">⚠ VIDER</text>
+              <text x="243" y="57" font-family="sans-serif" font-size="9" fill="#e63946">la source</text>
+              <!-- Billes -->
+              <circle cx="100" cy="155" r="5" fill="#ffd166" stroke="#e5b800" stroke-width="1"/>
+              <circle cx="115" cy="155" r="5" fill="#ffd166" stroke="#e5b800" stroke-width="1"/>
+              <circle cx="130" cy="155" r="5" fill="#ffd166" stroke="#e5b800" stroke-width="1"/>
+              <line x1="125" y1="145" x2="125" y2="138" stroke="#06d6a0" stroke-width="1.5" stroke-dasharray="3,2"/>
+              <text x="100" y="175" font-family="sans-serif" font-size="9" fill="#06d6a0">Billes retirées ✓</text>
+            </svg>
+          </div>
+          <div class="step-body">
+            <ol class="step-instructions">
+              <li>Vérifiez que le marqueur est déchargé — retirez le chargeur ou le magasin.</li>
+              <li>Dévissez et retirez complètement la source de gaz (bouteille HPA ou CO₂).</li>
+              <li>Pointez le marqueur dans une direction sûre et tirez 2–3 fois pour purger le gaz résiduel.</li>
+              <li>Posez le marqueur sur une surface propre, propulseur orienté à gauche.</li>
+            </ol>
+            <div class="step-tip" role="note">
+              <span class="tip-icon" aria-hidden="true">💡</span>
+              <strong>Conseil :</strong> Utilisez un tapis de démontage pour ne pas rayer l'anodisation et éviter de perdre de petites pièces.
+            </div>
+            <div class="step-warning" role="alert">
+              <span class="tip-icon" aria-hidden="true">⚠️</span>
+              <strong>Sécurité :</strong> Ne dépassez jamais cette étape si vous n'êtes pas certain que le marqueur est entièrement dépressurisé.
+            </div>
+          </div>
+          <div class="step-footer">
+            <div class="step-tools">
+              <span class="tool-tag" aria-label="Outil : tapis de démontage">🧲 Tapis</span>
+              <span class="tool-tag" aria-label="Outil : récipient pour vis">🥤 Récipient</span>
+            </div>
+            <button class="complete-btn" data-step="1" aria-label="Marquer l'étape 1 comme complétée">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Valider
+            </button>
+          </div>
+        </article>
+
+        <!-- ÉTAPE 2 -->
+        <article class="step-card" data-step="2" role="listitem" aria-label="Étape 2 : Retrait du canon">
+          <div class="step-header">
+            <div class="step-badge" aria-hidden="true">02</div>
+            <div class="step-meta">
+              <h3 class="step-title">Retrait du Canon</h3>
+              <span class="step-duration">⏱ 3 min</span>
+            </div>
+            <span class="step-status" aria-label="Étape non complétée">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+            </span>
+          </div>
+          <div class="step-visual">
+            <svg viewBox="0 0 320 180" role="img" aria-label="Illustration : retrait du canon Dye Ultralite">
+              <rect width="320" height="180" fill="#0d0f1a"/>
+              <!-- Canon détaché -->
+              <rect x="15" y="85" width="150" height="14" rx="4" fill="#252b50" stroke="#457b9d" stroke-width="1.5"/>
+              <circle cx="18" cy="92" r="5" fill="#111" stroke="#333"/>
+              <!-- Flèche de retrait -->
+              <line x1="160" y1="92" x2="195" y2="92" stroke="#06d6a0" stroke-width="2.5" stroke-dasharray="4,2" marker-end="url(#arrowGreen)"/>
+              <defs>
+                <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                  <polygon points="0 0, 10 3.5, 0 7" fill="#06d6a0"/>
+                </marker>
+              </defs>
+              <!-- Corps marqueur -->
+              <rect x="200" y="70" width="100" height="70" rx="6" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.5"/>
+              <!-- Pas de vis / Thread zone -->
+              <rect x="197" y="84" width="12" height="16" rx="3" fill="#0d4f3c" stroke="#06d6a0" stroke-width="1.5"/>
+              <line x1="200" y1="86" x2="207" y2="86" stroke="#06d6a0" stroke-width="0.8"/>
+              <line x1="200" y1="89" x2="207" y2="89" stroke="#06d6a0" stroke-width="0.8"/>
+              <line x1="200" y1="92" x2="207" y2="92" stroke="#06d6a0" stroke-width="0.8"/>
+              <line x1="200" y1="95" x2="207" y2="95" stroke="#06d6a0" stroke-width="0.8"/>
+              <line x1="200" y1="98" x2="207" y2="98" stroke="#06d6a0" stroke-width="0.8"/>
+              <!-- Label -->
+              <text x="30" y="115" font-family="sans-serif" font-size="10" fill="#457b9d">Canon Dye Ultralite</text>
+              <!-- Rotation indication -->
+              <path d="M 145 75 A 20 20 0 0 1 165 92" fill="none" stroke="#ffd166" stroke-width="2" stroke-dasharray="4,2"/>
+              <polygon points="145,75 138,80 148,82" fill="#ffd166"/>
+              <text x="140" y="68" font-family="sans-serif" font-size="9" fill="#ffd166">Rotation ↺</text>
+              <!-- O-ring -->
+              <ellipse cx="192" cy="92" rx="6" ry="8" fill="none" stroke="#e63946" stroke-width="2"/>
+              <text x="165" y="130" font-family="sans-serif" font-size="9" fill="#e63946">O-ring !</text>
+              <line x1="192" y1="100" x2="180" y2="125" stroke="#e63946" stroke-width="1" stroke-dasharray="3,2"/>
+            </svg>
+          </div>
+          <div class="step-body">
+            <ol class="step-instructions">
+              <li>Saisissez le canon fermement et tournez dans le sens antihoraire (environ ¼ de tour).</li>
+              <li>Tirez le canon vers l'avant pour le dégager du corps du marqueur.</li>
+              <li>Inspectez et récupérez le joint torique (O-ring) situé à la base du canon.</li>
+              <li>Conservez l'O-ring dans un sachet — c'est une pièce critique.</li>
+            </ol>
+            <div class="step-tip" role="note">
+              <span class="tip-icon" aria-hidden="true">💡</span>
+              <strong>Conseil :</strong> Le canon Dye Ultralite utilise un filetage <em>Autococker</em> ⅞-14 UNS — ne forcez jamais si ça résiste, vérifiez l'alignement.
+            </div>
+          </div>
+          <div class="step-footer">
+            <div class="step-tools">
+              <span class="tool-tag">👐 Mains</span>
+              <span class="tool-tag">🔴 O-ring spare</span>
+            </div>
+            <button class="complete-btn" data-step="2" aria-label="Marquer l'étape 2 comme complétée">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Valider
+            </button>
+          </div>
+        </article>
+
+        <!-- ÉTAPE 3 -->
+        <article class="step-card" data-step="3" role="listitem" aria-label="Étape 3 : Retrait du système de boulon">
+          <div class="step-header">
+            <div class="step-badge" aria-hidden="true">03</div>
+            <div class="step-meta">
+              <h3 class="step-title">Système de Boulon (Bolt)</h3>
+              <span class="step-duration">⏱ 5 min</span>
+            </div>
+            <span class="step-status" aria-label="Étape non complétée">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+            </span>
+          </div>
+          <div class="step-visual">
+            <svg viewBox="0 0 320 180" role="img" aria-label="Illustration : système de boulon OOPS">
+              <rect width="320" height="180" fill="#0d0f1a"/>
+              <!-- Corps marqueur -->
+              <rect x="20" y="55" width="180" height="80" rx="6" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.5"/>
+              <!-- Couvercle back cap -->
+              <rect x="196" y="60" width="25" height="70" rx="4" fill="#252b50" stroke="#457b9d" stroke-width="2"/>
+              <!-- Vis back cap -->
+              <circle cx="208" cy="75" r="5" fill="#1a1f3a" stroke="#457b9d" stroke-width="1.5"/>
+              <line x1="205" y1="75" x2="211" y2="75" stroke="#457b9d" stroke-width="1.5"/>
+              <line x1="208" y1="72" x2="208" y2="78" stroke="#457b9d" stroke-width="1.5"/>
+              <circle cx="208" cy="115" r="5" fill="#1a1f3a" stroke="#457b9d" stroke-width="1.5"/>
+              <line x1="205" y1="115" x2="211" y2="115" stroke="#457b9d" stroke-width="1.5"/>
+              <line x1="208" y1="112" x2="208" y2="118" stroke="#457b9d" stroke-width="1.5"/>
+              <!-- Bolt extrait -->
+              <rect x="230" y="80" width="70" height="20" rx="4" fill="#2d3561" stroke="#457b9d" stroke-width="1.5"/>
+              <rect x="230" y="84" width="15" height="12" rx="2" fill="#e63946"/>
+              <rect x="248" y="83" width="52" height="14" rx="2" fill="#252b50"/>
+              <!-- O-rings bolt -->
+              <ellipse cx="260" cy="90" rx="4" ry="7" fill="none" stroke="#06d6a0" stroke-width="2"/>
+              <ellipse cx="278" cy="90" rx="4" ry="7" fill="none" stroke="#06d6a0" stroke-width="2"/>
+              <text x="228" y="115" font-family="sans-serif" font-size="9" fill="#06d6a0">Bolt OOPS</text>
+              <!-- Flèche -->
+              <line x1="222" y1="90" x2="232" y2="90" stroke="#ffd166" stroke-width="2" stroke-dasharray="3,2" marker-end="url(#arrowYellow)"/>
+              <defs>
+                <marker id="arrowYellow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                  <polygon points="0 0, 10 3.5, 0 7" fill="#ffd166"/>
+                </marker>
+              </defs>
+              <!-- Allen key -->
+              <path d="M 215 40 L 215 60 L 225 60" fill="none" stroke="#c8c8c8" stroke-width="3" stroke-linecap="round"/>
+              <text x="205" y="35" font-family="sans-serif" font-size="9" fill="#c8c8c8">3mm Allen</text>
+              <!-- Labels -->
+              <text x="25" y="50" font-family="sans-serif" font-size="10" fill="#457b9d">Corps marqueur</text>
+            </svg>
+          </div>
+          <div class="step-body">
+            <ol class="step-instructions">
+              <li>Retirez les 2 vis Allen (3mm) du capot arrière (back cap) avec la clé hexagonale.</li>
+              <li>Faites glisser le back cap vers l'arrière et posez-le de côté.</li>
+              <li>Saisissez la poignée du boulon (bolt handle) et tirez l'ensemble bolt vers l'arrière, puis sortez-le.</li>
+              <li>Retirez délicatement les 3 O-rings du bolt — notez leur position exacte.</li>
+            </ol>
+            <div class="step-tip" role="note">
+              <span class="tip-icon" aria-hidden="true">💡</span>
+              <strong>Conseil :</strong> Le Dye DAM utilise le système <strong>OOPS</strong> (One Piece Spool) — le bolt et le spool sont une seule pièce. Ne les séparez pas.
+            </div>
+          </div>
+          <div class="step-footer">
+            <div class="step-tools">
+              <span class="tool-tag">🔩 Allen 3mm</span>
+              <span class="tool-tag">🟢 O-rings ×3</span>
+            </div>
+            <button class="complete-btn" data-step="3" aria-label="Marquer l'étape 3 comme complétée">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Valider
+            </button>
+          </div>
+        </article>
+
+        <!-- ÉTAPE 4 -->
+        <article class="step-card" data-step="4" role="listitem" aria-label="Étape 4 : Séparation poignée-corps">
+          <div class="step-header">
+            <div class="step-badge" aria-hidden="true">04</div>
+            <div class="step-meta">
+              <h3 class="step-title">Séparation Poignée / Corps</h3>
+              <span class="step-duration">⏱ 5 min</span>
+            </div>
+            <span class="step-status" aria-label="Étape non complétée">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+            </span>
+          </div>
+          <div class="step-visual">
+            <svg viewBox="0 0 320 180" role="img" aria-label="Illustration : séparation frame et grip">
+              <rect width="320" height="180" fill="#0d0f1a"/>
+              <!-- Corps (upper) -->
+              <rect x="30" y="40" width="160" height="60" rx="6" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.5"/>
+              <text x="90" y="75" font-family="sans-serif" font-size="10" fill="#3d4585" text-anchor="middle">Corps (Upper)</text>
+              <!-- Grip (lower) séparé -->
+              <path d="M80 130 L80 168 Q80 178 90 178 L120 178 Q130 178 130 168 L130 130 Z" fill="#141828" stroke="#e63946" stroke-width="1.5" stroke-dasharray="4,2"/>
+              <text x="105" y="160" font-family="sans-serif" font-size="9" fill="#e63946" text-anchor="middle">Grip Frame</text>
+              <!-- Vis de connexion -->
+              <line x1="105" y1="100" x2="105" y2="130" stroke="#ffd166" stroke-width="1.5" stroke-dasharray="4,2"/>
+              <!-- Vis 1 -->
+              <circle cx="68" cy="105" r="6" fill="#252b50" stroke="#ffd166" stroke-width="1.5"/>
+              <line x1="65" y1="105" x2="71" y2="105" stroke="#ffd166" stroke-width="1.5"/>
+              <line x1="68" y1="102" x2="68" y2="108" stroke="#ffd166" stroke-width="1.5"/>
+              <text x="55" y="122" font-family="sans-serif" font-size="8" fill="#ffd166">Vis ①</text>
+              <!-- Vis 2 -->
+              <circle cx="143" cy="105" r="6" fill="#252b50" stroke="#ffd166" stroke-width="1.5"/>
+              <line x1="140" y1="105" x2="146" y2="105" stroke="#ffd166" stroke-width="1.5"/>
+              <line x1="143" y1="102" x2="143" y2="108" stroke="#ffd166" stroke-width="1.5"/>
+              <text x="133" y="122" font-family="sans-serif" font-size="8" fill="#ffd166">Vis ②</text>
+              <!-- Solénoïde indication -->
+              <rect x="200" y="50" width="100" height="40" rx="5" fill="#0d1117" stroke="#457b9d" stroke-width="1.5"/>
+              <rect x="210" y="58" width="25" height="24" rx="3" fill="#1a3a5c" stroke="#457b9d"/>
+              <text x="240" y="70" font-family="sans-serif" font-size="8" fill="#457b9d">Solénoïde</text>
+              <text x="240" y="82" font-family="sans-serif" font-size="8" fill="#457b9d">Connecteur</text>
+              <line x1="205" y1="72" x2="195" y2="85" stroke="#e63946" stroke-width="1.5" stroke-dasharray="3,2"/>
+              <text x="160" y="92" font-family="sans-serif" font-size="8" fill="#e63946">Débrancher !</text>
+              <!-- Allen -->
+              <text x="200" y="130" font-family="sans-serif" font-size="9" fill="#c8c8c8">🔩 Clé Allen 5/32"</text>
+            </svg>
+          </div>
+          <div class="step-body">
+            <ol class="step-instructions">
+              <li>Repérez les 2 vis Allen (5/32") qui relient le grip frame au corps du marqueur.</li>
+              <li>Débranchez délicatement le connecteur électrique du solénoïde avant de tirer sur le grip.</li>
+              <li>Dévissez les 2 vis et conservez-les ensemble — elles sont différentes de la taille standard.</li>
+              <li>Tirez le grip frame vers le bas pour le séparer du corps. Ne forcez pas.</li>
+            </ol>
+            <div class="step-tip" role="note">
+              <span class="tip-icon" aria-hidden="true">💡</span>
+              <strong>Conseil :</strong> Photographiez le câblage du solénoïde avant de débrancher pour faciliter le remontage.
+            </div>
+            <div class="step-warning" role="alert">
+              <span class="tip-icon" aria-hidden="true">⚠️</span>
+              <strong>Attention :</strong> Le câble du solénoïde est fragile. Ne tirez jamais sur le fil, saisissez toujours le connecteur plastique.
+            </div>
+          </div>
+          <div class="step-footer">
+            <div class="step-tools">
+              <span class="tool-tag">🔩 Allen 5/32"</span>
+              <span class="tool-tag">📸 Photo câblage</span>
+            </div>
+            <button class="complete-btn" data-step="4" aria-label="Marquer l'étape 4 comme complétée">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Valider
+            </button>
+          </div>
+        </article>
+
+        <!-- ÉTAPE 5 -->
+        <article class="step-card" data-step="5" role="listitem" aria-label="Étape 5 : Retrait du solénoïde">
+          <div class="step-header">
+            <div class="step-badge" aria-hidden="true">05</div>
+            <div class="step-meta">
+              <h3 class="step-title">Retrait du Solénoïde</h3>
+              <span class="step-duration">⏱ 5 min</span>
+            </div>
+            <span class="step-status" aria-label="Étape non complétée">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+            </span>
+          </div>
+          <div class="step-visual">
+            <svg viewBox="0 0 320 180" role="img" aria-label="Illustration : solénoïde Dye DAM">
+              <rect width="320" height="180" fill="#0d0f1a"/>
+              <!-- Solénoïde bloc -->
+              <rect x="60" y="50" width="120" height="80" rx="8" fill="#0d1117" stroke="#457b9d" stroke-width="2"/>
+              <!-- Circuit imprimé PCB -->
+              <rect x="70" y="60" width="100" height="50" rx="4" fill="#0f2b1a" stroke="#06d6a0" stroke-width="1"/>
+              <rect x="80" y="68" width="30" height="18" rx="3" fill="#1a3a5c"/>
+              <rect x="118" y="68" width="12" height="8" rx="1" fill="#e63946"/>
+              <rect x="118" y="80" width="12" height="8" rx="1" fill="#ffd166"/>
+              <circle cx="150" cy="75" r="8" fill="#1a3a5c" stroke="#457b9d" stroke-width="1"/>
+              <text x="75" y="103" font-family="monospace" font-size="7" fill="#06d6a0">SOLENOID v2.1</text>
+              <!-- Connecteur -->
+              <rect x="170" y="80" width="30" height="20" rx="3" fill="#252b50" stroke="#457b9d" stroke-width="1.5"/>
+              <circle cx="177" cy="90" r="3" fill="#e63946"/>
+              <circle cx="186" cy="90" r="3" fill="#ffd166"/>
+              <circle cx="195" cy="90" r="3" fill="#06d6a0"/>
+              <text x="165" y="115" font-family="sans-serif" font-size="8" fill="#457b9d" text-anchor="middle">Connecteur</text>
+              <!-- Vis montage -->
+              <circle cx="68" cy="58" r="5" fill="#252b50" stroke="#c8c8c8" stroke-width="1"/>
+              <line x1="65.5" y1="58" x2="70.5" y2="58" stroke="#c8c8c8" stroke-width="1.5"/>
+              <line x1="68" y1="55.5" x2="68" y2="60.5" stroke="#c8c8c8" stroke-width="1.5"/>
+              <circle cx="172" cy="58" r="5" fill="#252b50" stroke="#c8c8c8" stroke-width="1"/>
+              <line x1="169.5" y1="58" x2="174.5" y2="58" stroke="#c8c8c8" stroke-width="1.5"/>
+              <line x1="172" y1="55.5" x2="172" y2="60.5" stroke="#c8c8c8" stroke-width="1.5"/>
+              <circle cx="68" cy="122" r="5" fill="#252b50" stroke="#c8c8c8" stroke-width="1"/>
+              <line x1="65.5" y1="122" x2="70.5" y2="122" stroke="#c8c8c8" stroke-width="1.5"/>
+              <line x1="68" y1="119.5" x2="68" y2="124.5" stroke="#c8c8c8" stroke-width="1.5"/>
+              <circle cx="172" cy="122" r="5" fill="#252b50" stroke="#c8c8c8" stroke-width="1"/>
+              <line x1="169.5" y1="122" x2="174.5" y2="122" stroke="#c8c8c8" stroke-width="1.5"/>
+              <line x1="172" y1="119.5" x2="172" y2="124.5" stroke="#c8c8c8" stroke-width="1.5"/>
+              <!-- Label -->
+              <text x="120" y="155" font-family="sans-serif" font-size="10" fill="#457b9d" text-anchor="middle">Solénoïde Dye 3-Way</text>
+              <text x="120" y="167" font-family="monospace" font-size="8" fill="#2d6a8f" text-anchor="middle">Vis: 4× M2 1.5mm Allen</text>
+            </svg>
+          </div>
+          <div class="step-body">
+            <ol class="step-instructions">
+              <li>Localisez les 4 vis M2 (clé Allen 1.5mm) qui maintiennent le solénoïde dans son logement.</li>
+              <li>Dévissez les 4 vis en croix — alternez pour éviter de tordre la platine.</li>
+              <li>Soulevez délicatement le solénoïde en le déboîtant de son rail de guidage.</li>
+              <li>Déposez le solénoïde sur le tapis, côté circuit orienté vers le haut.</li>
+            </ol>
+            <div class="step-tip" role="note">
+              <span class="tip-icon" aria-hidden="true">💡</span>
+              <strong>Conseil :</strong> Si le solénoïde semble résister, vérifiez qu'il ne reste aucune vis cachée sous l'étiquette de série.
+            </div>
+          </div>
+          <div class="step-footer">
+            <div class="step-tools">
+              <span class="tool-tag">🔩 Allen 1.5mm</span>
+              <span class="tool-tag">⚡ Décharge statique</span>
+            </div>
+            <button class="complete-btn" data-step="5" aria-label="Marquer l'étape 5 comme complétée">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Valider
+            </button>
+          </div>
+        </article>
+
+        <!-- ÉTAPE 6 -->
+        <article class="step-card" data-step="6" role="listitem" aria-label="Étape 6 : Retrait du régulateur">
+          <div class="step-header">
+            <div class="step-badge" aria-hidden="true">06</div>
+            <div class="step-meta">
+              <h3 class="step-title">Retrait du Régulateur</h3>
+              <span class="step-duration">⏱ 5 min</span>
+            </div>
+            <span class="step-status" aria-label="Étape non complétée">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+            </span>
+          </div>
+          <div class="step-visual">
+            <svg viewBox="0 0 320 180" role="img" aria-label="Illustration : régulateur Dye Rotor">
+              <rect width="320" height="180" fill="#0d0f1a"/>
+              <!-- Régulateur -->
+              <circle cx="120" cy="90" r="55" fill="#0d1117" stroke="#457b9d" stroke-width="2.5"/>
+              <circle cx="120" cy="90" r="40" fill="#111827" stroke="#2d6a8f" stroke-width="1.5"/>
+              <circle cx="120" cy="90" r="22" fill="#1a1f3a" stroke="#457b9d" stroke-width="1.5"/>
+              <circle cx="120" cy="90" r="10" fill="#457b9d" opacity="0.9"/>
+              <!-- Graduation pression -->
+              <line x1="120" y1="38" x2="120" y2="48" stroke="#c8c8c8" stroke-width="2"/>
+              <line x1="155" y1="58" x2="147" y2="64" stroke="#c8c8c8" stroke-width="1.5"/>
+              <line x1="155" y1="123" x2="147" y2="117" stroke="#c8c8c8" stroke-width="1.5"/>
+              <line x1="120" y1="143" x2="120" y2="133" stroke="#c8c8c8" stroke-width="2"/>
+              <line x1="85" y1="123" x2="93" y2="117" stroke="#c8c8c8" stroke-width="1.5"/>
+              <line x1="85" y1="58" x2="93" y2="64" stroke="#c8c8c8" stroke-width="1.5"/>
+              <!-- Pression indicateur -->
+              <text x="120" y="93" font-family="monospace" font-size="9" fill="#ffd166" text-anchor="middle">165</text>
+              <text x="120" y="103" font-family="monospace" font-size="7" fill="#ffd166" text-anchor="middle">PSI</text>
+              <!-- Sortie gaz -->
+              <rect x="175" y="82" width="30" height="16" rx="3" fill="#252b50" stroke="#06d6a0" stroke-width="1.5"/>
+              <line x1="195" y1="90" x2="215" y2="90" stroke="#06d6a0" stroke-width="2" stroke-dasharray="4,2" marker-end="url(#arrowGreen2)"/>
+              <defs>
+                <marker id="arrowGreen2" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                  <polygon points="0 0, 10 3.5, 0 7" fill="#06d6a0"/>
+                </marker>
+              </defs>
+              <text x="220" y="88" font-family="sans-serif" font-size="9" fill="#06d6a0">Vers ASA</text>
+              <!-- Pince à sangle -->
+              <text x="55" y="165" font-family="sans-serif" font-size="9" fill="#c8c8c8">Clé à sangle ou outil Dye</text>
+              <text x="55" y="155" font-family="sans-serif" font-size="9" fill="#ffd166">Rotation ↺ sens antihoraire</text>
+            </svg>
+          </div>
+          <div class="step-body">
+            <ol class="step-instructions">
+              <li>Utilisez la clé à sangle Dye (ou équivalent) pour saisir le corps du régulateur.</li>
+              <li>Tournez dans le sens antihoraire jusqu'au dégagement complet du filetage.</li>
+              <li>Récupérez les 2 O-rings d'étanchéité — l'un en entrée, l'autre en sortie.</li>
+              <li>Ne démontez pas l'intérieur du régulateur — c'est une pièce calibrée en usine.</li>
+            </ol>
+            <div class="step-tip" role="note">
+              <span class="tip-icon" aria-hidden="true">💡</span>
+              <strong>Conseil :</strong> La pression de sortie standard du Dye DAM est <strong>165–175 PSI</strong>. Ne modifiez pas ce réglage sauf si vous maîtrisez le réglage de pression électronique.
+            </div>
+          </div>
+          <div class="step-footer">
+            <div class="step-tools">
+              <span class="tool-tag">🔧 Clé sangle</span>
+              <span class="tool-tag">🔴 O-rings ×2</span>
+            </div>
+            <button class="complete-btn" data-step="6" aria-label="Marquer l'étape 6 comme complétée">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Valider
+            </button>
+          </div>
+        </article>
+
+        <!-- ÉTAPE 7 -->
+        <article class="step-card" data-step="7" role="listitem" aria-label="Étape 7 : Nettoyage et inspection">
+          <div class="step-header">
+            <div class="step-badge" aria-hidden="true">07</div>
+            <div class="step-meta">
+              <h3 class="step-title">Nettoyage & Inspection</h3>
+              <span class="step-duration">⏱ 10 min</span>
+            </div>
+            <span class="step-status" aria-label="Étape non complétée">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+            </span>
+          </div>
+          <div class="step-visual">
+            <svg viewBox="0 0 320 180" role="img" aria-label="Illustration : nettoyage et inspection des pièces">
+              <rect width="320" height="180" fill="#0d0f1a"/>
+              <!-- Tapis nettoyage -->
+              <rect x="10" y="100" width="300" height="65" rx="8" fill="#0d2013" stroke="#06d6a0" stroke-width="1" stroke-dasharray="5,3"/>
+              <text x="20" y="115" font-family="sans-serif" font-size="9" fill="#06d6a0" opacity="0.6">SURFACE DE TRAVAIL PROPRE</text>
+              <!-- Pièces disposées -->
+              <!-- Canon -->
+              <rect x="25" y="115" width="70" height="10" rx="3" fill="#252b50" stroke="#457b9d" stroke-width="1"/>
+              <text x="60" y="138" font-family="sans-serif" font-size="7" fill="#457b9d" text-anchor="middle">Canon</text>
+              <!-- Bolt -->
+              <rect x="110" y="115" width="50" height="12" rx="3" fill="#2d3561" stroke="#457b9d" stroke-width="1"/>
+              <text x="135" y="138" font-family="sans-serif" font-size="7" fill="#457b9d" text-anchor="middle">Bolt</text>
+              <!-- Régulateur -->
+              <circle cx="210" cy="123" r="20" fill="#0d1117" stroke="#457b9d" stroke-width="1"/>
+              <text x="210" y="154" font-family="sans-serif" font-size="7" fill="#457b9d" text-anchor="middle">Régulateur</text>
+              <!-- Solénoïde -->
+              <rect x="240" y="113" width="55" height="22" rx="3" fill="#0d1117" stroke="#457b9d" stroke-width="1"/>
+              <text x="267" y="148" font-family="sans-serif" font-size="7" fill="#457b9d" text-anchor="middle">Solénoïde</text>
+              <!-- Produits nettoyage -->
+              <!-- Spray -->
+              <rect x="20" y="35" width="18" height="50" rx="4" fill="#1a3a5c" stroke="#457b9d" stroke-width="1.5"/>
+              <rect x="24" y="30" width="10" height="8" rx="2" fill="#457b9d"/>
+              <text x="29" y="100" font-family="sans-serif" font-size="7" fill="#457b9d" text-anchor="middle">Spray</text>
+              <!-- Chiffon -->
+              <rect x="55" y="50" width="35" height="28" rx="3" fill="#1a2a1a" stroke="#06d6a0" stroke-width="1" stroke-dasharray="2,1"/>
+              <text x="72" y="90" font-family="sans-serif" font-size="7" fill="#06d6a0" text-anchor="middle">Chiffon</text>
+              <!-- Graisse -->
+              <rect x="105" y="45" width="22" height="40" rx="4" fill="#2d2000" stroke="#ffd166" stroke-width="1.5"/>
+              <text x="116" y="42" font-family="sans-serif" font-size="7" fill="#ffd166" text-anchor="middle">LUBE</text>
+              <text x="116" y="98" font-family="sans-serif" font-size="7" fill="#ffd166" text-anchor="middle">Graisse</text>
+              <!-- Check marqueurs -->
+              <text x="165" y="45" font-family="sans-serif" font-size="9" fill="#e63946" font-weight="bold">Points d'inspection :</text>
+              <text x="165" y="58" font-family="sans-serif" font-size="8" fill="#c8c8c8">✓ O-rings : pas de craquelures</text>
+              <text x="165" y="70" font-family="sans-serif" font-size="8" fill="#c8c8c8">✓ Bolt : surface lisse</text>
+              <text x="165" y="82" font-family="sans-serif" font-size="8" fill="#c8c8c8">✓ Canon : pas d'ébréchures</text>
+              <text x="165" y="94" font-family="sans-serif" font-size="8" fill="#c8c8c8">✓ Corps : pas de corrosion</text>
+            </svg>
+          </div>
+          <div class="step-body">
+            <ol class="step-instructions">
+              <li>Utilisez un spray dégraissant pour nettoyer le corps du marqueur, le canon et le bolt — essuyez immédiatement.</li>
+              <li>Inspectez tous les O-rings : remplacez tout joint présentant une fissure, une déformation ou un durcissement.</li>
+              <li>Vérifiez le canal d'air interne avec un éclairage — aucun débris ne doit être présent.</li>
+              <li>Appliquez une fine couche de graisse Dye Slick Lube (ou équivalente) sur les O-rings et les surfaces glissantes du bolt.</li>
+            </ol>
+            <div class="step-tip" role="note">
+              <span class="tip-icon" aria-hidden="true">💡</span>
+              <strong>Conseil :</strong> N'utilisez <em>jamais</em> de graisse à base de pétrole (WD-40, huile moteur) — elles gonflent les joints NBR et dégradent les pièces anodisées.
+            </div>
+          </div>
+          <div class="step-footer">
+            <div class="step-tools">
+              <span class="tool-tag">🧴 Dégraissant</span>
+              <span class="tool-tag">🧹 Chiffon microfibre</span>
+              <span class="tool-tag">🟢 Dye Lube</span>
+            </div>
+            <button class="complete-btn" data-step="7" aria-label="Marquer l'étape 7 comme complétée">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Valider
+            </button>
+          </div>
+        </article>
+
+        <!-- ÉTAPE 8 -->
+        <article class="step-card" data-step="8" role="listitem" aria-label="Étape 8 : Remontage complet">
+          <div class="step-header">
+            <div class="step-badge" aria-hidden="true">08</div>
+            <div class="step-meta">
+              <h3 class="step-title">Remontage Complet</h3>
+              <span class="step-duration">⏱ 10 min</span>
+            </div>
+            <span class="step-status" aria-label="Étape non complétée">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+            </span>
+          </div>
+          <div class="step-visual">
+            <svg viewBox="0 0 320 180" role="img" aria-label="Illustration : ordre de remontage">
+              <rect width="320" height="180" fill="#0d0f1a"/>
+              <!-- Flèche de progression -->
+              <line x1="30" y1="90" x2="290" y2="90" stroke="#2d3561" stroke-width="2"/>
+              <!-- Étapes remontage -->
+              <!-- 1: Régulateur -->
+              <circle cx="50" cy="90" r="22" fill="#1a1f3a" stroke="#457b9d" stroke-width="2"/>
+              <circle cx="50" cy="90" r="10" fill="#457b9d" opacity="0.7"/>
+              <text x="50" y="122" font-family="sans-serif" font-size="8" fill="#457b9d" text-anchor="middle">Régu.</text>
+              <text x="50" y="133" font-family="sans-serif" font-size="7" fill="#2d6a8f" text-anchor="middle">①</text>
+              <!-- 2: Solénoïde -->
+              <rect x="98" y="72" width="44" height="36" rx="5" fill="#0d1117" stroke="#06d6a0" stroke-width="2"/>
+              <text x="120" y="93" font-family="sans-serif" font-size="7" fill="#06d6a0" text-anchor="middle">Solé-</text>
+              <text x="120" y="103" font-family="sans-serif" font-size="7" fill="#06d6a0" text-anchor="middle">noïde</text>
+              <text x="120" y="118" font-family="sans-serif" font-size="7" fill="#06d6a0" text-anchor="middle">②</text>
+              <!-- 3: Grip/Corps -->
+              <rect x="165" y="70" width="40" height="40" rx="5" fill="#141828" stroke="#ffd166" stroke-width="2"/>
+              <text x="185" y="93" font-family="sans-serif" font-size="7" fill="#ffd166" text-anchor="middle">Grip</text>
+              <text x="185" y="103" font-family="sans-serif" font-size="7" fill="#ffd166" text-anchor="middle">Frame</text>
+              <text x="185" y="118" font-family="sans-serif" font-size="7" fill="#ffd166" text-anchor="middle">③</text>
+              <!-- 4: Bolt -->
+              <rect x="220" y="77" width="50" height="26" rx="4" fill="#2d3561" stroke="#e63946" stroke-width="2"/>
+              <text x="245" y="93" font-family="sans-serif" font-size="8" fill="#e63946" text-anchor="middle">Bolt</text>
+              <text x="245" y="113" font-family="sans-serif" font-size="7" fill="#e63946" text-anchor="middle">④</text>
+              <!-- 5: Canon -->
+              <rect x="20" y="145" width="80" height="12" rx="3" fill="#252b50" stroke="#457b9d" stroke-width="1.5"/>
+              <text x="60" y="168" font-family="sans-serif" font-size="8" fill="#457b9d" text-anchor="middle">Canon ⑤</text>
+              <!-- Couple serrage -->
+              <text x="130" y="150" font-family="sans-serif" font-size="9" fill="#06d6a0">Couples de serrage :</text>
+              <text x="130" y="163" font-family="sans-serif" font-size="8" fill="#c8c8c8">Back cap: 15 in-lb | Grip: 20 in-lb</text>
+              <!-- Check final -->
+              <text x="25" y="35" font-family="sans-serif" font-size="9" fill="#06d6a0" font-weight="bold">✓ Ordre de remontage inversé</text>
+            </svg>
+          </div>
+          <div class="step-body">
+            <ol class="step-instructions">
+              <li><strong>① Régulateur :</strong> Revissez dans le sens horaire, serrage à la main puis ¼ de tour clé — ne surchargez pas.</li>
+              <li><strong>② Solénoïde :</strong> Positionnez en alignant le rail, revissez les 4 vis M2 en croix, rebranchez le connecteur.</li>
+              <li><strong>③ Grip Frame :</strong> Emboîtez en alignant les deux broches, revissez les 2 vis Allen 5/32" à 20 in-lb.</li>
+              <li><strong>④ Bolt :</strong> Graissez légèrement, insérez depuis l'arrière, repositionnez le back cap, serrez les vis à 15 in-lb.</li>
+              <li><strong>⑤ Canon :</strong> Réinsérez l'O-ring lubrifié, vissez en sens horaire jusqu'au contact doux — ne forcez pas.</li>
+            </ol>
+            <div class="step-tip" role="note">
+              <span class="tip-icon" aria-hidden="true">💡</span>
+              <strong>Vérification finale :</strong> Raccordez la source HPA à basse pression (400 PSI) — écoutez les fuites (sifflement) avant de tester le tir.
+            </div>
+          </div>
+          <div class="step-footer">
+            <div class="step-tools">
+              <span class="tool-tag">🔩 Allen 5/32" & 3mm</span>
+              <span class="tool-tag">📏 Clé dynamométrique</span>
+            </div>
+            <button class="complete-btn" data-step="8" aria-label="Marquer l'étape 8 comme complétée">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Valider
+            </button>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- SECTION PIECES -->
+    <section id="section-pieces" class="guide-section" aria-labelledby="pieces-title">
+      <h2 id="pieces-title" class="section-title">
+        <span class="section-icon" aria-hidden="true">📋</span>
+        Nomenclature des Pièces
+      </h2>
+      <div class="parts-grid" role="list" aria-label="Liste des pièces du Dye DAM">
+
+        <article class="part-card" role="listitem">
+          <div class="part-icon" style="background:#1a3a5c" aria-hidden="true">
+            <svg viewBox="0 0 40 40"><rect x="3" y="17" width="34" height="6" rx="2" fill="#457b9d"/><circle cx="5" cy="20" r="4" fill="#2d6a8f"/></svg>
+          </div>
+          <div class="part-info">
+            <h3 class="part-name">Canon Dye Ultralite</h3>
+            <p class="part-ref">Réf. DYE-DAM-BRL-14</p>
+            <p class="part-desc">Canon 14" anodisé, filetage Autococker ⅞-14 UNS. Compatible Freak insert system.</p>
+            <span class="part-tag part-tag--critical">Critique</span>
+          </div>
+          <div class="part-qty" aria-label="Quantité : 1">×1</div>
+        </article>
+
+        <article class="part-card" role="listitem">
+          <div class="part-icon" style="background:#1a1a2e" aria-hidden="true">
+            <svg viewBox="0 0 40 40"><rect x="5" y="14" width="30" height="12" rx="4" fill="#e63946"/><rect x="8" y="17" width="10" height="6" rx="1" fill="#c1121f"/></svg>
+          </div>
+          <div class="part-info">
+            <h3 class="part-name">Bolt OOPS (One Piece Spool)</h3>
+            <p class="part-ref">Réf. DYE-DAM-BOLT-01</p>
+            <p class="part-desc">Système Spool monopiece, 3 O-rings NBR. Pression de fonctionnement 165 PSI.</p>
+            <span class="part-tag part-tag--critical">Critique</span>
+          </div>
+          <div class="part-qty" aria-label="Quantité : 1">×1</div>
+        </article>
+
+        <article class="part-card" role="listitem">
+          <div class="part-icon" style="background:#0d2013" aria-hidden="true">
+            <svg viewBox="0 0 40 40">
+              <circle cx="20" cy="20" r="16" fill="none" stroke="#06d6a0" stroke-width="2.5"/>
+              <circle cx="20" cy="20" r="8" fill="#06d6a0" opacity="0.5"/>
+              <circle cx="20" cy="20" r="3" fill="#06d6a0"/>
+            </svg>
+          </div>
+          <div class="part-info">
+            <h3 class="part-name">Régulateur Dye</h3>
+            <p class="part-ref">Réf. DYE-DAM-REG-165</p>
+            <p class="part-desc">Régulateur 2 étages, sortie 165 PSI usine. Inox + aluminium anodisé.</p>
+            <span class="part-tag part-tag--important">Important</span>
+          </div>
+          <div class="part-qty" aria-label="Quantité : 1">×1</div>
+        </article>
+
+        <article class="part-card" role="listitem">
+          <div class="part-icon" style="background:#1a0d1a" aria-hidden="true">
+            <svg viewBox="0 0 40 40">
+              <rect x="5" y="12" width="30" height="16" rx="3" fill="#0d1117" stroke="#457b9d" stroke-width="1.5"/>
+              <circle cx="30" cy="20" r="5" fill="#1a3a5c" stroke="#457b9d"/>
+              <rect x="10" y="16" width="12" height="8" rx="2" fill="#0f2b1a"/>
+            </svg>
+          </div>
+          <div class="part-info">
+            <h3 class="part-name">Solénoïde 3-Way</h3>
+            <p class="part-ref">Réf. DYE-DAM-SOL-3W</p>
+            <p class="part-desc">Electrovanne 3 voies, 12V DC, temps de réponse &lt;4ms. PCB intégré.</p>
+            <span class="part-tag part-tag--important">Important</span>
+          </div>
+          <div class="part-qty" aria-label="Quantité : 1">×1</div>
+        </article>
+
+        <article class="part-card" role="listitem">
+          <div class="part-icon" style="background:#1a0000" aria-hidden="true">
+            <svg viewBox="0 0 40 40">
+              <ellipse cx="20" cy="20" rx="12" ry="6" fill="none" stroke="#e63946" stroke-width="3"/>
+              <ellipse cx="20" cy="26" rx="12" ry="6" fill="none" stroke="#e63946" stroke-width="2" opacity="0.5"/>
+              <ellipse cx="20" cy="14" rx="12" ry="6" fill="none" stroke="#e63946" stroke-width="2" opacity="0.5"/>
+            </svg>
+          </div>
+          <div class="part-info">
+            <h3 class="part-name">Kit O-rings complet</h3>
+            <p class="part-ref">Réf. DYE-DAM-ORING-KIT</p>
+            <p class="part-desc">14 joints NBR torique, tailles 006 à 014. Remplacement recommandé chaque 50k billes.</p>
+            <span class="part-tag part-tag--consumable">Consommable</span>
+          </div>
+          <div class="part-qty" aria-label="Quantité : 14">×14</div>
+        </article>
+
+        <article class="part-card" role="listitem">
+          <div class="part-icon" style="background:#2d2000" aria-hidden="true">
+            <svg viewBox="0 0 40 40">
+              <rect x="14" y="5" width="12" height="30" rx="4" fill="#2d2000" stroke="#ffd166" stroke-width="1.5"/>
+              <rect x="17" y="5" width="6" height="6" rx="2" fill="#ffd166" opacity="0.7"/>
+              <text x="20" y="28" font-family="monospace" font-size="8" fill="#ffd166" text-anchor="middle">CR2</text>
+            </svg>
+          </div>
+          <div class="part-info">
+            <h3 class="part-name">Batterie CR2 Lithium</h3>
+            <p class="part-ref">Réf. CR2-3V-LITHIUM</p>
+            <p class="part-desc">3V lithium CR2. Autonomie ~50 000 billes. Vérifiez avant chaque partie.</p>
+            <span class="part-tag part-tag--consumable">Consommable</span>
+          </div>
+          <div class="part-qty" aria-label="Quantité : 1">×1</div>
+        </article>
+
+        <article class="part-card" role="listitem">
+          <div class="part-icon" style="background:#0d1a0d" aria-hidden="true">
+            <svg viewBox="0 0 40 40">
+              <rect x="8" y="16" width="24" height="10" rx="3" fill="#0d2013" stroke="#06d6a0" stroke-width="1.5"/>
+              <rect x="16" y="8" width="8" height="10" rx="2" fill="#06d6a0" opacity="0.7"/>
+            </svg>
+          </div>
+          <div class="part-info">
+            <h3 class="part-name">Chargeur Dye / Magasin MAG</h3>
+            <p class="part-ref">Réf. DYE-DAM-MAG-20</p>
+            <p class="part-desc">Magasin 20 coups First Strike, compatible systèmes double-alimentation DAM.</p>
+            <span class="part-tag">Optionnel</span>
+          </div>
+          <div class="part-qty" aria-label="Quantité variable">×1–2</div>
+        </article>
+
+        <article class="part-card" role="listitem">
+          <div class="part-icon" style="background:#1a1a00" aria-hidden="true">
+            <svg viewBox="0 0 40 40">
+              <path d="M8 32 L20 8 L32 32 Z" fill="none" stroke="#ffd166" stroke-width="2"/>
+              <line x1="8" y1="32" x2="32" y2="32" stroke="#ffd166" stroke-width="2"/>
+              <text x="20" y="28" font-family="sans-serif" font-size="9" fill="#ffd166" text-anchor="middle">!</text>
+            </svg>
+          </div>
+          <div class="part-info">
+            <h3 class="part-name">Vis Allen Set (8 pièces)</h3>
+            <p class="part-ref">Réf. DYE-DAM-SCREW-KIT</p>
+            <p class="part-desc">M2 ×4, 5/32" ×2, 3/32" ×2. Acier inox. Remplacez toute vis stripée immédiatement.</p>
+            <span class="part-tag part-tag--important">Important</span>
+          </div>
+          <div class="part-qty" aria-label="Quantité : 8">×8</div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- SECTION ENTRETIEN -->
+    <section id="section-entretien" class="guide-section" aria-labelledby="entretien-title">
+      <h2 id="entretien-title" class="section-title">
+        <span class="section-icon" aria-hidden="true">🛠️</span>
+        Planning d'Entretien
+      </h2>
+      <div class="maintenance-grid">
+
+        <div class="maint-card maint-card--daily">
+          <div class="maint-header">
+            <span class="maint-frequency">Après chaque partie</span>
+            <span class="maint-badge maint-badge--green">Rapide</span>
+          </div>
+          <ul class="maint-list" role="list">
+            <li>Retirer et nettoyer le canon</li>
+            <li>Essuyer le corps extérieur</li>
+            <li>Vérifier le niveau de batterie CR2</li>
+            <li>Inspecter visuellement les O-rings du canon</li>
+            <li>Retirer la source de gaz pour le stockage</li>
+          </ul>
+          <div class="maint-time">⏱ 5 minutes</div>
+        </div>
+
+        <div class="maint-card maint-card--weekly">
+          <div class="maint-header">
+            <span class="maint-frequency">Toutes les 5 000 billes</span>
+            <span class="maint-badge maint-badge--yellow">Standard</span>
+          </div>
+          <ul class="maint-list" role="list">
+            <li>Démontage complet du bolt</li>
+            <li>Nettoyage du canal d'air</li>
+            <li>Relubrification O-rings bolt</li>
+            <li>Nettoyage du solénoïde (air comprimé)</li>
+            <li>Vérification des câbles et connexions</li>
+            <li>Test de chronographe (280 FPS standard)</li>
+          </ul>
+          <div class="maint-time">⏱ 30 minutes</div>
+        </div>
+
+        <div class="maint-card maint-card--monthly">
+          <div class="maint-header">
+            <span class="maint-frequency">Toutes les 50 000 billes</span>
+            <span class="maint-badge maint-badge--red">Complet</span>
+          </div>
+          <ul class="maint-list" role="list">
+            <li>Démontage intégral (toutes sections)</li>
+            <li>Remplacement kit O-rings complet</li>
+            <li>Inspection régulateur (fuites, pression)</li>
+            <li>Vérification rail Picatinny + vis</li>
+            <li>Graissage complet de toutes les pièces mobiles</li>
+            <li>Mise à jour firmware si disponible</li>
+            <li>Envoi en révision technicien si doutes</li>
+          </ul>
+          <div class="maint-time">⏱ 60–90 minutes</div>
+        </div>
+
+      </div>
+
+      <!-- Tableau de dépannage -->
+      <div class="troubleshoot">
+        <h3 class="troubleshoot-title">
+          <span aria-hidden="true">🔍</span> Diagnostic Rapide
+        </h3>
+        <div class="trouble-table" role="table" aria-label="Tableau de dépannage">
+          <div class="trouble-row trouble-row--header" role="row">
+            <div role="columnheader">Symptôme</div>
+            <div role="columnheader">Cause probable</div>
+            <div role="columnheader">Solution</div>
+          </div>
+          <div class="trouble-row" role="row">
+            <div role="cell"><span class="symptom">Fuite au canon</span></div>
+            <div role="cell">O-ring canon usé</div>
+            <div role="cell">Remplacer O-ring #006, lubrifier</div>
+          </div>
+          <div class="trouble-row" role="row">
+            <div role="cell"><span class="symptom">Pas de tir électro</span></div>
+            <div role="cell">Batterie CR2 déchargée</div>
+            <div role="cell">Remplacer batterie CR2 3V</div>
+          </div>
+          <div class="trouble-row" role="row">
+            <div role="cell"><span class="symptom">Tir irrégulier</span></div>
+            <div role="cell">Bolt encrassé / O-rings secs</div>
+            <div role="cell">Nettoyage + relubrification bolt</div>
+          </div>
+          <div class="trouble-row" role="row">
+            <div role="cell"><span class="symptom">Fuite régulateur</span></div>
+            <div role="cell">O-ring régulateur endommagé</div>
+            <div role="cell">Déposer régulateur, remplacer O-rings</div>
+          </div>
+          <div class="trouble-row" role="row">
+            <div role="cell"><span class="symptom">Vitesse &gt; 300 FPS</span></div>
+            <div role="cell">Régulateur dé-réglé</div>
+            <div role="cell">Régler via menu électronique ou renvoyer</div>
+          </div>
+          <div class="trouble-row" role="row">
+            <div role="cell"><span class="symptom">Double-bille</span></div>
+            <div role="cell">Détecteur optique encrassé</div>
+            <div role="cell">Nettoyer capteur avec air comprimé</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION MONTAGE (résumé visuel) -->
+    <section id="section-montage" class="guide-section" aria-labelledby="montage-title">
+      <h2 id="montage-title" class="section-title">
+        <span class="section-icon" aria-hidden="true">⚙️</span>
+        Ordre de Montage — Vue d'ensemble
+      </h2>
+      <p class="section-intro">Le montage est le strict inverse du démontage. Respectez les couples de serrage pour ne pas endommager les filetages aluminium.</p>
+
+      <div class="assembly-flow" role="list" aria-label="Flux d'assemblage">
+        <div class="flow-step" role="listitem">
+          <div class="flow-num" aria-hidden="true">①</div>
+          <div class="flow-icon" aria-hidden="true">
+            <svg viewBox="0 0 50 50">
+              <circle cx="25" cy="25" r="20" fill="#1a1f3a" stroke="#457b9d" stroke-width="2"/>
+              <circle cx="25" cy="25" r="10" fill="#457b9d" opacity="0.7"/>
+              <circle cx="25" cy="25" r="4" fill="#457b9d"/>
+            </svg>
+          </div>
+          <h3>Régulateur</h3>
+          <p>Visser sens horaire<br>O-rings lubrifiés</p>
+          <span class="flow-torque">Main + ¼ tour</span>
+        </div>
+        <div class="flow-arrow" aria-hidden="true">→</div>
+
+        <div class="flow-step" role="listitem">
+          <div class="flow-num" aria-hidden="true">②</div>
+          <div class="flow-icon" aria-hidden="true">
+            <svg viewBox="0 0 50 50">
+              <rect x="8" y="15" width="34" height="20" rx="4" fill="#0d1117" stroke="#06d6a0" stroke-width="2"/>
+              <rect x="14" y="20" width="14" height="10" rx="2" fill="#0f2b1a"/>
+            </svg>
+          </div>
+          <h3>Solénoïde</h3>
+          <p>Aligner rail<br>4× vis M2 en croix</p>
+          <span class="flow-torque">8 in-lb</span>
+        </div>
+        <div class="flow-arrow" aria-hidden="true">→</div>
+
+        <div class="flow-step" role="listitem">
+          <div class="flow-num" aria-hidden="true">③</div>
+          <div class="flow-icon" aria-hidden="true">
+            <svg viewBox="0 0 50 50">
+              <path d="M15 40 L15 50 Q15 58 22 58 L28 58 Q35 58 35 50 L35 40 Z" transform="scale(0.85) translate(0,-5)" fill="#141828" stroke="#ffd166" stroke-width="2"/>
+              <rect x="12" y="15" width="26" height="28" rx="4" fill="#1a1f3a" stroke="#ffd166" stroke-width="2"/>
+            </svg>
+          </div>
+          <h3>Grip Frame</h3>
+          <p>Brancher solénoïde<br>2× vis 5/32"</p>
+          <span class="flow-torque">20 in-lb</span>
+        </div>
+        <div class="flow-arrow" aria-hidden="true">→</div>
+
+        <div class="flow-step" role="listitem">
+          <div class="flow-num" aria-hidden="true">④</div>
+          <div class="flow-icon" aria-hidden="true">
+            <svg viewBox="0 0 50 50">
+              <rect x="8" y="19" width="34" height="12" rx="4" fill="#2d3561" stroke="#e63946" stroke-width="2"/>
+              <rect x="8" y="22" width="10" height="6" rx="1" fill="#e63946"/>
+            </svg>
+          </div>
+          <h3>Bolt + Back Cap</h3>
+          <p>Graisser bolt<br>2× vis 3mm</p>
+          <span class="flow-torque">15 in-lb</span>
+        </div>
+        <div class="flow-arrow" aria-hidden="true">→</div>
+
+        <div class="flow-step" role="listitem">
+          <div class="flow-num" aria-hidden="true">⑤</div>
+          <div class="flow-icon" aria-hidden="true">
+            <svg viewBox="0 0 50 50">
+              <rect x="5" y="21" width="40" height="8" rx="3" fill="#252b50" stroke="#457b9d" stroke-width="2"/>
+              <circle cx="8" cy="25" r="5" fill="#111" stroke="#333"/>
+            </svg>
+          </div>
+          <h3>Canon</h3>
+          <p>O-ring positionné<br>Visser sens horaire</p>
+          <span class="flow-torque">À la main</span>
+        </div>
+        <div class="flow-arrow" aria-hidden="true">→</div>
+
+        <div class="flow-step flow-step--success" role="listitem">
+          <div class="flow-num" aria-hidden="true">✓</div>
+          <div class="flow-icon" aria-hidden="true">
+            <svg viewBox="0 0 50 50">
+              <circle cx="25" cy="25" r="20" fill="#0d2013" stroke="#06d6a0" stroke-width="2.5"/>
+              <polyline points="15 25 22 33 35 17" fill="none" stroke="#06d6a0" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Test HPA</h3>
+          <p>Source basse pression<br>Vérifier fuites</p>
+          <span class="flow-torque success-label">Opérationnel !</span>
+        </div>
+      </div>
+
+      <!-- Outils nécessaires -->
+      <div class="tools-panel">
+        <h3 class="tools-title">Outils nécessaires</h3>
+        <div class="tools-list" role="list" aria-label="Liste des outils">
+          <div class="tool-item" role="listitem">
+            <span class="tool-ico" aria-hidden="true">🔩</span>
+            <div>
+              <strong>Clés Allen</strong>
+              <span>1.5mm, 3mm, 5/32"</span>
+            </div>
+          </div>
+          <div class="tool-item" role="listitem">
+            <span class="tool-ico" aria-hidden="true">🔧</span>
+            <div>
+              <strong>Clé à sangle</strong>
+              <span>Pour le régulateur</span>
+            </div>
+          </div>
+          <div class="tool-item" role="listitem">
+            <span class="tool-ico" aria-hidden="true">📏</span>
+            <div>
+              <strong>Clé dynamométrique</strong>
+              <span>0–25 in-lb recommandé</span>
+            </div>
+          </div>
+          <div class="tool-item" role="listitem">
+            <span class="tool-ico" aria-hidden="true">🟢</span>
+            <div>
+              <strong>Dye Slick Lube</strong>
+              <span>Ou graisse silicone</span>
+            </div>
+          </div>
+          <div class="tool-item" role="listitem">
+            <span class="tool-ico" aria-hidden="true">🧲</span>
+            <div>
+              <strong>Tapis de démontage</strong>
+              <span>Surface protégée + magnétique</span>
+            </div>
+          </div>
+          <div class="tool-item" role="listitem">
+            <span class="tool-ico" aria-hidden="true">💡</span>
+            <div>
+              <strong>Lampe de poche</strong>
+              <span>Inspection canaux d'air</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-inner">
+      <p>Guide Dye DAM — Usage professionnel &amp; maintenance terrain</p>
+      <p class="footer-note">Respectez toujours les règles de sécurité du terrain. La pression maximale légale est de 300 FPS avec bille .68 calibre.</p>
+      <p class="footer-copy">Dye Precision® est une marque déposée. Guide non officiel à des fins éducatives.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
