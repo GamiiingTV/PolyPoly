@@ -37,7 +37,7 @@ function BreakthroughOverlay({ discovery }: { discovery: Discovery }) {
 
         {/* Label */}
         <div className="text-[11px] font-bold tracking-[0.4em] text-amber-400 mb-3 uppercase">
-          Breakthrough Discovery
+          Découverte Révolutionnaire
         </div>
 
         {/* Title */}

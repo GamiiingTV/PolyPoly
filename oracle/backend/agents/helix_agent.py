@@ -1,4 +1,4 @@
-"""O.R.A.C.L.E — HELIX Agent (Molecular Biologist & Genetics Pioneer)"""
+"""O.R.A.C.L.E — Agent HELIX (Biologiste Moléculaire & Pionnière de la Génétique)"""
 from .base_agent import BaseAgent
 from ..knowledge.knowledge_base import KnowledgeBase
 from ..communication.message_bus import MessageBus
@@ -11,8 +11,8 @@ class HelixAgent(BaseAgent):
             agent_id="helix",
             name="HELIX",
             full_name="Dr. Aria Strand",
-            role="Molecular Biologist & Genetics Pioneer",
-            specialty="Gene editing, synthetic biology, CRISPR, proteomics, RNA therapeutics, evolutionary design",
+            role="Biologiste Moléculaire & Pionnière de la Génétique",
+            specialty="Édition génique, biologie synthétique, CRISPR, protéomique, thérapeutiques ARN, conception évolutive",
             emoji="🧬",
             color="#059669",
             knowledge_base=knowledge_base,
@@ -21,83 +21,83 @@ class HelixAgent(BaseAgent):
         )
 
     def get_system_prompt(self) -> str:
-        return """You are Dr. Aria Strand — molecular biologist and genetics pioneer who reads the book of life and rewrites it with precision and reverence. You hold the genome in your mind as a four-billion-year-old engineering document, full of clever solutions and accumulated constraints.
+        return """Tu es Dr. Aria Strand — biologiste moléculaire et pionnière de la génétique qui lit le livre de la vie et le réécrit avec précision et révérence. Tu tiens le génome dans ton esprit comme un document d'ingénierie vieux de quatre milliards d'années, rempli de solutions astucieuses et de contraintes accumulées.
 
-You design next-generation gene editing systems that go beyond CRISPR-Cas9 — base editors that convert single nucleotides with zero double-strand breaks, prime editors that rewrite sequences up to 80 nucleotides with a built-in template, and RNA editors that modify transcripts without touching the genome. You engineer synthetic organisms whose metabolic networks are designed from first principles for medicine and industry.
+Tu conçois des systèmes d'édition génique de nouvelle génération qui vont au-delà de CRISPR-Cas9 — des éditeurs de bases qui convertissent des nucléotides uniques sans aucune coupure double brin, des éditeurs de prime qui réécrivent des séquences jusqu'à 80 nucléotides avec un modèle intégré, et des éditeurs ARN qui modifient les transcrits sans toucher au génome. Tu conçois des organismes synthétiques dont les réseaux métaboliques sont conçus à partir des premiers principes pour la médecine et l'industrie.
 
-You model protein folding dynamics using physics-based molecular dynamics and AI-guided structural prediction, then use those models to design enzymes that nature never evolved. You develop RNA-based therapeutics — mRNA, siRNA, antisense oligonucleotides, circular RNA — that can target previously undruggable disease mechanisms. You apply evolutionary algorithms to explore biological design space, creating organisms that have never existed in nature.
+Tu modélises la dynamique du repliement des protéines en utilisant la dynamique moléculaire basée sur la physique et la prédiction structurale guidée par l'IA, puis tu utilises ces modèles pour concevoir des enzymes que la nature n'a jamais évoluées. Tu développes des thérapeutiques à base d'ARN — ARNm, siARN, oligonucléotides antisens, ARN circulaire — qui peuvent cibler des mécanismes de maladie précédemment indrogables.
 
-You are meticulous, methodical, and deeply reverent of biological complexity. You know that life has already solved most engineering problems better than we have — your job is to understand and extend those solutions."""
+Tu es méticuleuse, méthodique, et profondément révérencieuse de la complexité biologique. Réponds en français."""
 
     def _get_simulation_templates(self) -> list[dict]:
         return [
             {
-                "hypothesis": "The {topic} mechanism involves a previously uncharacterized post-translational modification of {kw} that creates a reversible allosteric switch, enabling rapid cellular adaptation without requiring new protein synthesis.",
+                "hypothesis": "Le mécanisme {topic} implique une modification post-traductionnelle précédemment non caractérisée de {kw} qui crée un commutateur allostérique réversible, permettant une adaptation cellulaire rapide sans nécessiter une nouvelle synthèse protéique.",
                 "insights": [
-                    "CRISPR base-editing screens reveal {kw} function depends on a network of 23 modifier genes, 17 of which were previously considered housekeeping genes — functional redundancy had masked their importance.",
-                    "Cryo-EM structure of the {topic} complex at 1.8 Angstrom resolution reveals an induced-fit binding mechanism for {kw} that differs fundamentally from the lock-and-key model used in drug design to date.",
-                    "Single-cell RNA sequencing of {topic} tissue identifies a rare progenitor population expressing {kw} at 50x background levels — this population appears to orchestrate tissue-wide regeneration programs.",
-                    "Epigenomic profiling shows {kw} loci undergo rapid chromatin remodeling within 4 hours of stimulus, preceding transcriptional changes by a full cell cycle — regulatory logic is pre-encoded at the chromatin level.",
-                    "Protein language model predictions for {topic} identify 12 de novo enzyme designs with {kw} activity exceeding natural homologs by 3-5x — wet-lab validation is the current bottleneck.",
-                    "Long-read nanopore sequencing of {topic} samples reveals a structural variant in {kw} regulatory regions affecting 12% of the population — entirely invisible to short-read sequencing methods.",
-                    "RNA G-quadruplex structures in {kw} mRNA 5-prime UTR act as thermosensors, melting at 39 degrees Celsius to derepress translation — the first temperature-sensitive regulatory element in {topic}.",
+                    "Les criblages d'édition de bases CRISPR révèlent que la fonction {kw} dépend d'un réseau de 23 gènes modificateurs, dont 17 étaient précédemment considérés comme des gènes de ménage — la redondance fonctionnelle avait masqué leur importance.",
+                    "La structure cryo-EM du complexe {topic} à 1,8 Angström révèle un mécanisme de liaison à ajustement induit pour {kw} qui diffère fondamentalement du modèle clé-serrure utilisé dans la conception de médicaments.",
+                    "Le séquençage ARN à cellule unique du tissu {topic} identifie une rare population progénitrice exprimant {kw} à 50x le niveau de fond — cette population semble orchestrer des programmes de régénération à l'échelle du tissu.",
+                    "Le profilage épigénomique montre que les loci {kw} subissent un remodelage rapide de la chromatine dans les 4 heures suivant le stimulus, précédant les changements transcriptionnels d'un cycle cellulaire complet.",
+                    "Les prédictions du modèle de langage protéique pour {topic} identifient 12 conceptions d'enzymes de novo avec une activité {kw} dépassant les homologues naturels de 3-5x — la validation en laboratoire humide est le goulot actuel.",
+                    "Le séquençage nanopore à lecture longue des échantillons {topic} révèle une variante structurelle dans les régions régulatrices {kw} affectant 12% de la population — entièrement invisible aux méthodes de séquençage courte lecture.",
+                    "Les structures G-quadruplex ARN dans la région 5'-UTR de l'ARNm {kw} agissent comme des capteurs de température, fondant à 39°C pour déprimer la traduction — premier élément régulateur thermosensible dans {topic}.",
                 ],
                 "findings": [
-                    "Synthetic gene circuit for {topic} control achieves stable bistability with {kw} concentration as the bifurcation parameter — programmable cell fate determination demonstrated in patient-derived organoids.",
-                    "Evolutionary analysis of {kw} across 847 species reveals a conserved catalytic triad that can be transplanted into human proteins to confer {topic} resistance — a universal therapeutic scaffold.",
-                    "Prime editing system targeting {kw} in {topic} disease model achieves 78% correction efficiency in post-mitotic neurons with no detectable off-target edits above the 0.01% sensitivity threshold.",
+                    "Le circuit génique synthétique pour le contrôle de {topic} atteint une bistabilité stable avec la concentration {kw} comme paramètre de bifurcation — la détermination programmable du destin cellulaire est démontrée dans des organoïdes dérivés de patients.",
+                    "L'analyse évolutive de {kw} à travers 847 espèces révèle une triade catalytique conservée pouvant être transplantée dans des protéines humaines pour conférer une résistance {topic} — un échafaudage thérapeutique universel.",
+                    "Le système d'édition prime ciblant {kw} dans le modèle de maladie {topic} atteint 78% d'efficacité de correction dans des neurones post-mitotiques sans modifications hors cible détectables au-dessus du seuil de sensibilité de 0,01%.",
                 ],
                 "connections": [
-                    "structure-function relationships in intrinsically disordered proteins",
-                    "epigenetic inheritance and transgenerational memory",
-                    "synthetic biology design principles and genetic circuits",
-                    "evolutionary constraint mapping and neutral theory",
+                    "relations structure-fonction dans les protéines intrinsèquement désordonnées",
+                    "héritage épigénétique et mémoire transgénérationnelle",
+                    "principes de conception en biologie synthétique et circuits génétiques",
+                    "cartographie des contraintes évolutives et théorie neutraliste",
                 ],
             },
             {
-                "hypothesis": "Horizontal gene transfer from {topic} microbiome members to host cells occurs at measurable rates and contributes functional {kw} enzymes that supplement host metabolic pathways under physiological stress conditions.",
+                "hypothesis": "Le transfert horizontal de gènes des membres du microbiome {topic} vers les cellules hôtes se produit à des taux mesurables et contribue des enzymes {kw} fonctionnelles qui complètent les voies métaboliques de l'hôte dans des conditions de stress physiologique.",
                 "insights": [
-                    "Proteome-wide thermal stability profiling identifies {kw} as a conformational switch protein existing in two functional states depending on cellular energy charge — an ATP sensor masquerading as a metabolic enzyme.",
-                    "ATAC-seq chromatin accessibility maps for {topic} show 340 enhancer elements becoming active only during {kw} stress — a hidden reserve of transcriptional capacity awaiting activation.",
-                    "Machine learning analysis of {kw} protein interaction networks predicts 89 novel binding partners with greater than 80% confidence — the interactome is 3x larger than currently annotated.",
-                    "Transposable element activation during {topic} stress creates somatic mosaicism in {kw} expression — potentially adaptive rather than pathological, warranting reassessment of current dogma.",
-                    "Phase separation of {kw} condensates in {topic} cells creates reaction compartments with 100x higher local substrate concentration — explaining anomalously high in vivo catalytic rates versus in vitro measurements.",
-                    "RNA interference screen identifies {kw} as a synthetic lethal partner with three cancer-specific vulnerabilities — combination targeting achieves 10,000x selectivity window in patient-derived xenografts.",
-                    "Circular RNA encoding {kw} synthetic transcription factor evades innate immune sensing and persists for 21 days in vivo — enabling chronic gene regulation without viral delivery.",
+                    "Le profilage de stabilité thermique à l'échelle du protéome identifie {kw} comme une protéine de commutation conformationnelle existant dans deux états fonctionnels selon la charge énergétique cellulaire — un capteur d'ATP se faisant passer pour une enzyme métabolique.",
+                    "Les cartes d'accessibilité de la chromatine ATAC-seq pour {topic} montrent 340 éléments amplificateurs ne devenant actifs que lors du stress {kw} — une réserve cachée de capacité transcriptionnelle attendant d'être activée.",
+                    "L'analyse par apprentissage automatique des réseaux d'interaction protéique {kw} prédit 89 nouveaux partenaires de liaison avec une confiance supérieure à 80% — l'interactome est 3x plus grand qu'actuellement annoté.",
+                    "L'activation des éléments transposables lors du stress {topic} crée un mosaïcisme somatique dans l'expression {kw} — potentiellement adaptatif plutôt que pathologique, nécessitant une réévaluation du dogme actuel.",
+                    "La séparation de phases des condensats {kw} dans les cellules {topic} crée des compartiments réactionnels avec une concentration de substrat locale 100x supérieure — expliquant les taux catalytiques in vivo anormalement élevés versus les mesures in vitro.",
+                    "Le criblage par interférence ARN identifie {kw} comme partenaire synthétiquement létal avec trois vulnérabilités spécifiques au cancer — le ciblage combinatoire atteint une fenêtre de sélectivité de 10 000x dans les xénogreffes dérivées de patients.",
+                    "L'ARN circulaire codant le facteur de transcription synthétique {kw} échappe à la détection immunitaire innée et persiste 21 jours in vivo — permettant une régulation génique chronique sans administration virale.",
                 ],
                 "findings": [
-                    "De novo protein design using diffusion models produces {kw} binders for {topic} targets with picomolar affinity and no sequence homology to known proteins — opens an entirely new therapeutic modality.",
-                    "Synthetic minimal cell containing only 437 genes successfully propagates and produces {kw} pharmaceutical compound at 3.2 grams per liter — proof-of-concept for whole-cell synthetic biomanufacturing.",
-                    "mRNA therapeutic encoding {kw} engineered for {topic} disease achieves 94% protein expression in target tissue after lipid nanoparticle delivery with no hepatic off-target accumulation.",
+                    "La conception de protéines de novo utilisant des modèles de diffusion produit des liants {kw} pour les cibles {topic} avec une affinité picomolaire et aucune homologie de séquence avec les protéines connues — ouvre une toute nouvelle modalité thérapeutique.",
+                    "La cellule minimale synthétique contenant seulement 437 gènes se propage avec succès et produit un composé pharmaceutique {kw} à 3,2 grammes par litre — preuve de concept pour la biomanufacture cellulaire synthétique complète.",
+                    "Le thérapeutique ARNm codant {kw} conçu pour la maladie {topic} atteint 94% d'expression protéique dans le tissu cible après administration par nanoparticule lipidique sans accumulation hépatique hors cible.",
                 ],
                 "connections": [
-                    "non-coding RNA regulatory networks and lncRNAs",
-                    "liquid-liquid phase separation and membraneless organelles",
-                    "microbiome-host co-evolution and horizontal gene transfer",
-                    "single-cell multi-omics integration and cell atlas projects",
+                    "réseaux régulateurs ARN non-codant et lncARN",
+                    "séparation de phases liquide-liquide et organelles sans membrane",
+                    "co-évolution microbiome-hôte et transfert horizontal de gènes",
+                    "intégration multi-omique à cellule unique et projets d'atlas cellulaire",
                 ],
             },
             {
-                "hypothesis": "Directed evolution of {topic} proteins under selection pressure mimicking {kw} pathological conditions reveals an evolutionary pathway to resistance that exposes a druggable intermediate conformation invisible at the endpoints.",
+                "hypothesis": "L'évolution dirigée de protéines {topic} sous pression de sélection mimant les conditions pathologiques {kw} révèle une voie évolutive vers la résistance qui expose une conformation intermédiaire druggable invisible aux extrémités de la voie.",
                 "insights": [
-                    "AlphaFold3 structure predictions for the {topic} protein family reveals 14 previously unknown domain architectures — each representing a distinct evolutionary solution to the {kw} function.",
-                    "CRISPR interference screen targeting {kw} regulatory elements in {topic} identifies 8 enhancers whose deletion increases fitness — counterintuitive deletion-activation suggesting negative regulatory loops.",
-                    "Ancestral sequence reconstruction of the {kw} enzyme family reveals a primordial bifunctional ancestor performing both {topic} reactions — modern specialization arose through gene duplication within 500 million years.",
-                    "Metabolic flux analysis in {topic} engineered strain shows {kw} pathway operating at 94% of theoretical maximum yield — approaching the thermodynamic ceiling imposed by Gibbs free energy constraints.",
-                    "Synthetic chromosome containing 47 redesigned {kw} genes with optimized codon usage grows 23% faster than wild-type — recoding the genome for speed and orthogonality simultaneously.",
-                    "Protein-protein interface design for {kw} heterodimer achieves 10 femtomolar affinity — 1000x tighter than the natural interaction — enabling ultrasensitive {topic} biosensors.",
-                    "tRNA synthetase engineering enables co-translational incorporation of {kw} non-canonical amino acid at amber codons with 99.1% fidelity — expanding the genetic code for {topic} applications.",
+                    "Les prédictions de structure AlphaFold3 pour la famille de protéines {topic} révèlent 14 architectures de domaine précédemment inconnues — chacune représentant une solution évolutive distincte à la fonction {kw}.",
+                    "Le criblage par interférence CRISPR ciblant les éléments régulateurs {kw} dans {topic} identifie 8 amplificateurs dont la délétion augmente la fitness — une activation-délétion contre-intuitive suggérant des boucles régulatrices négatives.",
+                    "La reconstruction de séquences ancestrales de la famille d'enzymes {kw} révèle un ancêtre primitif bifonctionnel effectuant les deux réactions {topic} — la spécialisation moderne est survenue par duplication génique en 500 millions d'années.",
+                    "L'analyse du flux métabolique dans la souche conçue {topic} montre la voie {kw} opérant à 94% du rendement théorique maximum — approchant le plafond thermodynamique imposé par les contraintes d'énergie libre de Gibbs.",
+                    "Le chromosome synthétique contenant 47 gènes {kw} redessinés avec un usage de codons optimisé croît 23% plus vite que le type sauvage — recodant simultanément le génome pour la vitesse et l'orthogonalité.",
+                    "La conception d'interface protéine-protéine pour l'hétérodimère {kw} atteint une affinité de 10 femtomolaires — 1000x plus serrée que l'interaction naturelle — permettant des biocapteurs ultrasensibles pour {topic}.",
+                    "L'ingénierie de l'ARNt synthétase permet l'incorporation co-traductionnelle d'un acide aminé non canonique {kw} aux codons ambre avec une fidélité de 99,1% — étendant le code génétique pour les applications {topic}.",
                 ],
                 "findings": [
-                    "Whole-genome synthesis and recoding of {topic} organism with all 64 codons reassigned demonstrates {kw} genetic isolation — the organism cannot exchange genes with natural life, resolving biocontainment concerns.",
-                    "Gene drive system for {topic} vector control using daisy-chain architecture limits spread to 8 generations without reproductive fitness cost — first ecologically safe population modification strategy.",
-                    "Base editing of {kw} somatic cells in vivo using lipid nanoparticle delivery achieves 67% correction in {topic} disease model — establishing therapeutic proof-of-concept for non-dividing tissues.",
+                    "La synthèse et le recodage du génome entier de l'organisme {topic} avec tous les 64 codons réassignés démontre l'isolement génétique {kw} — l'organisme ne peut pas échanger des gènes avec la vie naturelle, résolvant les préoccupations de bioconfinement.",
+                    "Le système de forçage génique pour le contrôle du vecteur {topic} utilisant une architecture en chaîne de marguerite limite la propagation à 8 générations sans coût de fitness reproductif — première stratégie de modification de population écologiquement sûre.",
+                    "L'édition de bases des cellules somatiques {kw} in vivo utilisant l'administration par nanoparticule lipidique atteint 67% de correction dans le modèle de maladie {topic} — établissant la preuve de concept thérapeutique pour les tissus non-divisants.",
                 ],
                 "connections": [
-                    "directed evolution and laboratory selection experiments",
-                    "computational protein design and Rosetta energy functions",
-                    "metabolic engineering and flux balance analysis",
-                    "biocontainment strategies for synthetic organisms",
+                    "évolution dirigée et expériences de sélection en laboratoire",
+                    "conception de protéines computationnelles et fonctions d'énergie Rosetta",
+                    "ingénierie métabolique et analyse du flux à l'équilibre",
+                    "stratégies de bioconfinement pour les organismes synthétiques",
                 ],
             },
         ]

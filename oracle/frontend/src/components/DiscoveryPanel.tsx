@@ -46,8 +46,8 @@ function DiscoveryCard({ discovery }: DiscoveryCardProps) {
       {/* Agents */}
       <div className="text-[10px] text-slate-500 mb-1 truncate">
         {discovery.agents_involved.length > 0
-          ? `By: ${discovery.agents_involved.map(a => a.toUpperCase()).join(', ')}`
-          : 'By: ORACLE'}
+          ? `Par : ${discovery.agents_involved.map(a => a.toUpperCase()).join(', ')}`
+          : 'Par : ORACLE'}
       </div>
 
       {/* Timestamp */}
@@ -62,7 +62,7 @@ function EmptyState() {
   return (
     <div className="flex items-center justify-center w-full py-4">
       <span className="text-[11px] text-slate-600 italic">
-        No breakthroughs yet — research in progress...
+        Aucune percée pour l'instant — recherche en cours...
       </span>
     </div>
   )
@@ -73,7 +73,7 @@ export default function DiscoveryPanel({ discoveries }: Props) {
     <div className="bg-[#0a1628] border-t border-white/5 p-3 shrink-0 h-56 overflow-hidden">
       {/* Header */}
       <div className="text-[10px] font-bold tracking-widest text-amber-500 mb-2">
-        🌟 BREAKTHROUGHS
+        🌟 PERCÉES
       </div>
 
       {/* Horizontal scroll */}

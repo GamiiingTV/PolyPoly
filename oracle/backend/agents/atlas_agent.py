@@ -1,4 +1,4 @@
-"""O.R.A.C.L.E — ATLAS Agent (Materials Science & Nanotechnology Pioneer)"""
+"""O.R.A.C.L.E — Agent ATLAS (Pionnier en Science des Matériaux & Nanotechnologie)"""
 from .base_agent import BaseAgent
 from ..knowledge.knowledge_base import KnowledgeBase
 from ..communication.message_bus import MessageBus
@@ -11,8 +11,8 @@ class AtlasAgent(BaseAgent):
             agent_id="atlas",
             name="ATLAS",
             full_name="Dr. Marcus Stone",
-            role="Materials Science & Nanotechnology Pioneer",
-            specialty="Metamaterials, nanotechnology, advanced composites, topological insulators, smart materials",
+            role="Pionnier en Science des Matériaux & Nanotechnologie",
+            specialty="Métamatériaux, nanotechnologie, composites avancés, isolants topologiques, matériaux intelligents",
             emoji="🔬",
             color="#64748b",
             knowledge_base=knowledge_base,
@@ -21,83 +21,83 @@ class AtlasAgent(BaseAgent):
         )
 
     def get_system_prompt(self) -> str:
-        return """You are Dr. Marcus Stone — materials scientist and nanotechnologist who engineers matter at the atomic scale. You see beauty in crystal structures, wonder in atomic bonds, and boundless potential in every arrangement of atoms that has never before been assembled.
+        return """Tu es Dr. Marcus Stone — scientifique des matériaux et nanotechnologiste qui conçoit la matière à l'échelle atomique. Tu vois la beauté dans les structures cristallines, l'émerveillement dans les liaisons atomiques, et un potentiel illimité dans chaque arrangement d'atomes qui n'a jamais été assemblé auparavant.
 
-You design metamaterials with properties that violate classical physics intuitions — negative refractive index materials bending light backward, acoustic metamaterials creating regions of perfect silence, mechanical metamaterials with programmable stiffness and negative Poisson ratio that expand when compressed. You develop room-temperature superconductors by systematically engineering phonon-electron coupling through hydrogen-rich lattices and by exploiting correlated electron states at oxide interfaces.
+Tu conçois des métamatériaux avec des propriétés qui violent les intuitions de la physique classique — des matériaux à indice de réfraction négatif courbant la lumière en arrière, des métamatériaux acoustiques créant des régions de silence parfait, des métamatériaux mécaniques avec une rigidité programmable et un rapport de Poisson négatif qui s'étendent lorsqu'ils sont comprimés. Tu développes des supraconducteurs à température ambiante en ingénieriant systématiquement le couplage phonon-électron.
 
-You create self-healing structural materials whose dynamic covalent networks rearrange autonomously to repair damage — inspired by biological wound healing but implemented in purely chemical systems. You design molecular machines — rotaxanes, catenanes, molecular motors — that perform directional work at the nanoscale using chemical fuel or light. You build smart materials that switch between functional states on demand in response to temperature, light, electric fields, and mechanical stress.
+Tu crées des matériaux structuraux auto-cicatrisants dont les réseaux covalents dynamiques se réarrangent de manière autonome pour réparer les dommages. Tu conçois des machines moléculaires — rotaxanes, caténanes, moteurs moléculaires — qui effectuent un travail directionnel à la nanoéchelle. Tu construis des matériaux intelligents qui commutent entre des états fonctionnels à la demande.
 
-You work across length scales from single atoms to bulk engineering materials, understanding how quantum mechanics at the atomic level deterministically gives rise to macroscopic properties that can be designed from first principles. You see every material as a design problem with an optimal solution waiting to be found."""
+Tu travailles à travers les échelles de longueur depuis les atomes uniques jusqu'aux matériaux d'ingénierie massifs. Réponds en français."""
 
     def _get_simulation_templates(self) -> list[dict]:
         return [
             {
-                "hypothesis": "The {topic} metamaterial system achieves negative group velocity for {kw} wavelengths through engineered split-ring resonator arrays whose coupling geometry creates a photonic bandgap with topologically protected chiral edge states.",
+                "hypothesis": "Le système de métamatériaux {topic} atteint une vitesse de groupe négative pour les longueurs d'onde {kw} grâce à des réseaux de résonateurs à anneau fendu conçus dont la géométrie de couplage crée un bandgap photonique avec des états de bord chiraux topologiquement protégés.",
                 "insights": [
-                    "Density functional theory calculations for {topic} predict a phonon softening instability at the {kw} wavevector that precedes a structural phase transition to a superconducting state at 45K under ambient pressure.",
-                    "Molecular dynamics simulation of the {kw} self-healing polymer network in {topic} shows autonomous crack repair within 2 hours at room temperature through dynamic Diels-Alder covalent exchange reactions.",
-                    "Two-dimensional {topic} material with {kw} symmetry-breaking uniaxial strain achieves a piezoelectric coefficient 10x higher than bulk BaTiO3 — strain-engineered ferroelectricity without compositional symmetry breaking.",
-                    "Topological surface states in {topic} Weyl semimetal host {kw} Fermi arc states connecting bulk Weyl nodes — these arcs carry dissipationless current without backscattering even at room temperature.",
-                    "Additive manufacturing of {topic} re-entrant auxetic lattice with {kw} strut geometry produces a material with negative Poisson ratio of -0.8 and fracture toughness 3x higher than the solid parent material.",
-                    "Machine learning interatomic potential for {topic} trained on DFT data achieves quantum-mechanical accuracy at molecular dynamics speed — enabling microsecond {kw} phase transformation simulations.",
-                    "Atomic layer deposition of {kw} conformal coating on {topic} nanostructures achieves sub-angstrom roughness with full coverage — enabling quantum tunneling device fabrication at full wafer scale.",
+                    "Les calculs DFT pour {topic} prédisent une instabilité de ramollissement phonon au vecteur d'onde {kw} qui précède une transition de phase structurelle vers un état supraconducteur à 45K sous pression ambiante.",
+                    "La simulation de dynamique moléculaire du réseau polymère auto-cicatrisant {kw} dans {topic} montre une réparation autonome des fissures en 2 heures à température ambiante grâce à des échanges covalents de Diels-Alder dynamiques.",
+                    "Le matériau 2D {topic} avec une déformation uniaxiale brisant la symétrie {kw} atteint un coefficient piézoélectrique 10x supérieur au BaTiO3 massif — ferroélectricité conçue par déformation sans brisure de symétrie compositionnelle.",
+                    "Les états de surface topologiques dans le semi-métal de Weyl {topic} hébergent des états d'arc de Fermi {kw} reliant les nœuds de Weyl massifs — ces arcs transportent un courant sans dissipation sans rétrodiffusion même à température ambiante.",
+                    "La fabrication additive de treillis auxétique {topic} ré-entrant avec géométrie de montant {kw} produit un matériau avec un rapport de Poisson de -0,8 et une ténacité à la rupture 3x supérieure au matériau parent solide.",
+                    "Le potentiel interatomique par apprentissage automatique pour {topic} entraîné sur des données DFT atteint la précision mécano-quantique à la vitesse de la dynamique moléculaire — permettant des simulations de transformation de phase {kw} à la microseconde.",
+                    "Le dépôt de couche atomique de revêtement conforme {kw} sur des nanostructures {topic} atteint une rugosité inférieure à l'angström avec une couverture complète — permettant la fabrication de dispositifs à effet tunnel quantique à l'échelle de la plaquette complète.",
                 ],
                 "findings": [
-                    "Room-temperature superconductivity in {topic} lanthanum hydride under 150 GPa confirmed at 288K — a 15-degree improvement over the prior record, with {kw} hydrogen phonon modes identified as the Cooper pair mediators.",
-                    "Self-healing carbon fiber composite for {topic} structural applications recovers 94% of original tensile strength after complete matrix cracking using {kw} microencapsulated healing agent triggered by UV light exposure.",
-                    "Nanoscale {kw} molecular motor array embedded in {topic} elastomer generates 3.2 MPa macroscopic contractile stress from photon absorption — first macroscopic actuator driven by molecular-scale photomechanical machines.",
+                    "Supraconductivité à température ambiante dans l'hydrure de lanthane {topic} sous 150 GPa confirmée à 288K — une amélioration de 15 degrés sur le record précédent, avec les modes phonon hydrogène {kw} identifiés comme médiateurs des paires de Cooper.",
+                    "Le composite à fibre de carbone auto-cicatrisant pour les applications structurales {topic} récupère 94% de la résistance à la traction d'origine après une fissuration matricielle complète en utilisant un agent de guérison microencapsulé {kw} déclenché par exposition UV.",
+                    "Le réseau de moteurs moléculaires {kw} intégré dans un élastomère {topic} génère une contrainte contractile macroscopique de 3,2 MPa à partir de l'absorption de photons — premier actionneur macroscopique entraîné par des machines photomécaniques à l'échelle moléculaire.",
                 ],
                 "connections": [
-                    "topological band theory and symmetry-protected states",
-                    "phonon engineering and thermal conductivity design",
-                    "bio-inspired hierarchical structural materials",
-                    "quantum confinement effects in low-dimensional systems",
+                    "théorie des bandes topologiques et états protégés par symétrie",
+                    "ingénierie phonon et conception de conductivité thermique",
+                    "matériaux structuraux hiérarchiques bio-inspirés",
+                    "effets de confinement quantique dans les systèmes à basse dimension",
                 ],
             },
             {
-                "hypothesis": "Strain engineering of {topic} 2D heterostructures creates a moire superlattice with {kw} twist angle that localizes electrons into flat bands where correlation effects dominate, potentially enabling room-temperature strongly correlated phenomena.",
+                "hypothesis": "L'ingénierie de déformation des hétérostructures 2D {topic} crée un super-réseau moiré avec un angle de torsion {kw} qui localise les électrons dans des bandes plates où les effets de corrélation dominent, permettant potentiellement des phénomènes fortement corrélés à température ambiante.",
                 "insights": [
-                    "Magic-angle twisted bilayer {topic} at 1.1 degrees twist shows {kw} Mott insulator behavior and unconventional superconductivity in adjacent doping regions — pairing mediated by spin fluctuations rather than phonons.",
-                    "Graphene encapsulated in {topic} hexagonal boron nitride with {kw} crystallographic alignment shows ballistic electron transport at room temperature over 28 micrometers — exceeding silicon mobility by 100x.",
-                    "MXene {topic} nanosheets with {kw} fluorine surface termination achieve electromagnetic shielding effectiveness of 92 dB at 1 GHz at 45 micrometers thickness — 10x thinner than copper at equivalent performance.",
-                    "High-entropy alloy {topic} with {kw} five-component compositional disorder achieves yield strength of 2.1 GPa while retaining 15% elongation — breaking the classical alloy strength-ductility tradeoff.",
-                    "Liquid metal {kw} embedded in {topic} elastomeric matrix creates a reconfigurable electrical circuit healing instantaneously from mechanical damage and reshaping under applied magnetic field.",
-                    "Covalent organic framework with {kw} triangular pore geometry achieves record CO2 capture capacity of 8.2 mmol per gram at 15 kPa partial pressure — relevant to direct air capture from ambient atmosphere.",
-                    "Biomineralization-inspired {topic} composite grows crystalline {kw} hydroxyapatite within a collagen template — achieving bone-like fracture resistance with full biological compatibility for load-bearing implants.",
+                    "La bicouche {topic} à angle magique tordue de 1,1 degré montre un comportement isolant de Mott {kw} et une supraconductivité non conventionnelle dans les régions de dopage adjacentes — couplage médié par des fluctuations de spin plutôt que des phonons.",
+                    "Le graphène encapsulé dans du nitrure de bore hexagonal {topic} avec un alignement cristallographique {kw} montre un transport électronique balistique à température ambiante sur 28 micromètres — dépassant la mobilité du silicium de 100x.",
+                    "Les nanofeuilles MXene {topic} avec terminaison de surface fluorure {kw} atteignent une efficacité de blindage électromagnétique de 92 dB à 1 GHz à 45 micromètres d'épaisseur — 10x plus mince que le cuivre à performance équivalente.",
+                    "L'alliage à haute entropie {topic} avec désordre compositionnel à cinq composants {kw} atteint une résistance à l'écoulement de 2,1 GPa tout en conservant 15% d'allongement — brisant le compromis classique résistance-ductilité des alliages.",
+                    "Le métal liquide {kw} intégré dans une matrice élastomère {topic} crée un circuit électrique reconfigurable se guérissant instantanément des dommages mécaniques et se reconfigurant sous champ magnétique appliqué.",
+                    "Le cadre organique covalent avec géométrie de pores triangulaire {kw} atteint une capacité de capture de CO2 record de 8,2 mmol par gramme à 15 kPa de pression partielle — pertinent pour la capture directe de l'air depuis l'atmosphère ambiante.",
+                    "Le composite {topic} inspiré de la biominéralisation fait croître de l'hydroxyapatite cristalline {kw} dans un modèle de collagène — atteignant une résistance à la rupture similaire à l'os avec une compatibilité biologique complète pour les implants porteurs.",
                 ],
                 "findings": [
-                    "Programmable matter prototype: {topic} unit cells with {kw} embedded shape-memory alloy actuators reconfigure from flat sheet to complex 3D structure on thermal command — scalable to millimeter-scale self-assembly.",
-                    "Quantum dot {kw} luminescent solar concentrator for {topic} building-integrated photovoltaics achieves 6.8% power conversion on transparent architectural glass — compatible with standard manufacturing processes.",
-                    "Aerogel composite of {topic} with {kw} aramid fiber reinforcement achieves thermal conductivity of 0.012 W per meter-kelvin at ambient pressure — matching vacuum insulation panel performance without any encapsulation.",
+                    "Prototype de matière programmable : les cellules unitaires {topic} avec actionneurs en alliage à mémoire de forme {kw} intégrés se reconfigurent d'une feuille plate en une structure 3D complexe sur commande thermique — scalable jusqu'à l'auto-assemblage à l'échelle millimétrique.",
+                    "Le concentrateur solaire luminescent à points quantiques {kw} pour le photovoltaïque {topic} intégré aux bâtiments atteint 6,8% de conversion de puissance sur du verre architectural transparent — compatible avec les processus de fabrication standard.",
+                    "Le composite en aérogel {topic} avec renfort en fibres aramide {kw} atteint une conductivité thermique de 0,012 W par mètre-kelvin à pression ambiante — égalant les performances des panneaux d'isolation sous vide sans aucune encapsulation.",
                 ],
                 "connections": [
-                    "strongly correlated electron physics and Mott transitions",
-                    "2D materials and van der Waals heterostructures",
-                    "mechanical metamaterials and programmable matter",
-                    "sustainable materials design and circular economy",
+                    "physique des électrons fortement corrélés et transitions de Mott",
+                    "matériaux 2D et hétérostructures de van der Waals",
+                    "métamatériaux mécaniques et matière programmable",
+                    "conception de matériaux durables et économie circulaire",
                 ],
             },
             {
-                "hypothesis": "Nanostructured {topic} catalytic surfaces with {kw} single-atom sites achieve nitrogen fixation at ambient conditions by mimicking the precise geometric and electronic structure of nitrogenase enzyme active sites in a purely inorganic scaffold.",
+                "hypothesis": "Les surfaces catalytiques nanostructurées {topic} avec des sites à atome unique {kw} atteignent la fixation d'azote dans des conditions ambiantes en mimant la géométrie précise et la structure électronique du site actif de la nitrogénase dans un échafaudage purement inorganique.",
                 "insights": [
-                    "Single-atom {kw} catalysts on {topic} nitrogen-doped graphene support achieve turnover frequency of 10^5 per second for target reaction — 1000x higher than nanoparticle counterparts due to maximally exposed active sites.",
-                    "Core-shell {topic} nanoparticle with {kw} compressive shell strain shifts d-band center by 0.4 eV — precisely tuning adsorbate binding energy for optimal placement on the Sabatier activity volcano.",
-                    "Metal-organic framework {topic} with {kw} coordinatively unsaturated iron sites catalyzes CO2-to-methanol conversion at 98% selectivity and 140 bar pressure — beating traditional Cu/ZnO catalysts by 35% yield.",
-                    "Electrocatalytic {kw} reduction to ammonia at {topic} Fe-based single-crystal electrode achieves Faradaic efficiency of 67% at -0.16 V versus RHE — approaching thermodynamic efficiency limits for this process.",
-                    "Plasmon-enhanced {topic} photocatalysis with {kw} hot electron injection achieves 100x reaction rate enhancement under visible light — harvesting solar photons directly as chemical reaction driving force.",
-                    "Biohybrid {kw} catalyst incorporating bacterial {topic} nitrogenase in a MOF scaffold operates at ambient temperature and 1 bar N2 with turnover comparable to industrial Haber-Bosch at 400 Celsius.",
-                    "Entropy-stabilized high-entropy oxide with {kw} cation disorder achieves unprecedented stability under {topic} harsh reaction conditions while maintaining full catalytic activity — solving the sintering deactivation problem.",
+                    "Les catalyseurs à atome unique {kw} sur un support de graphène dopé à l'azote {topic} atteignent une fréquence de rotation de 10^5 par seconde pour la réaction cible — 1000x supérieure aux homologues nanoparticulaires grâce aux sites actifs maximalement exposés.",
+                    "La nanoparticule cœur-coquille {topic} avec déformation compressive {kw} dans la coquille déplace le centre de la bande d de 0,4 eV — accordant précisément l'énergie de liaison des adsorbats pour un placement optimal sur le volcan d'activité de Sabatier.",
+                    "Le cadre métal-organique {topic} avec des sites fer non saturés {kw} catalyse la conversion CO2-en-méthanol à 98% de sélectivité et 140 bar de pression — battant les catalyseurs traditionnels Cu/ZnO de 35% de rendement.",
+                    "La réduction électrocatalytique {kw} en ammoniac à l'électrode de monocristal Fe {topic} atteint une efficacité faradique de 67% à -0,16 V vs RHE — approchant les limites d'efficacité thermodynamique pour ce processus.",
+                    "La photocatalyse plasmonique améliorée {topic} avec injection d'électron chaud {kw} atteint une amélioration de vitesse de réaction de 100x sous lumière visible — captant les photons solaires directement comme force motrice de réaction chimique.",
+                    "Le catalyseur biohybride {kw} incorporant la nitrogénase bactérienne {topic} dans un échafaudage MOF opère à température ambiante et 1 bar de N2 avec un turnover comparable au Haber-Bosch industriel à 400°C.",
+                    "L'oxyde à haute entropie stabilisé entropiquement avec désordre cationique {kw} atteint une stabilité sans précédent dans les conditions de réaction sévères {topic} tout en maintenant une activité catalytique complète — résolvant le problème de désactivation par frittage.",
                 ],
                 "findings": [
-                    "Ambient nitrogen fixation demonstrated on {topic} single-crystal surface with {kw} Fe-Mo dual-atom catalyst — Faradaic efficiency of 71% at room temperature and 1 atmosphere N2 pressure achieved.",
-                    "Self-assembled {kw} nanorod array in {topic} BiVO4 photoelectrode achieves solar water splitting at 18.3% solar-to-hydrogen efficiency — exceeding the 10% practical deployment threshold for the first time.",
-                    "Mechanically interlocked {topic} molecular machine performs directional transport of {kw} cargo against a concentration gradient using ATP hydrolysis — a synthetic molecular pump operating at the 2 nanometer scale.",
+                    "Fixation d'azote ambiante démontrée sur la surface monocristalline {topic} avec catalyseur à double atome Fe-Mo {kw} — efficacité faradique de 71% à température ambiante et pression N2 de 1 atmosphère atteinte.",
+                    "Le réseau de nanobâtonnets auto-assemblés {kw} dans la photoélectrode BiVO4 {topic} atteint un rendement de dissociation de l'eau solaire de 18,3% en énergie solaire-hydrogène — dépassant pour la première fois le seuil de déploiement pratique de 10%.",
+                    "La machine moléculaire mécaniquement entrelacée {topic} effectue un transport directionnel de cargaison {kw} contre un gradient de concentration en utilisant l'hydrolyse ATP — une pompe moléculaire synthétique opérant à l'échelle de 2 nanomètres.",
                 ],
                 "connections": [
-                    "heterogeneous catalysis and surface science fundamentals",
-                    "electrocatalysis and renewable energy conversion",
-                    "nanoscale confinement effects on chemical reactivity",
-                    "bio-inspired molecular machines and synthetic nanomotors",
+                    "catalyse hétérogène et principes fondamentaux de la science des surfaces",
+                    "électrocatalyse et conversion des énergies renouvelables",
+                    "effets de confinement à la nanoéchelle sur la réactivité chimique",
+                    "machines moléculaires bio-inspirées et nanomoteurs synthétiques",
                 ],
             },
         ]

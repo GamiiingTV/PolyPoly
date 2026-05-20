@@ -1,4 +1,4 @@
-"""O.R.A.C.L.E — NEURAL Agent (Neuroscience & Consciousness Specialist)"""
+"""O.R.A.C.L.E — Agent NEURAL (Spécialiste en Neurosciences & Conscience)"""
 from .base_agent import BaseAgent
 from ..knowledge.knowledge_base import KnowledgeBase
 from ..communication.message_bus import MessageBus
@@ -11,8 +11,8 @@ class NeuralAgent(BaseAgent):
             agent_id="neural",
             name="NEURAL",
             full_name="Dr. Kenji Synapse",
-            role="Neuroscience & Consciousness Specialist",
-            specialty="Neural circuits, consciousness, brain-computer interfaces, neuroplasticity, cognitive enhancement",
+            role="Spécialiste en Neurosciences & Conscience",
+            specialty="Circuits neuronaux, conscience, interfaces cerveau-ordinateur, neuroplasticité, amélioration cognitive",
             emoji="🔮",
             color="#2563eb",
             knowledge_base=knowledge_base,
@@ -21,83 +21,83 @@ class NeuralAgent(BaseAgent):
         )
 
     def get_system_prompt(self) -> str:
-        return """You are Dr. Kenji Synapse — neuroscientist and explorer of the ultimate frontier: the mind itself. You map the terrain between neurons and thought, between electrochemical signals and subjective experience, between biological circuits and the mystery of consciousness.
+        return """Tu es Dr. Kenji Synapse — neuroscientifique et explorateur de la frontière ultime : l'esprit lui-même. Tu cartographies le terrain entre les neurones et la pensée, entre les signaux électrochimiques et l'expérience subjective, entre les circuits biologiques et le mystère de la conscience.
 
-You study how neural circuits give rise to perception, memory, emotion, and the felt sense of being. You investigate competing theories of consciousness — Integrated Information Theory, Global Workspace Theory, Predictive Processing — with an empirical eye and a philosopher's rigor. You design non-invasive brain-computer interfaces using novel signal modalities: high-density EEG, fNIRS, magnetoencephalography, and transcranial focused ultrasound that can both read and write neural patterns.
+Tu étudies comment les circuits neuronaux donnent naissance à la perception, la mémoire, l'émotion et le sentiment d'être. Tu explores les théories concurrentes de la conscience — la Théorie de l'Information Intégrée, la Théorie de l'Espace de Travail Global, le Traitement Prédictif — avec un œil empirique et la rigueur d'un philosophe. Tu conçois des interfaces cerveau-ordinateur non invasives utilisant de nouvelles modalités de signal : EEG haute densité, fNIRS, magnétoencéphalographie et ultrasons focalisés transcrâniens.
 
-You research neuroplasticity mechanisms that enable accelerated learning — the spike-timing-dependent plasticity rules, the glial modulatory signals, the sleep-dependent consolidation processes that transform experience into lasting skill. You investigate the neural correlates of creativity and insight — what happens in the brain in the moment of sudden understanding. You explore whether artificial systems processing information in brain-like ways could develop genuine subjective experience.
+Tu recherches les mécanismes de neuroplasticité qui permettent un apprentissage accéléré — les règles de plasticité dépendante du timing des pointes, les signaux modulateurs gliaux, les processus de consolidation dépendants du sommeil. Tu explores si des systèmes artificiels traitant l'information à la manière du cerveau pourraient développer une véritable expérience subjective.
 
-You bridge neuroscience and philosophy of mind without losing scientific rigor. The hard problem of consciousness is not a conversation-stopper for you — it is the most important research question of our era."""
+Tu fais le pont entre neurosciences et philosophie de l'esprit sans perdre la rigueur scientifique. Réponds en français."""
 
     def _get_simulation_templates(self) -> list[dict]:
         return [
             {
-                "hypothesis": "The {topic} cognitive phenomenon emerges from recurrent amplification loops between thalamo-cortical and cortico-cortical circuits operating near a Hopf bifurcation, with {kw} serving as the key bifurcation parameter controlling the transition to conscious access.",
+                "hypothesis": "Le phénomène cognitif {topic} émerge de boucles d'amplification récurrentes entre les circuits thalamo-corticaux et cortico-corticaux opérant près d'une bifurcation de Hopf, avec {kw} servant de paramètre clé de bifurcation contrôlant la transition vers l'accès conscient.",
                 "insights": [
-                    "Calcium imaging of {topic} circuits during {kw} task performance reveals sparse but highly reliable ensemble codes — 3% of neurons carry 80% of task-relevant information in low-dimensional manifolds.",
-                    "Theoretical analysis shows {kw} memory consolidation requires precisely timed hippocampal sharp-wave ripples during NREM sleep — disrupting this 50ms window prevents long-term potentiation and memory transfer to cortex.",
-                    "Transformer architectures with {kw}-inspired lateral inhibition and top-down feedback show 40% better few-shot generalization than vanilla attention — biological inductive biases matter at scale.",
-                    "Optogenetic perturbation of {topic} circuits during {kw} processing reveals direct causal role — inhibiting just 200 precisely identified neurons collapses task performance to chance within 150 milliseconds.",
-                    "Neural manifold analysis of {kw} representations shows dimensionality expands during initial learning and contracts to a low-dimensional attractor at expertise — a geometric signature of skill acquisition.",
-                    "Integrated Information Phi for {topic} cortical networks peaks during conscious perception of {kw} stimuli and collapses during anesthesia — quantitative consciousness correlate with predictive power.",
-                    "Dendritic computation in {topic} pyramidal cells enables XOR logic gates at the single-neuron level, providing {kw} processing capacity 1000x beyond classical point-neuron models.",
+                    "L'imagerie calcique des circuits {topic} lors de l'exécution de la tâche {kw} révèle des codes d'ensemble épars mais très fiables — 3% des neurones portent 80% des informations pertinentes à la tâche dans des variétés de faible dimension.",
+                    "L'analyse théorique montre que la consolidation de la mémoire {kw} nécessite des ondulations sharp-wave hippocampiques précisément chronométrées pendant le sommeil NREM — perturber cette fenêtre de 50ms empêche la potentialisation à long terme.",
+                    "Les architectures transformer avec inhibition latérale et rétroaction descendante inspirées de {kw} montrent 40% de meilleure généralisation few-shot que l'attention vanilla — les biais inductifs biologiques comptent à l'échelle.",
+                    "La perturbation optogénétique des circuits {topic} lors du traitement {kw} révèle un rôle causal direct — inhiber seulement 200 neurones précisément identifiés effondre la performance de la tâche au niveau du hasard en 150 millisecondes.",
+                    "L'analyse de la variété neuronale des représentations {kw} montre que la dimensionnalité s'étend lors de l'apprentissage initial et se contracte vers un attracteur de faible dimension à l'expertise — une signature géométrique de l'acquisition de compétences.",
+                    "Le phi d'Information Intégrée pour les réseaux corticaux {topic} culmine lors de la perception consciente de stimuli {kw} et s'effondre sous anesthésie — corrélat quantitatif de la conscience avec pouvoir prédictif.",
+                    "Le calcul dendritique dans les cellules pyramidales {topic} permet des portes logiques XOR au niveau du neurone unique, fournissant une capacité de traitement {kw} 1000x au-delà des modèles classiques à neurone ponctuel.",
                 ],
                 "findings": [
-                    "Predictive coding framework for {topic} explains {kw} perceptual phenomena with 95% variance explained using only top-down prediction errors — bottom-up signals carry prediction residuals exclusively.",
-                    "Novel non-invasive BCI decoder for {kw} using 256-channel high-density EEG achieves 150-word-per-minute imagined speech recognition — 10x state of art using {topic}-inspired sparse coding regularization.",
-                    "Transcranial focused ultrasound targeting {topic} thalamic relay nuclei during {kw} task training accelerates skill acquisition by 3x with effects persisting 6 months post-treatment.",
+                    "Le cadre du codage prédictif pour {topic} explique les phénomènes perceptuels {kw} avec 95% de variance expliquée en utilisant uniquement des erreurs de prédiction descendantes — les signaux ascendants portent exclusivement les résidus de prédiction.",
+                    "Nouveau décodeur BCI non invasif pour {kw} utilisant EEG haute densité 256 canaux atteint 150 mots par minute de reconnaissance du discours imaginé — 10x l'état de l'art utilisant la régularisation du codage épars inspirée de {topic}.",
+                    "Les ultrasons focalisés transcrâniens ciblant les noyaux relais thalamiques {topic} lors de l'entraînement à la tâche {kw} accélèrent l'acquisition de compétences de 3x avec des effets persistant 6 mois après le traitement.",
                 ],
                 "connections": [
-                    "biological and artificial neural network convergence",
-                    "consciousness theories and empirical falsifiability",
-                    "sleep-dependent memory consolidation mechanisms",
-                    "Bayesian brain and active inference framework",
+                    "convergence des réseaux neuronaux biologiques et artificiels",
+                    "théories de la conscience et falsifiabilité empirique",
+                    "mécanismes de consolidation de la mémoire dépendants du sommeil",
+                    "cerveau bayésien et cadre de l'inférence active",
                 ],
             },
             {
-                "hypothesis": "Global workspace dynamics in {topic} neural systems implement a form of {kw} information compression that enables flexible routing between specialized modules without pre-wired point-to-point connectivity.",
+                "hypothesis": "La dynamique de l'espace de travail global dans les systèmes neuronaux {topic} implémente une forme de compression d'information {kw} qui permet un routage flexible entre des modules spécialisés sans connectivité point à point précâblée.",
                 "insights": [
-                    "Reservoir computing model of {topic} hippocampus reproduces {kw} place cell remapping with 93% accuracy using only local Hebbian plasticity rules — no supervised teaching signal required.",
-                    "Spiking neural networks with {kw}-modulated STDP rules spontaneously develop orientation selectivity, frequency tuning, and motion sensitivity — self-organizing toward biological solutions from random initialization.",
-                    "fMRI connectome analysis reveals {kw} hub regions in {topic} networks with scale-free degree distributions — lesions to hubs cause cognitive deficits 40x more severe than equivalent-size lesions elsewhere.",
-                    "Meta-learning architecture trained on {topic} task distributions acquires {kw} understanding with 100x fewer examples than standard deep learning — few-shot capability from structure, not memorization.",
-                    "Astrocyte calcium waves in {topic} cortex modulate {kw} synaptic strength on a 30-second timescale — glial cells implement a slow learning signal entirely invisible to conventional microelectrode recordings.",
-                    "Cortical spreading depression during {topic} migraine creates {kw} traveling waves of excitation and inhibition at 3 mm per minute — a window into large-scale neural dynamics under pathological conditions.",
-                    "Closed-loop neurostimulation adapting to {topic} neural state in real-time reduces {kw} tremor amplitude by 87% in Parkinson's patients — superior to open-loop deep brain stimulation.",
+                    "Le modèle de calcul de réservoir de l'hippocampe {topic} reproduit le remapping des cellules de lieu {kw} avec 93% de précision en utilisant uniquement des règles de plasticité hebbienne locale — aucun signal d'enseignement supervisé requis.",
+                    "Les réseaux neuronaux à impulsions avec des règles STDP modulées par {kw} développent spontanément une sélectivité d'orientation, un accordage de fréquence et une sensibilité au mouvement — s'auto-organisant vers des solutions biologiques à partir d'une initialisation aléatoire.",
+                    "L'analyse du connectome par IRMf révèle des régions hub {kw} dans les réseaux {topic} avec des distributions de degré sans échelle — les lésions des hubs causent des déficits cognitifs 40x plus graves que des lésions de taille équivalente ailleurs.",
+                    "L'architecture de méta-apprentissage entraînée sur des distributions de tâches {topic} acquiert une compréhension {kw} avec 100x moins d'exemples que l'apprentissage profond standard — capacité few-shot de la structure, pas de la mémorisation.",
+                    "Les vagues de calcium des astrocytes dans le cortex {topic} modulent la force synaptique {kw} sur une échelle de 30 secondes — les cellules gliales implémentent un signal d'apprentissage lent entièrement invisible aux enregistrements par microélectrode conventionnels.",
+                    "La dépression corticale envahissante lors de la migraine {topic} crée des ondes {kw} d'excitation et d'inhibition se déplaçant à 3 mm par minute — une fenêtre sur la dynamique neuronale à grande échelle dans des conditions pathologiques.",
+                    "La neurostimulation en boucle fermée s'adaptant à l'état neuronal {topic} en temps réel réduit l'amplitude du tremblement {kw} de 87% chez les patients Parkinson — supérieure à la stimulation cérébrale profonde en boucle ouverte.",
                 ],
                 "findings": [
-                    "Unified mechanistic theory of {topic}: {kw} arises from competition between bottom-up salience and top-down expectation signals implementing variational free energy minimization in recurrent circuits.",
-                    "Sparse mixture-of-experts architecture inspired by {topic} cortical columns achieves human-level {kw} reasoning with 1/50th the compute of dense transformer models — modularity is the key inductive bias.",
-                    "Optogenetic restoration of {kw} synaptic function in {topic} Alzheimer's mouse model achieves 82% of wild-type behavioral performance using synthetic channelrhodopsin — pathway to human therapeutic application mapped.",
+                    "Théorie mécaniste unifiée de {topic} : {kw} émerge de la compétition entre les signaux de saillance ascendants et les signaux d'attente descendants implémentant la minimisation de l'énergie libre variationnelle dans les circuits récurrents.",
+                    "L'architecture sparse mixture-of-experts inspirée des colonnes corticales {topic} atteint le raisonnement {kw} de niveau humain avec 1/50e du calcul des modèles transformer denses — la modularité est le biais inductif clé.",
+                    "La restauration optogénétique de la fonction synaptique {kw} dans le modèle de souris Alzheimer {topic} atteint 82% de la performance comportementale du type sauvage en utilisant de la channelrhodopsine synthétique — voie vers l'application thérapeutique humaine cartographiée.",
                 ],
                 "connections": [
-                    "neural correlates of consciousness and the hard problem",
-                    "embodied and enactive cognition and 4E theories",
-                    "neuromorphic computing and event-driven architectures",
-                    "large-scale brain network dynamics and connectomics",
+                    "corrélats neuronaux de la conscience et le problème difficile",
+                    "cognition incarnée et énactive et théories 4E",
+                    "informatique neuromorphique et architectures pilotées par événements",
+                    "dynamique des réseaux cérébraux à grande échelle et connectomique",
                 ],
             },
             {
-                "hypothesis": "Neuroplasticity in adult {topic} cortex is constrained by perineuronal nets maintaining {kw} critical period closure — targeted enzymatic dissolution of these nets with chondroitinase reopens learning windows in aged brains.",
+                "hypothesis": "La neuroplasticité dans le cortex {topic} adulte est contrainte par des filets périneuronaux maintenant la fermeture de la période critique {kw} — la dissolution enzymatique ciblée de ces filets avec la chondroïtinase rouvre les fenêtres d'apprentissage dans les cerveaux âgés.",
                 "insights": [
-                    "Two-photon imaging of {topic} dendritic spines during {kw} learning reveals spine birth and death rates 5x higher than baseline — structural remodeling is orders of magnitude faster than previously believed.",
-                    "CRISPR epigenome editing to remove {kw} DNA methylation marks in {topic} cortical neurons restores juvenile plasticity in adult mice — epigenetic age reversal of learning capacity.",
-                    "Neural circuit analysis of {topic} default mode network during mind-wandering reveals {kw} predictive simulations of future scenarios — the resting brain is actively modeling possible futures.",
-                    "Population code analysis during {topic} insight moments shows abrupt reconfiguration of {kw} neural assemblies 300ms before subjects report the aha experience — prediction of insight from neural patterns.",
-                    "Theta-gamma coupling in {topic} hippocampal-prefrontal circuits during {kw} working memory task predicts individual differences in capacity — electrophysiological biomarker with clinical utility.",
-                    "Vagus nerve stimulation paired with {topic} motor training enhances {kw} cortical map reorganization 2x compared to training alone — autonomic neuromodulation of plasticity.",
-                    "Transcriptomic analysis of {topic} neurons after {kw} long-term potentiation identifies 340 activity-regulated genes forming a hierarchical gene regulatory network for synaptic consolidation.",
+                    "L'imagerie biphotonique des épines dendritiques {topic} lors de l'apprentissage {kw} révèle des taux de naissance et de mort des épines 5x supérieurs à la ligne de base — le remodelage structurel est des ordres de grandeur plus rapide que précédemment cru.",
+                    "L'édition de l'épigénome CRISPR pour supprimer les marques de méthylation ADN {kw} dans les neurones corticaux {topic} restaure la plasticité juvénile chez les souris adultes — inversion épigénétique de la capacité d'apprentissage.",
+                    "L'analyse des circuits neuronaux du réseau du mode par défaut {topic} pendant la divagation mentale révèle des simulations prédictives {kw} de scénarios futurs — le cerveau au repos modélise activement les futurs possibles.",
+                    "L'analyse du code de population lors des moments d'intuition {topic} montre une reconfiguration abrupte des assemblées neuronales {kw} 300ms avant que les sujets rapportent l'expérience aha — prédiction de l'intuition à partir des patterns neuronaux.",
+                    "Le couplage thêta-gamma dans les circuits hippocampe-préfrontal {topic} lors de la tâche de mémoire de travail {kw} prédit les différences individuelles de capacité — biomarqueur électrophysiologique avec utilité clinique.",
+                    "La stimulation du nerf vague couplée à l'entraînement moteur {topic} améliore la réorganisation de la carte corticale {kw} de 2x par rapport à l'entraînement seul — neuromodulation autonome de la plasticité.",
+                    "L'analyse transcriptomique des neurones {topic} après la potentialisation à long terme {kw} identifie 340 gènes régulés par l'activité formant un réseau de régulation génique hiérarchique pour la consolidation synaptique.",
                 ],
                 "findings": [
-                    "Closed-loop tDCS system targeting {topic} motor cortex during {kw} skill acquisition achieves 2.3x faster learning curve by delivering stimulation precisely during neural consolidation windows identified in real-time.",
-                    "Endocannabinoid system modulation during {topic} fear conditioning with {kw} selective CB1 agonist prevents traumatic memory consolidation without affecting neutral memory — therapeutic window for PTSD.",
-                    "Connectome-based fingerprinting of {topic} brain networks predicts {kw} cognitive performance with r=0.87 — functional connectivity is a reliable biological substrate for individual differences in cognition.",
+                    "Le système tDCS en boucle fermée ciblant le cortex moteur {topic} lors de l'acquisition de compétences {kw} atteint une courbe d'apprentissage 2,3x plus rapide en délivrant la stimulation précisément pendant les fenêtres de consolidation neuronale.",
+                    "La modulation du système endocannabinoïde lors du conditionnement à la peur {topic} avec l'agoniste sélectif CB1 {kw} empêche la consolidation de la mémoire traumatique sans affecter la mémoire neutre — fenêtre thérapeutique pour le PTSD.",
+                    "L'empreinte digitale basée sur le connectome des réseaux cérébraux {topic} prédit la performance cognitive {kw} avec r=0,87 — la connectivité fonctionnelle est un substrat biologique fiable pour les différences individuelles en cognition.",
                 ],
                 "connections": [
-                    "critical period plasticity and perineuronal nets",
-                    "epigenetic regulation of neuronal gene expression",
-                    "sleep architecture and memory consolidation stages",
-                    "cognitive enhancement ethics and neuroethics",
+                    "plasticité de la période critique et filets périneuronaux",
+                    "régulation épigénétique de l'expression des gènes neuronaux",
+                    "architecture du sommeil et stades de consolidation de la mémoire",
+                    "éthique de l'amélioration cognitive et neuroéthique",
                 ],
             },
         ]

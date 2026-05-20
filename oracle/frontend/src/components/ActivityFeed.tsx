@@ -79,7 +79,7 @@ function EmptyState() {
     <div className="flex flex-col items-center justify-center h-full text-slate-600 py-8">
       <div className="text-2xl mb-2">🔮</div>
       <div className="text-[11px] text-center italic">
-        Waiting for research activity
+        En attente d'activité de recherche
         <span className="inline-flex gap-0.5 ml-0.5">
           <span className="animate-bounce" style={{ animationDelay: '0ms' }}>.</span>
           <span className="animate-bounce" style={{ animationDelay: '150ms' }}>.</span>
@@ -96,7 +96,7 @@ export default function ActivityFeed({ activities }: Props) {
       {/* Header */}
       <div className="px-3 py-2 border-b border-white/5 flex-shrink-0">
         <span className="text-[11px] font-bold tracking-widest text-slate-400">
-          ⚡ LIVE FEED
+          ⚡ FLUX EN DIRECT
         </span>
       </div>
 

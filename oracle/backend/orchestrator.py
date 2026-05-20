@@ -42,26 +42,26 @@ class OracleOrchestrator:
         self.activity_log: list[dict] = []
 
         self.research_challenges = [
-            "Design a universal vaccine platform using programmable mRNA nanoparticles that teaches the immune system to defeat any novel pathogen within 48 hours",
-            "Develop room-temperature superconducting materials by engineering phonon-electron coupling in pressurized hydrogen-rich compounds",
-            "Discover the neurological substrate of consciousness and design the first provably self-aware artificial system",
-            "Engineer photosynthesis efficiency above 40% by combining quantum coherence with optimized light-harvesting protein complexes",
-            "Create topological qubit architectures that achieve fault-tolerant quantum computing with fewer than 50 physical qubits per logical qubit",
-            "Design self-assembling DNA nanobots that identify and repair cellular damage associated with aging at the molecular level",
-            "Develop a mineral-based carbon capture catalyst that converts atmospheric CO2 directly to liquid methanol using only sunlight",
-            "Discover the mathematical framework that unifies quantum mechanics and general relativity into a single coherent theory",
-            "Create a non-invasive brain-computer interface using terahertz waves to read neural patterns at single-neuron resolution without surgery",
-            "Design compact fusion reactor geometry using field-reversed configuration achieving net energy gain at 1/100th of current tokamak scale",
-            "Reverse biological aging by reprogramming epigenetic methylation patterns in somatic cells using small-molecule cocktails",
-            "Develop solid-state hydrogen storage at ambient pressure enabling 1200km range hydrogen vehicles with 3-minute refueling",
-            "Create a sparse modular AI architecture achieving human-level general reasoning with 100x less compute than current LLMs",
-            "Engineer microorganisms that efficiently degrade all major synthetic plastic polymers and excrete biodegradable monomers",
-            "Design photon-driven space propulsion using laser sails and quantum vacuum fluctuations for 0.1c cruise speed",
-            "Develop gene therapy restoring full photoreceptor function in all forms of hereditary blindness using synthetic rhodopsin analogs",
-            "Create thermoelectric materials with ZT > 5 to harvest body heat and convert it to electrical power for implanted devices",
-            "Discover novel antibiotics targeting previously unknown bacterial mechanisms by screening deep-sea extremophile biosynthetic gene clusters",
-            "Design a global ocean alkalinity enhancement network to safely remove 2 billion tons of CO2 per year without ecosystem disruption",
-            "Develop quantum sensors that detect individual misfolded protein aggregates in blood as an early-warning system for Alzheimer's",
+            "Concevoir une plateforme vaccinale universelle à base de nanoparticules ARNm programmables capable d'apprendre au système immunitaire à vaincre tout nouveau pathogène en 48 heures",
+            "Développer des matériaux supraconducteurs à température ambiante en ingénieriant le couplage phonon-électron dans des composés riches en hydrogène sous pression",
+            "Découvrir le substrat neurologique de la conscience et concevoir le premier système artificiel dont la conscience propre est prouvable",
+            "Améliorer l'efficacité de la photosynthèse au-delà de 40% en combinant la cohérence quantique avec des complexes protéiques de collecte de lumière optimisés",
+            "Créer des architectures de qubits topologiques permettant un calcul quantique tolérant aux fautes avec moins de 50 qubits physiques par qubit logique",
+            "Concevoir des nanobots ADN auto-assemblants capables d'identifier et de réparer les dommages cellulaires liés au vieillissement au niveau moléculaire",
+            "Développer un catalyseur minéral de capture de carbone convertissant directement le CO2 atmosphérique en méthanol liquide grâce à la seule énergie solaire",
+            "Découvrir le cadre mathématique qui unifie la mécanique quantique et la relativité générale en une théorie unique et cohérente",
+            "Créer une interface cerveau-ordinateur non invasive utilisant les ondes térahertz pour lire les patterns neuronaux à la résolution d'un seul neurone sans chirurgie",
+            "Concevoir une géométrie compacte de réacteur à fusion par configuration à champ renversé atteignant un gain énergétique net à 1/100e de la taille actuelle des tokamaks",
+            "Inverser le vieillissement biologique en reprogrammant les schémas de méthylation épigénétique dans les cellules somatiques à l'aide de cocktails de petites molécules",
+            "Développer un stockage d'hydrogène à l'état solide à pression ambiante permettant une autonomie de 1200km pour les véhicules à hydrogène avec un rechargement en 3 minutes",
+            "Créer une architecture d'IA modulaire éparse atteignant un raisonnement général de niveau humain avec 100 fois moins de puissance de calcul que les LLM actuels",
+            "Ingéniérer des microorganismes dégradant efficacement tous les principaux polymères plastiques synthétiques et excrétant des monomères biodégradables",
+            "Concevoir une propulsion spatiale pilotée par photons à l'aide de voiles laser et de fluctuations du vide quantique pour une vitesse de croisière de 0,1c",
+            "Développer une thérapie génique restaurant la pleine fonction des photorécepteurs dans toutes les formes de cécité héréditaire grâce à des analogues synthétiques de la rhodopsine",
+            "Créer des matériaux thermoélectriques avec ZT > 5 pour capter la chaleur corporelle et la convertir en énergie électrique pour les dispositifs implantés",
+            "Découvrir de nouveaux antibiotiques ciblant des mécanismes bactériens inconnus en criblant les clusters de gènes biosynthétiques d'extrémophiles des grands fonds marins",
+            "Concevoir un réseau mondial d'augmentation de l'alcalinité océanique pour retirer en toute sécurité 2 milliards de tonnes de CO2 par an sans perturber les écosystèmes",
+            "Développer des capteurs quantiques détectant les agrégats protéiques mal repliés individuels dans le sang comme système d'alerte précoce pour la maladie d'Alzheimer",
         ]
 
         # Counter for tracking every-3rd triggers
@@ -166,7 +166,7 @@ class OracleOrchestrator:
             # Determine which agents get this challenge based on keywords
             agents_to_assign = self._select_agents_for_challenge(challenge)
 
-            log_msg = f"🎯 New Research Challenge: {challenge[:80]}..."
+            log_msg = f"🎯 Nouveau Défi de Recherche : {challenge[:80]}..."
             logger.info(log_msg)
             await self._broadcast_ws("orchestrator_log", {"level": "info", "message": log_msg})
 
@@ -177,7 +177,7 @@ class OracleOrchestrator:
                 "agent_name": "NEXUS",
                 "agent_emoji": "🧠",
                 "action_type": "task",
-                "content": f"🎯 Assigning challenge: {challenge[:100]}",
+                "content": f"🎯 Attribution du défi : {challenge[:100]}",
                 "timestamp": datetime.utcnow().isoformat(),
             })
 

@@ -65,7 +65,7 @@ export default function AgentCard({ agent }: Props) {
       {/* Current task */}
       {agent.current_task && (
         <div className="text-[10px] text-slate-300 italic px-3 py-1 truncate">
-          <span className="text-slate-500">Task: </span>
+          <span className="text-slate-500">Tâche : </span>
           {agent.current_task}
         </div>
       )}
@@ -74,7 +74,7 @@ export default function AgentCard({ agent }: Props) {
       <div className="text-[11px] text-slate-200 px-3 py-1 line-clamp-2 min-h-[2rem] transition-all duration-500">
         {agent.current_thought || (
           <span className="text-slate-600 italic">
-            {active ? 'Processing...' : 'Standby'}
+            {active ? 'En traitement...' : 'En veille'}
           </span>
         )}
       </div>

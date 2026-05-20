@@ -4,10 +4,10 @@ import { useWebSocket } from './useWebSocket'
 
 export function relativeTime(iso: string): string {
   const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
-  if (diff < 5) return 'just now'
-  if (diff < 60) return `${diff}s ago`
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
-  return `${Math.floor(diff / 3600)}h ago`
+  if (diff < 5) return "à l'instant"
+  if (diff < 60) return `${diff}s`
+  if (diff < 3600) return `${Math.floor(diff / 60)} min`
+  return `${Math.floor(diff / 3600)}h`
 }
 
 export function useOracleStore() {
@@ -82,7 +82,7 @@ export function useOracleStore() {
           agent_name: e.author_agent.toUpperCase(),
           agent_emoji: e.author_emoji || '🔬',
           action_type: 'knowledge',
-          content: `📚 Added: "${e.title}"`,
+          content: `📚 Ajouté : "${e.title}"`,
           timestamp: e.timestamp,
         })
         break
@@ -98,7 +98,7 @@ export function useOracleStore() {
           agent_name: 'ORACLE',
           agent_emoji: '💡',
           action_type: 'discovery',
-          content: `🌟 BREAKTHROUGH: ${d.title}`,
+          content: `🌟 PERCÉE : ${d.title}`,
           timestamp: d.timestamp,
         })
         setTimeout(() => setLatestDiscovery(null), 7000)

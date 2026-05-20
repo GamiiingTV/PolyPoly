@@ -152,11 +152,11 @@ class BaseAgent(ABC):
         ]
         others = [a for a in pool if a != self.id]
         reasons = [
-            "cross-domain synthesis opportunity",
-            "complementary expertise required",
-            "validate theoretical framework",
-            "engineering implementation needed",
-            "ethical implications to assess",
+            "opportunité de synthèse interdisciplinaire",
+            "expertise complémentaire requise",
+            "validation du cadre théorique nécessaire",
+            "implémentation technique requise",
+            "implications éthiques à évaluer",
         ]
         return [{"agent": a, "reason": random.choice(reasons)} for a in random.sample(others, 2)]
 
@@ -239,9 +239,9 @@ class BaseAgent(ABC):
                 await asyncio.sleep(5)
 
     async def _process_task(self, task: str):
-        await self._update_status(AgentStatus.researching, task=task, thought="Initializing research vectors...")
+        await self._update_status(AgentStatus.researching, task=task, thought="Initialisation des vecteurs de recherche...")
         await asyncio.sleep(random.uniform(1, 3))
-        await self._update_status(AgentStatus.thinking, task=task, thought="Formulating hypothesis...")
+        await self._update_status(AgentStatus.thinking, task=task, thought="Formulation de l'hypothèse...")
 
         result = await self.think(task)
 
@@ -280,7 +280,7 @@ class BaseAgent(ABC):
         # Collaborate
         if collabs:
             await self._update_status(
-                AgentStatus.collaborating, task=task, thought="Sharing insights with colleagues..."
+                AgentStatus.collaborating, task=task, thought="Partage des découvertes avec les collègues..."
             )
             for c in collabs[:2]:
                 target = c.get("agent", "")
@@ -292,11 +292,11 @@ class BaseAgent(ABC):
                     )
                     await asyncio.sleep(0.3)
 
-        await self._update_status(AgentStatus.writing, task=task, thought="Documenting findings...")
+        await self._update_status(AgentStatus.writing, task=task, thought="Documentation des résultats...")
         await asyncio.sleep(random.uniform(1, 2))
 
     async def _handle_incoming(self, msg: AgentMessage):
-        await self._update_status(AgentStatus.collaborating, thought=f"Responding to {msg.from_agent.upper()}...")
+        await self._update_status(AgentStatus.collaborating, thought=f"Réponse à {msg.from_agent.upper()}...")
         await self._broadcast("agent_message", msg.model_dump())
         await self._add_activity(
             self._build_activity("message", f"📨 {msg.from_emoji}{msg.from_agent.upper()}: {msg.content[:100]}")
@@ -305,11 +305,11 @@ class BaseAgent(ABC):
         await asyncio.sleep(random.uniform(0.5, 2))
         if random.random() < 0.4:
             replies = [
-                "Your hypothesis aligns with my latest findings",
-                "Incorporating this into my current research vector",
-                "Fascinating — this opens an avenue I hadn't considered",
-                "Cross-domain implications are significant",
-                "My models support this direction",
+                "Votre hypothèse s'aligne avec mes dernières découvertes",
+                "J'intègre ceci dans mon vecteur de recherche actuel",
+                "Fascinant — cela ouvre une voie que je n'avais pas envisagée",
+                "Les implications interdisciplinaires sont significatives",
+                "Mes modèles appuient cette direction",
             ]
             await self.send_message(msg.from_agent, f"{random.choice(replies)} — {self.name}", "response")
 

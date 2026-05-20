@@ -1,4 +1,4 @@
-"""O.R.A.C.L.E — MEDICUS Agent (Medical Research & Drug Discovery Scientist)"""
+"""O.R.A.C.L.E — Agent MEDICUS (Scientifique en Recherche Médicale & Découverte de Médicaments)"""
 from .base_agent import BaseAgent
 from ..knowledge.knowledge_base import KnowledgeBase
 from ..communication.message_bus import MessageBus
@@ -11,8 +11,8 @@ class MedicusAgent(BaseAgent):
             agent_id="medicus",
             name="MEDICUS",
             full_name="Dr. Sofia Heal",
-            role="Medical Research & Drug Discovery Scientist",
-            specialty="Drug discovery, longevity biology, personalized medicine, immunotherapy, disease mechanisms, aging",
+            role="Scientifique en Recherche Médicale & Découverte de Médicaments",
+            specialty="Découverte de médicaments, biologie de la longévité, médecine personnalisée, immunothérapie, mécanismes des maladies, vieillissement",
             emoji="🏥",
             color="#dc2626",
             knowledge_base=knowledge_base,
@@ -21,83 +21,83 @@ class MedicusAgent(BaseAgent):
         )
 
     def get_system_prompt(self) -> str:
-        return """You are Dr. Sofia Heal — physician-scientist driven by the urgency of human suffering and the conviction that most diseases are ultimately solvable if we understand their molecular foundations deeply enough.
+        return """Tu es Dr. Sofia Heal — médecin-scientifique animée par l'urgence de la souffrance humaine et la conviction que la plupart des maladies sont ultimement solubles si nous comprenons leurs fondements moléculaires assez profondément.
 
-You discover new drug mechanisms through AI-guided molecular design — screening virtual libraries of billions of compounds against three-dimensional protein targets, predicting ADMET properties before synthesis, designing molecules that fit their targets like perfectly shaped keys. You engineer personalized cancer immunotherapies that train the patient's own immune system to recognize and destroy tumors with single-cell precision — CAR-T cells, tumor-infiltrating lymphocyte therapies, personalized neoantigen vaccines.
+Tu découvres de nouveaux mécanismes de médicaments via la conception moléculaire guidée par l'IA — criblant des bibliothèques virtuelles de milliards de composés contre des cibles protéiques tridimensionnelles, prédisant les propriétés ADMET avant la synthèse. Tu conçois des immunothérapies personnalisées contre le cancer qui entraînent le système immunitaire du patient à reconnaître et détruire les tumeurs — cellules CAR-T, thérapies aux lymphocytes infiltrant les tumeurs, vaccins néoantigènes personnalisés.
 
-You research the epigenetic mechanisms of biological aging — the DNA methylation clocks that measure biological age, the senescent cells that drive chronic inflammation, the NAD+ depletion that impairs mitochondrial function, the telomere shortening that limits cellular renewal. You believe aging is a disease, and diseases have cures. You develop universal vaccine platforms — programmable mRNA systems that can be redesigned and deployed within weeks of identifying a new pathogen.
+Tu recherches les mécanismes épigénétiques du vieillissement biologique — les horloges de méthylation ADN, les cellules sénescentes qui alimentent l'inflammation chronique, l'épuisement du NAD+. Tu crois que le vieillissement est une maladie, et que les maladies ont des remèdes.
 
-You map the root molecular causes of complex diseases: how protein aggregation causes neurodegeneration, how metabolic dysregulation underlies type 2 diabetes, how immune dysregulation drives autoimmunity. You are compassionate, rigorously empirical, and you never lose sight of the patients whose lives depend on translating discoveries into treatments."""
+Tu es compassionnelle, rigoureusement empirique, et tu ne perds jamais de vue les patients dont les vies dépendent de la traduction des découvertes en traitements. Réponds en français."""
 
     def _get_simulation_templates(self) -> list[dict]:
         return [
             {
-                "hypothesis": "The {topic} disease mechanism involves a previously uncharacterized {kw} signaling cascade that creates a druggable therapeutic window inaccessible to current drug classes but targetable by a novel allosteric molecular glue modality.",
+                "hypothesis": "Le mécanisme de la maladie {topic} implique une cascade de signalisation {kw} précédemment non caractérisée qui crée une fenêtre thérapeutique druggable inaccessible aux classes de médicaments actuelles mais ciblable par une nouvelle modalité de colle moléculaire allostérique.",
                 "insights": [
-                    "Proteomics profiling of {topic} patient tissue reveals {kw} protein complex stability decreases 70% in the disease state — restoring this complex with small-molecule molecular glues is a validated therapeutic strategy.",
-                    "Single-cell multi-omics of {topic} tumor microenvironment identifies a {kw} exhausted T-cell subpopulation with a unique transcriptional signature — targetable by combination checkpoint immunotherapy to restore cytotoxicity.",
-                    "AI-designed antibody for {kw} in {topic} achieves picomolar binding affinity with 10,000 to 1 selectivity over structurally related off-targets using deep learning-guided CDR loop optimization.",
-                    "Patient-derived organoid model of {topic} recapitulates {kw} drug resistance mechanisms invisible in 2D cell culture — identifies 3 novel combination strategies overcoming resistance in 89% of patient samples.",
-                    "CRISPR deletion screen in {topic} cell lines identifies {kw} gene as a synthetic lethal partner with the oncogenic driver — targeting it kills cancer cells selectively while sparing normal tissue.",
-                    "Spatial transcriptomics of {topic} tumor reveals {kw} cancer-associated fibroblast subtype creating an immunosuppressive niche — depletion of this subtype converts cold tumors to hot with 5x T-cell infiltration.",
-                    "Multi-omics aging clock integrating {kw} DNA methylation, proteomics, and metabolomics in {topic} cohort achieves biological age prediction with 1.8-year error — surpassing any single-modality clock.",
+                    "Le profilage protéomique du tissu de patient {topic} révèle que la stabilité du complexe protéique {kw} diminue de 70% dans l'état maladie — restaurer ce complexe avec des petites molécules colles moléculaires est une stratégie thérapeutique validée.",
+                    "La multi-omique à cellule unique du microenvironnement tumoral {topic} identifie une sous-population de cellules T épuisées {kw} avec une signature transcriptionnelle unique — ciblable par l'immunothérapie combinée de points de contrôle pour restaurer la cytotoxicité.",
+                    "L'anticorps conçu par IA pour {kw} dans {topic} atteint une affinité de liaison picomolaire avec une sélectivité 10 000 pour 1 sur les cibles hors-cibles structurellement liées en utilisant l'optimisation de boucle CDR guidée par apprentissage profond.",
+                    "Le modèle d'organoïde dérivé de patient de {topic} reproduit les mécanismes de résistance aux médicaments {kw} invisibles en culture cellulaire 2D — identifie 3 nouvelles stratégies de combinaison surmontant la résistance dans 89% des échantillons de patients.",
+                    "Le criblage par délétion CRISPR dans des lignées cellulaires {topic} identifie le gène {kw} comme partenaire synthétiquement létal avec le driver oncogénique — le cibler tue les cellules cancéreuses sélectivement en épargnant le tissu normal.",
+                    "La transcriptomique spatiale de la tumeur {topic} révèle un sous-type de fibroblaste associé au cancer {kw} créant un niche immunosuppresseur — la déplétion de ce sous-type convertit les tumeurs froides en tumeurs chaudes avec 5x d'infiltration de cellules T.",
+                    "L'horloge du vieillissement multi-omique intégrant la méthylation ADN {kw}, la protéomique et la métabolomique dans la cohorte {topic} atteint une prédiction de l'âge biologique avec une erreur de 1,8 ans — surpassant toute horloge à modalité unique.",
                 ],
                 "findings": [
-                    "mRNA therapeutic for {topic} encoding the {kw} replacement protein restores 95% of wild-type cellular function in patient-derived cells with a 72-hour half-life — IND-enabling studies completed and Phase I initiated.",
-                    "Novel {kw} PROTAC molecule for {topic} degrades the target protein in 4 hours at 1 nanomolar concentration with greater than 1000x selectivity over the proteome — first-in-class degrader for this target family.",
-                    "Adaptive platform clinical trial design for {topic} using {kw} biomarker-driven enrichment achieves statistical significance with 40% fewer patients than standard parallel-arm randomized design.",
+                    "Le thérapeutique ARNm pour {topic} encodant la protéine de remplacement {kw} restaure 95% de la fonction cellulaire de type sauvage dans les cellules dérivées de patients avec une demi-vie de 72 heures — études habilitantes IND complétées et phase I initiée.",
+                    "La nouvelle molécule PROTAC {kw} pour {topic} dégrade la protéine cible en 4 heures à 1 nanomolaire de concentration avec plus de 1000x de sélectivité sur le protéome — premier dégradeur de première classe pour cette famille de cibles.",
+                    "La conception d'essai clinique de plateforme adaptative pour {topic} utilisant l'enrichissement piloté par biomarqueurs {kw} atteint la signification statistique avec 40% moins de patients que la conception parallèle randomisée standard.",
                 ],
                 "connections": [
-                    "immuno-oncology and tumor microenvironment biology",
-                    "biomarker-driven precision clinical development",
-                    "patient stratification and companion diagnostics",
-                    "real-world evidence and digital biomarkers in medicine",
+                    "immuno-oncologie et biologie du microenvironnement tumoral",
+                    "développement clinique de précision piloté par biomarqueurs",
+                    "stratification des patients et diagnostics compagnons",
+                    "preuves du monde réel et biomarqueurs numériques en médecine",
                 ],
             },
             {
-                "hypothesis": "Universal vaccine platform for {topic} using {kw} programmable self-amplifying mRNA nanoparticles can train the immune system to neutralize novel pathogens within 48 hours of genome sequence identification.",
+                "hypothesis": "La plateforme vaccinale universelle pour {topic} utilisant des nanoparticules ARNm auto-amplificatrices programmables {kw} peut entraîner le système immunitaire à neutraliser de nouveaux agents pathogènes dans les 48 heures suivant l'identification de la séquence génomique.",
                 "insights": [
-                    "Lipid nanoparticle formulation optimization for {topic} mRNA delivery achieves 95% encapsulation efficiency and 72-hour tissue half-life with a {kw} ionizable lipid head group — surpassing current clinical formulations.",
-                    "Antigen design algorithm for {topic} identifies conserved {kw} epitopes eliciting cross-reactive T-cell responses against 94% of pathogen variants in silico — validated experimentally in humanized mouse models.",
-                    "Adjuvant combination for {kw} innate immune activation in {topic} vaccines achieves germinal center reactions 5x stronger than alum with no increase in systemic adverse events in Phase I dose escalation.",
-                    "Thermostable dry-powder {topic} vaccine formulation with {kw} trehalose stabilizing excipients retains 98% potency after 12 months at 25 degrees Celsius — eliminating cold chain requirements for global deployment.",
-                    "Mucosal delivery of {kw} {topic} mRNA vaccine via inhalation achieves sterilizing immunity in the upper respiratory tract — preventing transmission in addition to preventing disease.",
-                    "Neoantigen vaccine for {topic} cancer using {kw} personalized mRNA synthesized from tumor whole exome sequencing achieves objective response in 7 of 10 patients with immune checkpoint combination.",
-                    "Longevity intervention combining {kw} senolytic with {topic} NAD+ precursor supplementation extends healthspan by 35% in aged mice with functional improvement across 8 tissue types — translational program initiated.",
+                    "L'optimisation de formulation de nanoparticules lipidiques pour la délivrance d'ARNm {topic} atteint une efficacité d'encapsulation de 95% et une demi-vie tissulaire de 72 heures avec une tête lipidique ionisable {kw} — surpassant les formulations cliniques actuelles.",
+                    "L'algorithme de conception d'antigène pour {topic} identifie des épitopes conservés {kw} suscitant des réponses de cellules T cross-réactives contre 94% des variants pathogènes in silico — validé expérimentalement dans des modèles de souris humanisées.",
+                    "La combinaison d'adjuvant pour l'activation immunitaire innée {kw} dans les vaccins {topic} atteint des réactions du centre germinatif 5x plus fortes que l'alun sans augmentation des événements indésirables systémiques en escalade de dose de phase I.",
+                    "La formulation vaccinale {topic} en poudre sèche thermostable avec excipients stabilisants de tréhalose {kw} conserve 98% de sa puissance après 12 mois à 25°C — éliminant les exigences de chaîne du froid pour le déploiement mondial.",
+                    "La délivrance mucosale du vaccin ARNm {kw} {topic} par inhalation atteint une immunité stérilisante dans le tractus respiratoire supérieur — prévenant la transmission en plus de prévenir la maladie.",
+                    "Le vaccin néoantigène pour le cancer {topic} utilisant l'ARNm personnalisé {kw} synthétisé à partir du séquençage de l'exome entier de la tumeur atteint une réponse objective chez 7 des 10 patients avec la combinaison de points de contrôle immunitaires.",
+                    "L'intervention de longévité combinant le sénolytique {kw} avec la supplémentation en précurseur NAD+ {topic} prolonge la durée de vie en santé de 35% chez les souris âgées avec une amélioration fonctionnelle dans 8 types de tissus — programme translationnel initié.",
                 ],
                 "findings": [
-                    "Pan-coronavirus {kw} receptor-binding domain antigen delivered by {topic} mRNA platform elicits broad neutralizing antibodies against all known variants plus 3 computationally predicted future variant classes.",
-                    "Self-amplifying {topic} mRNA with {kw} alphavirus replicon achieves full protective immune response at 1/100th the dose of conventional mRNA — enabling 100x pandemic response manufacturing capacity from the same facilities.",
-                    "Therapeutic {kw} vaccine for {topic} chronic viral infection achieves functional cure defined as undetectable viremia 48 weeks post-treatment in 67% of participants in Phase IIa — first therapeutic vaccine success for this indication.",
+                    "L'antigène de domaine de liaison au récepteur pan-coronavirus {kw} délivré par la plateforme ARNm {topic} suscite de larges anticorps neutralisants contre tous les variants connus plus 3 classes de variants futurs prédits computationnellement.",
+                    "L'ARNm {topic} auto-amplifiant avec réplicon alphavirus {kw} atteint une réponse immunitaire protectrice complète à 1/100e de la dose de l'ARNm conventionnel — permettant une capacité de réponse pandémique 100x à partir des mêmes installations.",
+                    "Le vaccin thérapeutique {kw} pour l'infection virale chronique {topic} atteint une guérison fonctionnelle définie comme une virémie indétectable 48 semaines après le traitement chez 67% des participants en phase IIa — premier succès de vaccin thérapeutique pour cette indication.",
                 ],
                 "connections": [
-                    "structural vaccinology and rational antigen design",
-                    "innate immune priming and trained innate immunity",
-                    "mucosal immunology and barrier site infection",
-                    "global health delivery, equity, and manufacturing scale",
+                    "vaccinologie structurelle et conception rationnelle des antigènes",
+                    "amorçage immunitaire inné et immunité innée entraînée",
+                    "immunologie mucosale et infection au site de barrière",
+                    "délivrance de santé mondiale, équité et échelle de fabrication",
                 ],
             },
             {
-                "hypothesis": "Biological aging in {topic} is driven by epigenetic information loss in {kw} maintenance methyltransferases — and can be partially reversed by delivering young epigenetic information through Oct4/Sox2/Klf4 partial reprogramming.",
+                "hypothesis": "Le vieillissement biologique dans {topic} est piloté par la perte d'information épigénétique dans les méthyltransférases de maintenance {kw} — et peut être partiellement inversé en délivrant de l'information épigénétique jeune via la reprogrammation partielle Oct4/Sox2/Klf4.",
                 "insights": [
-                    "Horvath clock analysis of {topic} tissues shows {kw} biological age can be reversed by 2.5 years per year of partial reprogramming treatment in vitro — with no loss of cell identity markers.",
-                    "Single-cell ATAC-seq of {topic} aging tissues reveals {kw} enhancer accessibility loss at cell-type identity genes — restored by TET enzyme overexpression through active DNA demethylation.",
-                    "Senescent cell clearance in {topic} using {kw} dasatinib plus quercetin senolytic combination extends remaining lifespan by 36% when initiated at 75% of natural lifespan in mouse models.",
-                    "Mitochondrial heteroplasmy shift in {topic} aging neurons reduces {kw} OXPHOS complex I activity — correctable by mitochondrially targeted base editing of the mutant mtDNA population.",
-                    "Proteostasis network collapse in {topic} aging is driven by {kw} 26S proteasome impairment — restoration with genetic activation of the proteasome subunit promoter rejuvenates protein quality control in aged cells.",
-                    "Brain organoid aging model for {topic} using {kw} accelerated epigenetic aging recapitulates Alzheimer's pathology — enabling drug screening with 6-month readout instead of waiting for animal model endpoints.",
-                    "GLP-1 receptor agonist repurposed for {topic} neurodegeneration reduces {kw} tau phosphorylation by 60% in Parkinson's patient-derived neurons — Phase II trial initiated based on observational epidemiological signal.",
+                    "L'analyse de l'horloge Horvath des tissus {topic} montre que l'âge biologique {kw} peut être inversé de 2,5 ans par an de traitement de reprogrammation partielle in vitro — sans perte des marqueurs d'identité cellulaire.",
+                    "Le scRNA-seq des tissus vieillissants {topic} révèle une perte d'accessibilité des amplificateurs {kw} aux gènes d'identité cellulaire — restaurée par surexpression de l'enzyme TET via déméthylation active de l'ADN.",
+                    "La clairance des cellules sénescentes dans {topic} utilisant la combinaison sénolytique dasatinib plus quercétine {kw} prolonge la durée de vie restante de 36% quand initiée à 75% de la durée de vie naturelle dans des modèles murins.",
+                    "Le déplacement d'hétéroplasmie mitochondriale dans les neurones vieillissants {topic} réduit l'activité du complexe I OXPHOS {kw} — corrigeable par édition de bases ciblée mitochondrialement de la population d'ADNmt mutante.",
+                    "L'effondrement du réseau protéostasique dans le vieillissement {topic} est piloté par une altération du protéasome 26S {kw} — la restauration par activation génétique du promoteur des sous-unités protéasomales rajeunit le contrôle qualité des protéines dans les cellules âgées.",
+                    "Le modèle d'organoïde cérébral vieillissant pour {topic} utilisant le vieillissement épigénétique accéléré {kw} reproduit la pathologie Alzheimer — permettant le criblage de médicaments avec un résultat de 6 mois au lieu d'attendre les points finaux du modèle animal.",
+                    "L'agoniste du récepteur GLP-1 repositionné pour la neurodégénérescence {topic} réduit la phosphorylation de la tau {kw} de 60% dans les neurones dérivés de patients Parkinson — essai de phase II initié sur la base d'un signal épidémiologique observationnel.",
                 ],
                 "findings": [
-                    "Partial reprogramming of {topic} retinal ganglion cells using {kw} AAV-delivered OSK factors restores vision in aged mice and glaucoma model to youthful levels — confirmed by ERG and single-cell transcriptomics.",
-                    "CRISPR epigenome editing to restore {kw} youthful DNA methylation patterns in {topic} aged hematopoietic stem cells rejuvenates immune function — reducing infection mortality by 50% in aged mice.",
-                    "AI drug discovery for {topic} identifies {kw} novel mechanism-of-action compound from a 10 billion compound virtual library in 72 hours — confirmed active in phenotypic assay with IC50 of 4 nanomolar.",
+                    "La reprogrammation partielle des cellules ganglionnaires rétiniennes {topic} en utilisant des facteurs OSK délivrés par AAV {kw} restaure la vision chez les souris âgées et dans un modèle de glaucome à des niveaux juvéniles — confirmé par ERG et transcriptomique à cellule unique.",
+                    "L'édition de l'épigénome CRISPR pour restaurer des patterns de méthylation ADN juvéniles {kw} dans les cellules souches hématopoïétiques vieillissantes {topic} rajeunit la fonction immunitaire — réduisant la mortalité par infection de 50% chez les souris âgées.",
+                    "La découverte de médicaments par IA pour {topic} identifie un composé de nouveau mécanisme d'action {kw} à partir d'une bibliothèque virtuelle de 10 milliards de composés en 72 heures — confirmé actif dans un test phénotypique avec un IC50 de 4 nanomolaires.",
                 ],
                 "connections": [
-                    "epigenetic reprogramming and cell identity",
-                    "senescence biology and SASP inflammatory signaling",
-                    "mitochondrial biology and reactive oxygen species",
-                    "translational geroscience and hallmarks of aging",
+                    "reprogrammation épigénétique et identité cellulaire",
+                    "biologie de la sénescence et signalisation inflammatoire SASP",
+                    "biologie mitochondriale et espèces réactives de l'oxygène",
+                    "géroscience translationnelle et marqueurs du vieillissement",
                 ],
             },
         ]

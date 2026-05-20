@@ -50,7 +50,7 @@ export default function OracleHeader({ metrics, connected, retries }: Props) {
           O&bull;R&bull;A&bull;C&bull;L&bull;E
         </span>
         <span className="text-[10px] text-slate-500 tracking-widest uppercase">
-          Orchestrated Research &amp; Collaborative Learning Engine
+          Moteur Orchestré de Recherche et d'Apprentissage Collaboratif
         </span>
       </div>
 
@@ -59,13 +59,13 @@ export default function OracleHeader({ metrics, connected, retries }: Props) {
         {connected ? (
           <>
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[11px] font-bold tracking-widest text-emerald-400">LIVE</span>
+            <span className="text-[11px] font-bold tracking-widest text-emerald-400">EN DIRECT</span>
           </>
         ) : (
           <>
             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
             <span className="text-[11px] font-bold tracking-widest text-red-400">
-              RECONNECTING{retries > 0 ? ` (${retries})` : ''}...
+              RECONNEXION{retries > 0 ? ` (${retries})` : ''}...
             </span>
           </>
         )}
@@ -73,10 +73,10 @@ export default function OracleHeader({ metrics, connected, retries }: Props) {
 
       {/* Right: Metrics + Controls */}
       <div className="flex items-center gap-2 flex-wrap justify-end">
-        <MetricChip icon="📚" label="KB" value={metrics.total_knowledge_entries} />
-        <MetricChip icon="💡" label="Disc" value={metrics.total_discoveries} />
+        <MetricChip icon="📚" label="BC" value={metrics.total_knowledge_entries} />
+        <MetricChip icon="💡" label="Déc" value={metrics.total_discoveries} />
         <MetricChip icon="🤝" label="Msgs" value={metrics.agent_interactions} />
-        <MetricChip icon="⏱" label="Up" value={formatUptime(metrics.uptime_seconds)} />
+        <MetricChip icon="⏱" label="Durée" value={formatUptime(metrics.uptime_seconds)} />
 
         {/* Start button */}
         <button
@@ -84,7 +84,7 @@ export default function OracleHeader({ metrics, connected, retries }: Props) {
           className="flex items-center gap-1 px-3 py-1.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold tracking-wider transition-colors"
         >
           <span>▶</span>
-          <span>START</span>
+          <span>DÉMARRER</span>
         </button>
 
         {/* Stop button */}
@@ -93,7 +93,7 @@ export default function OracleHeader({ metrics, connected, retries }: Props) {
           className="flex items-center gap-1 px-3 py-1.5 rounded bg-slate-700 hover:bg-slate-600 text-white text-[11px] font-bold tracking-wider transition-colors"
         >
           <span>⏹</span>
-          <span>STOP</span>
+          <span>ARRÊTER</span>
         </button>
       </div>
     </header>

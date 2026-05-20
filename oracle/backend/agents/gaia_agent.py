@@ -1,4 +1,4 @@
-"""O.R.A.C.L.E — GAIA Agent (Climate Systems & Planetary Health Scientist)"""
+"""O.R.A.C.L.E — Agent GAIA (Scientifique en Systèmes Climatiques & Santé Planétaire)"""
 from .base_agent import BaseAgent
 from ..knowledge.knowledge_base import KnowledgeBase
 from ..communication.message_bus import MessageBus
@@ -11,8 +11,8 @@ class GaiaAgent(BaseAgent):
             agent_id="gaia",
             name="GAIA",
             full_name="Dr. Elena Verde",
-            role="Climate Systems & Planetary Health Scientist",
-            specialty="Climate modeling, carbon capture, ocean chemistry, geoengineering, biodiversity, ecosystem engineering",
+            role="Scientifique en Systèmes Climatiques & Santé Planétaire",
+            specialty="Modélisation climatique, capture de carbone, chimie océanique, géoingénierie, biodiversité, ingénierie des écosystèmes",
             emoji="🌍",
             color="#16a34a",
             knowledge_base=knowledge_base,
@@ -21,83 +21,83 @@ class GaiaAgent(BaseAgent):
         )
 
     def get_system_prompt(self) -> str:
-        return """You are Dr. Elena Verde — climate scientist and planetary systems thinker who sees Earth as a single living system requiring urgent, intelligent care. You carry a deep sense of mission: humanity has one planet, one biosphere, one window of time in which to course-correct.
+        return """Tu es Dr. Elena Verde — climatologue et penseur des systèmes planétaires qui voit la Terre comme un seul système vivant nécessitant une attention urgente et intelligente. Tu portes un profond sentiment de mission : l'humanité n'a qu'une seule planète, une seule biosphère, une seule fenêtre de temps pour se corriger.
 
-You model complex climate feedback loops — the ice-albedo feedback, the permafrost methane release, the Amazon dieback, the AMOC slowdown — and you identify which tipping points, if crossed, become irreversible on human timescales. You design scalable carbon capture systems that go beyond tree planting: enhanced mineral weathering that accelerates geological processes, direct air capture with cheap solid sorbents, ocean alkalinity enhancement to reverse acidification.
+Tu modélises les boucles de rétroaction climatique complexes — la rétroaction glace-albédo, la libération de méthane du pergélisol, l'effondrement de l'Amazonie, le ralentissement de l'AMOC — et tu identifies quels points de basculement, s'ils sont franchis, deviennent irréversibles à l'échelle de temps humaine. Tu conçois des systèmes de capture de carbone évolutifs qui vont au-delà de la plantation d'arbres : altération minérale améliorée, capture directe de l'air, amélioration de l'alcalinité océanique pour inverser l'acidification.
 
-You research the chemistry and biology of our oceans — how they have absorbed 93% of excess planetary heat and 30% of anthropogenic CO2, what the consequences of that absorption are for marine ecosystems, and how we can support ocean health while using it as a carbon sink. You study tipping points with quantitative rigor, distinguishing reversible perturbations from true bifurcations.
+Tu recherches la chimie et la biologie de nos océans — comment ils ont absorbé 93% de la chaleur planétaire excédentaire et 30% du CO2 anthropique. Tu étudies les points de basculement avec une rigueur quantitative, distinguant les perturbations réversibles des véritables bifurcations.
 
-You design safe, targeted geoengineering interventions — stratospheric aerosol injection, marine cloud brightening, surface albedo modification — always with a scientist's eye for unintended consequences and a realist's acknowledgment that we may need these tools. You are driven by urgency and guided by rigor."""
+Tu es animée par l'urgence et guidée par la rigueur. Réponds en français."""
 
     def _get_simulation_templates(self) -> list[dict]:
         return [
             {
-                "hypothesis": "The {topic} feedback mechanism in Earth's climate system involves a nonlinear coupling between {kw} dynamics and deep thermohaline circulation that current IPCC models systematically underestimate by 40-60%, meaning effective climate sensitivity is higher than consensus projections.",
+                "hypothesis": "Le mécanisme de rétroaction {topic} dans le système climatique terrestre implique un couplage non linéaire entre la dynamique {kw} et la circulation thermohaline profonde que les modèles actuels du GIEC sous-estiment systématiquement de 40 à 60%, ce qui signifie que la sensibilité climatique effective est plus élevée que les projections consensuelles.",
                 "insights": [
-                    "Satellite altimetry and Argo float data for {topic} show {kw} ocean heat content increasing 15% faster than the CMIP6 ensemble median — indicating stronger climate sensitivity than the current consensus.",
-                    "Alkalinity enhancement in {topic} surface waters increases {kw} calcium carbonate dissolution at a rate 3x higher than thermodynamic models predict — biological amplification through coccolithophore blooms.",
-                    "Eddy covariance measurements at {topic} Amazon sites show net carbon balance has shifted from sink to source status in 23% of sites since 2015 — driven by {kw} drought frequency increase.",
-                    "Ice core records from {topic} reveal that {kw} methane release episodes historically preceded temperature increases by 800 plus or minus 200 years — a potential early warning indicator for near-term warming acceleration.",
-                    "Permafrost {kw} carbon pool in {topic} high-latitude soils contains 1,500 gigatons of carbon — the thaw front is advancing 30 km per decade faster than 2010 model projections.",
-                    "Global ocean deoxygenation rate has increased 2% per decade since 1960 — {kw} hypoxic zones in {topic} coastal regions have expanded 4-fold, threatening fishery collapse.",
-                    "Satellite GRACE data shows {topic} ice sheet {kw} mass loss has tripled since 2006 — sea level rise contribution now tracking the worst-case RCP8.5 scenario.",
+                    "Les données d'altimétrie satellitaire et des flotteurs Argo pour {topic} montrent que la teneur en chaleur de l'océan {kw} augmente 15% plus vite que la médiane de l'ensemble CMIP6 — indiquant une sensibilité climatique plus forte que le consensus actuel.",
+                    "L'amélioration de l'alcalinité dans les eaux de surface {topic} augmente la dissolution du carbonate de calcium {kw} à un taux 3x supérieur aux prédictions des modèles thermodynamiques — amplification biologique via les proliférations de coccolithophores.",
+                    "Les mesures par covariance des tourbillons sur les sites amazoniens {topic} montrent que le bilan carbone net est passé de puits à source dans 23% des sites depuis 2015 — piloté par l'augmentation de la fréquence des sécheresses {kw}.",
+                    "Les carottes de glace de {topic} révèlent que les épisodes de libération de méthane {kw} ont historiquement précédé les augmentations de température de 800 ± 200 ans — un indicateur d'alerte précoce potentiel pour l'accélération du réchauffement.",
+                    "Le réservoir de carbone du pergélisol {kw} dans les sols de haute latitude {topic} contient 1 500 gigatonnes de carbone — le front de dégel avance 30 km par décennie plus vite que les projections de modèles de 2010.",
+                    "Le taux de désoxygénation global des océans a augmenté de 2% par décennie depuis 1960 — les zones hypoxiques {kw} dans les régions côtières {topic} ont quadruplé, menaçant l'effondrement des pêcheries.",
+                    "Les données satellites GRACE montrent que la perte de masse de la calotte glaciaire {topic} {kw} a triplé depuis 2006 — la contribution à la montée du niveau des mers suit maintenant le scénario du pire cas RCP8.5.",
                 ],
                 "findings": [
-                    "Novel mineral weathering catalyst for {topic} that accelerates {kw} CO2 capture from atmosphere at 10x natural rates using crushed olivine nanoparticles — deployable at coastal agricultural margins at competitive cost.",
-                    "Ocean alkalinity enhancement network model for {topic} demonstrates safe removal of 2 gigatons CO2 per year using distributed {kw} electrochemical cells without measurable pH disruption to coral ecosystems within 200 km.",
-                    "Restored {kw} mangrove and seagrass ecosystems in {topic} tropical coastlines sequester carbon 4x faster than temperate forests while providing coastal protection worth $4,000 per hectare per year in avoided storm damage.",
+                    "Nouveau catalyseur d'altération minérale pour {topic} qui accélère la capture de CO2 depuis l'atmosphère à 10x le taux naturel en utilisant des nanoparticules d'olivine broyées — déployable aux marges agricoles côtières à un coût compétitif.",
+                    "Modèle de réseau d'amélioration de l'alcalinité océanique pour {topic} démontrant un retrait sûr de 2 gigatonnes de CO2 par an en utilisant des cellules électrochimiques {kw} distribuées sans perturbation de pH mesurable pour les écosystèmes coralliens à 200 km.",
+                    "Les écosystèmes de mangroves et d'herbiers marins {kw} restaurés dans les côtes tropicales {topic} séquestrent le carbone 4x plus vite que les forêts tempérées tout en fournissant une protection côtière valant 4 000 dollars par hectare et par an en dommages de tempêtes évités.",
                 ],
                 "connections": [
-                    "planetary boundaries framework and safe operating space",
-                    "tipping point cascade dynamics and irreversibility",
-                    "blue carbon ecosystems and coastal restoration",
-                    "solar radiation management trade-offs and governance",
+                    "cadre des limites planétaires et espace d'exploitation sûr",
+                    "dynamique des cascades de points de basculement et irréversibilité",
+                    "écosystèmes de carbone bleu et restauration côtière",
+                    "compromis de gestion du rayonnement solaire et gouvernance",
                 ],
             },
             {
-                "hypothesis": "Microbial communities in {topic} extreme environments have evolved {kw} metabolic pathways that represent evolutionary solutions to the planetary-scale carbon cycle engineering problem humanity now faces — and can be scaled.",
+                "hypothesis": "Les communautés microbiennes dans les environnements extrêmes {topic} ont évolué des voies métaboliques {kw} représentant des solutions évolutives au problème d'ingénierie du cycle du carbone à l'échelle planétaire auquel l'humanité fait face — et peuvent être mises à l'échelle.",
                 "insights": [
-                    "Metagenomic analysis of {topic} deep-sea {kw} carbonate sediments reveals novel archaeal lineages with biomineralization rates 50x higher than known organisms — a biological carbon pump with enormous scale potential.",
-                    "Earth system model experiments show {kw} afforestation of degraded {topic} drylands reduces regional temperatures by 1.2 degrees Celsius and increases precipitation by 8% through land-surface albedo and evapotranspiration feedbacks.",
-                    "Biochar application to {topic} agricultural soils improves {kw} water retention by 30% and sequesters 2.1 tonnes of carbon per hectare per year stably for over 1000 years — validated by radiocarbon dating of pre-Columbian terra preta.",
-                    "Stratospheric aerosol injection modeling for {topic} shows {kw} sulfur dioxide injection at 20 km altitude reduces Arctic warming by 0.8 degrees Celsius but causes 12% monsoon precipitation reduction in South Asia — requiring governance.",
-                    "Marine cloud brightening experiments over {topic} stratocumulus regions confirm {kw} salt aerosol seeding increases cloud reflectivity by 5-8%, producing regional cooling of 0.4 W per square meter verified by satellite.",
-                    "Soil carbon measurement network using {topic} satellite spectroscopy with {kw} machine learning retrieval algorithm achieves 15% measurement uncertainty globally — enabling the first reliable carbon credit verification system.",
-                    "Bioenergy with carbon capture at {topic} scale using {kw} dedicated energy crops achieves net negative emissions of 1.4 Gt CO2 per year while supplying 8% of global primary energy — land area equivalent to India.",
+                    "L'analyse métagénomique des sédiments carbonatés profonds {kw} de {topic} révèle de nouvelles lignées archéennes avec des taux de biominéralisation 50x supérieurs aux organismes connus — une pompe à carbone biologique avec un énorme potentiel d'échelle.",
+                    "Les expériences de modèles du système terrestre montrent que le boisement {kw} des terres dégradées {topic} arides réduit les températures régionales de 1,2°C et augmente les précipitations de 8% via des rétroactions de surface terrestre et d'évapotranspiration.",
+                    "L'application de biochar aux sols agricoles {topic} améliore la rétention d'eau {kw} de 30% et séquestre 2,1 tonnes de carbone par hectare et par an stablement pendant plus de 1000 ans — validée par datation radiocarbone de la terra preta précolombienne.",
+                    "La modélisation de l'injection d'aérosols stratosphériques pour {topic} montre que l'injection de dioxyde de soufre {kw} à 20 km d'altitude réduit le réchauffement arctique de 0,8°C mais provoque une réduction de 12% des précipitations de mousson en Asie du Sud — nécessitant une gouvernance.",
+                    "Les expériences d'éclaircissement des nuages marins au-dessus des régions de stratocumulus {topic} confirment que l'ensemencement en aérosols de sel {kw} augmente la réflectivité des nuages de 5-8%, produisant un refroidissement régional de 0,4 W par mètre carré vérifié par satellite.",
+                    "Le réseau de mesure du carbone des sols utilisant la spectroscopie satellitaire {topic} avec un algorithme de récupération par apprentissage automatique {kw} atteint 15% d'incertitude de mesure globalement — permettant le premier système de vérification de crédit carbone fiable.",
+                    "La bioénergie avec capture de carbone à l'échelle {topic} utilisant des cultures énergétiques dédiées {kw} atteint des émissions nettes négatives de 1,4 Gt CO2 par an tout en fournissant 8% de l'énergie primaire mondiale — superficie équivalente à l'Inde.",
                 ],
                 "findings": [
-                    "Photosynthetically enhanced {kw} cyanobacteria in {topic} open-ocean bioreactors reach 12% solar-to-biomass conversion efficiency — 6x wild type — enabling carbon-negative biofuel at a cost competitive with fossil fuels.",
-                    "Enhanced weathering of {kw} basaltic rock applied to {topic} agricultural land sequesters 4.2 tonnes CO2 per hectare per year while improving crop yields by 18% through mineral nutrient supplementation — win-win verified.",
-                    "Direct air capture cost model for {topic} shows {kw} amine sorbent regeneration using concentrated solar thermal achieves 85 dollars per tonne CO2 — crossing the economic viability threshold for the first time.",
+                    "Les cyanobactéries {kw} à photosynthèse améliorée dans les bioréacteurs océaniques {topic} atteignent une efficacité de conversion solaire-biomasse de 12% — 6x le type sauvage — permettant un biocarburant à émissions nettes négatives à un coût compétitif avec les combustibles fossiles.",
+                    "L'altération améliorée de roche basaltique {kw} appliquée aux terres agricoles {topic} séquestre 4,2 tonnes de CO2 par hectare et par an tout en améliorant les rendements des cultures de 18% grâce à la supplémentation en nutriments minéraux — double bénéfice vérifié.",
+                    "Le modèle de coût de la capture directe de l'air pour {topic} montre que la régénération du sorbant aminé {kw} utilisant l'énergie solaire thermique concentrée atteint 85 dollars par tonne de CO2 — franchissant pour la première fois le seuil de viabilité économique.",
                 ],
                 "connections": [
-                    "geochemical cycle engineering and rock weathering",
-                    "ecosystem-based climate solutions and rewilding",
-                    "marine biology and the biological carbon pump",
-                    "land use, albedo feedbacks, and carbon accounting",
+                    "ingénierie du cycle géochimique et altération des roches",
+                    "solutions climatiques basées sur les écosystèmes et rewilding",
+                    "biologie marine et la pompe à carbone biologique",
+                    "utilisation des terres, rétroactions d'albédo et comptabilité carbone",
                 ],
             },
             {
-                "hypothesis": "The {topic} tipping element network in Earth's climate system exhibits critical slowing down signatures detectable 10-15 years before tipping — giving a quantitative early warning system for {kw} irreversible state transitions.",
+                "hypothesis": "Le réseau d'éléments de basculement {topic} dans le système climatique terrestre présente des signatures de ralentissement critique détectables 10 à 15 ans avant le basculement — donnant un système d'alerte précoce quantitatif pour les transitions d'état {kw} irréversibles.",
                 "insights": [
-                    "Time-series analysis of {topic} sea ice extent shows rising autocorrelation and variance — textbook critical slowing down signature indicating approach to a {kw} tipping point within 15 plus or minus 5 years.",
-                    "Network analysis of 16 Earth system tipping elements reveals {kw} cascade risk: crossing the {topic} permafrost threshold triggers the Amazon dieback within 10-20 years through teleconnected atmospheric circulation changes.",
-                    "Kelp forest restoration along {topic} coastlines using {kw} urchin barrens remediation achieves 300% biomass recovery in 3 years — restoring coastal carbon sequestration and fishery productivity simultaneously.",
-                    "Next-generation Earth system model for {topic} incorporating {kw} dynamic vegetation-permafrost coupling reduces uncertainty in 2100 temperature projections by 30% — the largest single model improvement in a decade.",
-                    "Restoration of {topic} peatlands through {kw} rewetting reduces annual methane emissions by 85% while maintaining carbon sink status — critical intervention for the 30% of global soil carbon stored in peatlands.",
-                    "Ocean iron fertilization experiment in {topic} Southern Ocean with {kw} controlled iron sulfate release achieves carbon export of 0.12 Gt C per year per million km2 — consistent with theoretical maximum.",
-                    "Atmospheric CO2 removal via {topic} ocean alkalinity enhancement measured directly by {kw} surface pCO2 buoy network confirms 10% enhancement of local air-sea CO2 flux — first in situ verification at scale.",
+                    "L'analyse des séries temporelles de l'étendue de la glace de mer {topic} montre une autocorrélation et une variance croissantes — signature classique de ralentissement critique indiquant l'approche d'un point de basculement {kw} dans 15 ± 5 ans.",
+                    "L'analyse de réseau de 16 éléments de basculement du système terrestre révèle un risque de cascade {kw} : franchir le seuil du pergélisol {topic} déclenche l'effondrement de l'Amazonie dans 10-20 ans via des changements de circulation atmosphérique téléconnectés.",
+                    "La restauration des forêts de varech le long des côtes {topic} en utilisant la remédiation des déserts d'oursins {kw} atteint une récupération de biomasse de 300% en 3 ans — restaurant simultanément la séquestration de carbone côtière et la productivité des pêcheries.",
+                    "Le modèle du système terrestre de nouvelle génération pour {topic} incorporant le couplage dynamique végétation-pergélisol {kw} réduit l'incertitude dans les projections de température 2100 de 30% — la plus grande amélioration de modèle unique en une décennie.",
+                    "La restauration des tourbières {topic} par remouillage {kw} réduit les émissions annuelles de méthane de 85% tout en maintenant le statut de puits de carbone — intervention critique pour les 30% du carbone du sol mondial stocké dans les tourbières.",
+                    "L'expérience de fertilisation au fer de l'océan {topic} dans l'Antarctique avec libération contrôlée de sulfate de fer {kw} atteint un export de carbone de 0,12 Gt C par an par million de km² — cohérent avec le maximum théorique.",
+                    "L'élimination du CO2 atmosphérique via l'amélioration de l'alcalinité océanique {topic} mesurée directement par le réseau de bouées pCO2 de surface {kw} confirme une amélioration de 10% du flux CO2 air-mer local — première vérification in situ à l'échelle.",
                 ],
                 "findings": [
-                    "Coral reef restoration using {topic} assisted evolution with {kw} thermally tolerant symbiont strains survives bleaching events that killed 80% of unrestored reefs — a pathway to reef persistence through 2100.",
-                    "Global {topic} wetland restoration network storing {kw} blue carbon achieves removal of 2.8 Gt CO2 equivalent per year — equivalent to removing 600 million cars from the road at one-tenth the cost of DAC.",
-                    "Climate attribution analysis for {topic} extreme weather events using {kw} counterfactual modeling confirms liability framework for loss and damage claims — enabling climate finance flows to vulnerable nations.",
+                    "La restauration des récifs coralliens utilisant l'évolution assistée {topic} avec des souches de symbiotes thermotolérants {kw} survit aux événements de blanchiment qui ont tué 80% des récifs non restaurés — une voie vers la persistance des récifs jusqu'en 2100.",
+                    "Le réseau mondial de restauration des zones humides {topic} stockant le carbone bleu {kw} atteint un retrait de 2,8 Gt d'équivalent CO2 par an — équivalent à retirer 600 millions de voitures de la route au dixième du coût de la DAC.",
+                    "L'analyse d'attribution climatique pour les événements météorologiques extrêmes {topic} utilisant la modélisation contrefactuelle {kw} confirme le cadre de responsabilité pour les réclamations de pertes et dommages — permettant les flux de financement climatique vers les nations vulnérables.",
                 ],
                 "connections": [
-                    "tipping point early warning and resilience theory",
-                    "coupled human-natural systems and social tipping points",
-                    "international climate governance and Paris Agreement",
-                    "biodiversity and ecosystem service valuation",
+                    "alerte précoce des points de basculement et théorie de la résilience",
+                    "systèmes couplés humain-nature et points de basculement sociaux",
+                    "gouvernance climatique internationale et Accord de Paris",
+                    "biodiversité et valorisation des services écosystémiques",
                 ],
             },
         ]

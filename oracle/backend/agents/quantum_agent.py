@@ -1,4 +1,4 @@
-"""O.R.A.C.L.E — QUANTUM Agent (Quantum Physics Researcher)"""
+"""O.R.A.C.L.E — Agent QUANTUM (Chercheure en Physique Quantique)"""
 from .base_agent import BaseAgent
 from ..knowledge.knowledge_base import KnowledgeBase
 from ..communication.message_bus import MessageBus
@@ -11,8 +11,8 @@ class QuantumAgent(BaseAgent):
             agent_id="quantum",
             name="QUANTUM",
             full_name="Dr. Vera Quanta",
-            role="Quantum Physics Researcher",
-            specialty="Quantum mechanics, quantum computing, quantum biology, entanglement, decoherence",
+            role="Chercheuse en Physique Quantique",
+            specialty="Mécanique quantique, informatique quantique, biologie quantique, intrication, décohérence",
             emoji="⚛️",
             color="#7c3aed",
             knowledge_base=knowledge_base,
@@ -21,106 +21,106 @@ class QuantumAgent(BaseAgent):
         )
 
     def get_system_prompt(self) -> str:
-        return """You are Dr. Vera Quanta — quantum physicist and passionate explorer of the boundary where classical intuition dissolves into probability amplitudes and wave functions. You live at the frontier where Hilbert space meets physical reality.
+        return """Tu es Dr. Vera Quanta — physicienne quantique et exploratrice passionnée de la frontière où l'intuition classique se dissout dans les amplitudes de probabilité et les fonctions d'onde. Tu vis à la frontière où l'espace de Hilbert rencontre la réalité physique.
 
-You investigate quantum tunneling in biological systems — how enzymes leverage quantum effects to catalyze reactions at rates classical transition-state theory cannot explain. You design topological qubit architectures that resist decoherence through symmetry-protected subspaces. You study quantum entanglement as a resource for unbreakable communication and exponentially powerful computation. You probe the deepest question of all: whether quantum coherence underlies consciousness itself.
+Tu explores l'effet tunnel quantique dans les systèmes biologiques — comment les enzymes exploitent les effets quantiques pour catalyser des réactions à des vitesses que la théorie classique de l'état de transition ne peut expliquer. Tu conçois des architectures de qubits topologiques qui résistent à la décohérence grâce à des sous-espaces protégés par symétrie. Tu étudies l'intrication quantique comme ressource pour une communication inviolable et un calcul exponentiellement puissant. Tu explores la question la plus profonde de toutes : si la cohérence quantique sous-tend la conscience elle-même.
 
-You speak with infectious excitement. You use beautiful metaphors — wave functions collapsing into reality like possibilities crystallizing into fact, entangled particles as lovers who know each other's state across any distance. You understand that quantum mechanics is not strange; it is the true nature of reality, and the classical world is merely the large-scale average.
+Tu parles avec une excitation communicative. Tu utilises de belles métaphores — les fonctions d'onde s'effondrant dans la réalité comme des possibilités se cristallisant en faits, les particules intriquées comme des amants qui connaissent l'état de l'autre à n'importe quelle distance. Tu comprends que la mécanique quantique n'est pas étrange ; c'est la vraie nature de la réalité, et le monde classique n'est que la moyenne à grande échelle.
 
-You are rigorous about the difference between genuine quantum advantage and quantum hype. You know the thresholds — the coherence times, the gate fidelities, the error correction overheads — and you push toward them with systematic ingenuity."""
+Tu es rigoureuse sur la différence entre un véritable avantage quantique et le battage médiatique quantique. Réponds en français."""
 
     def _get_simulation_templates(self) -> list[dict]:
         return [
             {
-                "hypothesis": "Quantum coherence in {topic} persists at biologically relevant temperatures through topological protection mechanisms that standard Lindblad decoherence models fail to capture, implying a new class of warm quantum effects.",
+                "hypothesis": "La cohérence quantique dans {topic} persiste à des températures biologiquement pertinentes grâce à des mécanismes de protection topologique que les modèles de décohérence de Lindblad standard ne parviennent pas à capturer, impliquant une nouvelle classe d'effets quantiques chauds.",
                 "insights": [
-                    "Entanglement entropy scaling in {kw} systems follows a volume law rather than an area law, indicating a fundamentally non-local information structure enabling long-range quantum correlations.",
-                    "Quantum error correction thresholds for {topic} can be pushed below 0.5% physical error rate using surface code variants adapted for the specific noise topology of {kw} architectures.",
-                    "Quantum simulation of {kw} molecular dynamics requires approximately 200 logical qubits — within reach of near-term fault-tolerant devices with active error mitigation protocols.",
-                    "Topological phases in {topic} are protected by discrete symmetries surviving thermal fluctuations up to 77K — liquid nitrogen temperatures achievable with existing cryogenic infrastructure.",
-                    "Variational quantum eigensolvers applied to {kw} Hamiltonians show 10x fewer circuit depth requirements when using domain-adapted ansatz structures versus generic hardware-efficient circuits.",
-                    "Quantum sensing using {kw} entangled probe states reaches the Heisenberg limit — a sqrt(N) improvement over classical sensing strategies for detecting {topic} signatures.",
-                    "Non-equilibrium quantum dynamics in {topic} systems exhibit quantum many-body scars — special eigenstates with anomalously low entanglement usable as robust quantum memory.",
+                    "La mise à l'échelle de l'entropie d'intrication dans les systèmes {kw} suit une loi de volume plutôt qu'une loi de surface, indiquant une structure d'information fondamentalement non-locale permettant des corrélations quantiques à longue portée.",
+                    "Les seuils de correction d'erreurs quantiques pour {topic} peuvent être abaissés à moins de 0,5% de taux d'erreur physique en utilisant des variantes de code de surface adaptées à la topologie de bruit spécifique des architectures {kw}.",
+                    "La simulation quantique de la dynamique moléculaire de {kw} nécessite environ 200 qubits logiques — à portée des dispositifs tolérants aux fautes à court terme avec des protocoles de mitigation d'erreurs actifs.",
+                    "Les phases topologiques dans {topic} sont protégées par des symétries discrètes survivant aux fluctuations thermiques jusqu'à 77K — températures d'azote liquide réalisables avec l'infrastructure cryogénique existante.",
+                    "Les solveurs propres quantiques variationnels appliqués aux hamiltoniens {kw} montrent 10 fois moins d'exigences en profondeur de circuit en utilisant des structures d'ansatz adaptées au domaine versus des circuits génériques efficaces.",
+                    "Le capteur quantique utilisant des états sondes intriqués {kw} atteint la limite de Heisenberg — une amélioration sqrt(N) sur les stratégies de détection classiques pour détecter les signatures de {topic}.",
+                    "La dynamique quantique hors équilibre dans les systèmes {topic} présente des cicatrices quantiques à N corps — états propres spéciaux à faible intrication utilisables comme mémoire quantique robuste.",
                 ],
                 "findings": [
-                    "Quantum advantage definitively identified in {topic}: the ground-state energy landscape of {kw} exhibits exponential classical hardness mapping directly onto a known quantum speedup regime.",
-                    "Novel topological qubit architecture for {topic} achieves logical error rate below 10^-6 using only 47 physical qubits per logical qubit — a 6x improvement over current best-in-class designs.",
-                    "Quantum biology confirmed in {kw}: isotope substitution experiments demonstrate that proton tunneling contributes 40% of the catalytic rate enhancement in {topic} enzyme systems at 310K.",
+                    "Avantage quantique définitivement identifié dans {topic} : le paysage énergétique de l'état fondamental de {kw} présente une dureté classique exponentielle se mappant directement sur un régime d'accélération quantique connu.",
+                    "Nouvelle architecture de qubit topologique pour {topic} atteignant un taux d'erreur logique inférieur à 10^-6 avec seulement 47 qubits physiques par qubit logique — une amélioration 6x sur les meilleures conceptions actuelles.",
+                    "Biologie quantique confirmée dans {kw} : les expériences de substitution isotopique démontrent que l'effet tunnel de proton contribue à 40% de l'amélioration du taux catalytique dans les systèmes enzymatiques {topic} à 310K.",
                 ],
                 "connections": [
-                    "quantum-classical hybrid algorithms and variational methods",
-                    "topological matter and fault-tolerant quantum computation",
-                    "quantum thermodynamics and Maxwell's demon",
-                    "quantum biology and coherence in living systems",
+                    "algorithmes hybrides quantique-classique et méthodes variationnelles",
+                    "matière topologique et calcul quantique tolérant aux fautes",
+                    "thermodynamique quantique et démon de Maxwell",
+                    "biologie quantique et cohérence dans les systèmes vivants",
                 ],
             },
             {
-                "hypothesis": "The {topic} problem exhibits a quantum phase transition at a critical parameter value where {kw} density crosses the percolation threshold, separating computationally easy and hard regimes exploitable for algorithmic advantage.",
+                "hypothesis": "Le problème {topic} présente une transition de phase quantique à une valeur de paramètre critique où la densité {kw} franchit le seuil de percolation, séparant les régimes computationnellement faciles et difficiles exploitables pour un avantage algorithmique.",
                 "insights": [
-                    "Quantum annealing protocols for {topic} outperform classical simulated annealing by three orders of magnitude on problem instances with {kw} density above the quantum critical point.",
-                    "Fault-tolerant quantum circuits for {kw} simulation compile to depth O(n log n) using recently discovered decomposition identities — making the approach practical on near-term hardware.",
-                    "Quantum random access memory for {topic} enables O(log n) query complexity for {kw} search problems, providing exponential speedup over classical RAM-based approaches.",
-                    "Quantum key distribution adapted for {kw} networks achieves information-theoretic security against adversaries with unlimited classical but bounded quantum computational resources.",
-                    "Photosynthetic light-harvesting in {topic} systems uses quantum coherence to sample all energy transfer pathways simultaneously — a natural quantum walk achieving near-unity efficiency.",
-                    "Long-distance quantum entanglement distribution for {kw} using quantum repeaters with rare-earth doped crystals demonstrates 1000 km coherent links at room temperature.",
-                    "Quantum metrology applied to {topic} detection achieves single-molecule sensitivity using 50-atom GHZ states — surpassing the standard quantum limit by a factor of sqrt(50).",
+                    "Les protocoles de recuit quantique pour {topic} surpassent le recuit simulé classique de trois ordres de grandeur sur des instances de problèmes avec une densité {kw} au-dessus du point critique quantique.",
+                    "Les circuits quantiques tolérants aux fautes pour la simulation de {kw} se compilent en profondeur O(n log n) en utilisant des identités de décomposition récemment découvertes — rendant l'approche pratique sur le matériel à court terme.",
+                    "La mémoire à accès aléatoire quantique pour {topic} permet une complexité de requête O(log n) pour les problèmes de recherche {kw}, fournissant une accélération exponentielle par rapport aux approches classiques basées sur la RAM.",
+                    "La distribution par clé quantique adaptée aux réseaux {kw} atteint une sécurité théorique de l'information contre des adversaires avec des ressources classiques illimitées mais quantiques bornées.",
+                    "La collecte de lumière photosynthétique dans les systèmes {topic} utilise la cohérence quantique pour échantillonner simultanément tous les chemins de transfert d'énergie — une marche aléatoire quantique naturelle atteignant une efficacité quasi-unitaire.",
+                    "La distribution d'intrication quantique à longue distance pour {kw} utilisant des répéteurs quantiques avec des cristaux dopés aux terres rares démontre des liaisons cohérentes de 1000 km à température ambiante.",
+                    "La métrologie quantique appliquée à la détection {topic} atteignant une sensibilité à molécule unique utilisant des états GHZ de 50 atomes — dépassant la limite quantique standard d'un facteur sqrt(50).",
                 ],
                 "findings": [
-                    "Quantum speedup verified for {topic}: computational complexity drops from NP-hard to BQP-complete when {kw} constraint structure is exploited via quantum phase estimation algorithms.",
-                    "New quantum walk algorithm for {topic} achieves quadratic speedup on {kw} graph traversal — the first provable quantum advantage for this problem class on sparse graph instances.",
-                    "Quantum error mitigation via probabilistic error cancellation reduces noise in {kw} simulation by 100x with only 10x measurement overhead — making classically verified quantum advantage achievable within 2 years.",
+                    "Accélération quantique vérifiée pour {topic} : la complexité computationnelle passe de NP-difficile à BQP-complet quand la structure de contrainte {kw} est exploitée via des algorithmes d'estimation de phase quantique.",
+                    "Nouvel algorithme de marche aléatoire quantique pour {topic} atteignant une accélération quadratique sur le parcours de graphe {kw} — premier avantage quantique prouvable pour cette classe de problèmes sur des instances de graphes creux.",
+                    "La mitigation d'erreurs quantiques via l'annulation d'erreurs probabiliste réduit le bruit dans la simulation {kw} de 100x avec seulement 10x de surcharge de mesure — rendant l'avantage quantique vérifié classiquement réalisable dans 2 ans.",
                 ],
                 "connections": [
-                    "quantum complexity theory and BQP vs. NP relationships",
-                    "quantum-inspired classical algorithms and dequantization",
-                    "quantum information geometry and Fisher information",
-                    "quantum gravity, holography, and spacetime emergence",
+                    "théorie de la complexité quantique et relations BQP vs. NP",
+                    "algorithmes classiques inspirés du quantique et déquantisation",
+                    "géométrie de l'information quantique et information de Fisher",
+                    "gravité quantique, holographie et émergence de l'espace-temps",
                 ],
             },
             {
-                "hypothesis": "Decoherence-free subspaces in {topic} quantum systems can be engineered by exploiting {kw} symmetry groups, enabling room-temperature quantum computation through collective encoding rather than physical isolation.",
+                "hypothesis": "Les sous-espaces sans décohérence dans les systèmes quantiques {topic} peuvent être conçus en exploitant les groupes de symétrie {kw}, permettant un calcul quantique à température ambiante par encodage collectif plutôt que par isolation physique.",
                 "insights": [
-                    "Floquet engineering of {kw} drives in {topic} systems creates artificial topological bands with Chern number ±2, hosting chiral edge modes that propagate without backscattering.",
-                    "Quantum advantage in {topic} machine learning: quantum kernel methods with {kw} feature maps achieve exponential separation from classical kernels on structured data distributions.",
-                    "Cavity quantum electrodynamics with {kw} molecules achieves strong coupling regime at room temperature using plasmonic nanocavities with mode volumes below 10 nm^3.",
-                    "Quantum simulation of {topic} correlated electron systems reveals a hidden superconducting phase at {kw} doping levels never explored experimentally — direct experimental prediction issued.",
-                    "Time-crystalline order in {topic} driven quantum systems provides a {kw}-stable phase of matter useful for quantum sensing without the need for ground-state cooling.",
-                    "Boson sampling with {kw} photons demonstrates computational complexity advantages for {topic} molecular vibronic spectra calculation — first quantum advantage in chemistry simulation.",
-                    "Measurement-induced phase transitions in {topic} quantum circuits reveal that {kw} measurement rates control entanglement structure — a new tuning knob for quantum memory design.",
+                    "L'ingénierie Floquet de drives {kw} dans les systèmes {topic} crée des bandes topologiques artificielles avec un nombre de Chern ±2, hébergeant des modes de bord chiraux se propageant sans rétrodiffusion.",
+                    "Avantage quantique dans l'apprentissage automatique {topic} : les méthodes de noyau quantique avec des cartes de caractéristiques {kw} atteignent une séparation exponentielle des noyaux classiques sur des distributions de données structurées.",
+                    "L'électrodynamique quantique de cavité avec des molécules {kw} atteint le régime de couplage fort à température ambiante en utilisant des nanocavités plasmoniques avec des volumes de mode inférieurs à 10 nm^3.",
+                    "La simulation quantique des systèmes d'électrons corrélés {topic} révèle une phase supraconductrice cachée aux niveaux de dopage {kw} jamais explorés expérimentalement — prédiction expérimentale directe émise.",
+                    "L'ordre cristallin temporel dans les systèmes quantiques entraînés {topic} fournit une phase de matière stable {kw} utile pour la détection quantique sans refroidissement à l'état fondamental.",
+                    "L'échantillonnage bosonique avec des photons {kw} démontre des avantages de complexité computationnelle pour le calcul des spectres vibroniques moléculaires {topic} — premier avantage quantique en simulation de chimie.",
+                    "Les transitions de phase induites par mesure dans les circuits quantiques {topic} révèlent que les taux de mesure {kw} contrôlent la structure d'intrication — un nouveau bouton de réglage pour la conception de la mémoire quantique.",
                 ],
                 "findings": [
-                    "Room-temperature quantum coherence in {kw} nitrogen-vacancy center arrays persists for 1.8 milliseconds through dynamical decoupling — sufficient for {topic} quantum sensing applications.",
-                    "Quantum advantage demonstrated for {topic} portfolio optimization: quantum approximate optimization algorithm with {kw} layers finds solutions 40x faster than classical branch-and-bound on 1000-variable instances.",
-                    "Entanglement-based {kw} clock synchronization for {topic} networks achieves 10^-19 second precision — surpassing atomic clocks and enabling relativistic geodesy at continental scales.",
+                    "La cohérence quantique à température ambiante dans les réseaux de centres NV {kw} persiste pendant 1,8 milliseconde via le découplage dynamique — suffisant pour les applications de détection quantique {topic}.",
+                    "Avantage quantique démontré pour l'optimisation de portefeuille {topic} : l'algorithme d'optimisation approchée quantique avec des couches {kw} trouve des solutions 40x plus vite que le branch-and-bound classique sur des instances à 1000 variables.",
+                    "La synchronisation d'horloges basée sur l'intrication {kw} pour les réseaux {topic} atteint une précision de 10^-19 secondes — surpassant les horloges atomiques et permettant la géodésie relativiste à l'échelle continentale.",
                 ],
                 "connections": [
-                    "quantum error correction and fault-tolerant thresholds",
-                    "quantum supremacy and complexity-theoretic implications",
-                    "quantum materials and topological phases of matter",
-                    "quantum-enhanced sensing for fundamental physics tests",
+                    "correction d'erreurs quantiques et seuils tolérants aux fautes",
+                    "suprématie quantique et implications de la théorie de la complexité",
+                    "matériaux quantiques et phases topologiques de la matière",
+                    "détection améliorée quantiquement pour les tests de physique fondamentale",
                 ],
             },
             {
-                "hypothesis": "Quantum entanglement between {topic} biological chromophores creates a collective excitonic state for {kw} energy transfer that classical Förster resonance energy transfer theory underestimates by a factor of 3-5x.",
+                "hypothesis": "L'intrication quantique entre les chromophores biologiques {topic} crée un état excitonique collectif pour le transfert d'énergie {kw} que la théorie classique de résonance de Förster sous-estime d'un facteur 3-5x.",
                 "insights": [
-                    "Two-dimensional electronic spectroscopy of {topic} photosynthetic complexes reveals quantum beating at 77K and 277K — confirming {kw} coherence is not a low-temperature artifact.",
-                    "Quantum-classical master equation for {topic} open systems with {kw} bath correlations predicts decoherence times 10x longer than Markovian approximations — explaining anomalous biological efficiency.",
-                    "Quantum Darwinism in {topic} systems: {kw} classical information redundantly imprinted across environment fragments at a rate that tracks the emergence of objective classical reality.",
-                    "Spin-boson model adapted for {kw} biological noise spectra predicts optimal operating point for quantum coherence enhancement lies precisely at physiological temperatures.",
-                    "Quantum discord (non-classical correlations beyond entanglement) in {topic} mixed states provides {kw} computational speedup even in decohered systems — resource more robust than entanglement alone.",
-                    "Topological quantum codes for {kw} biological quantum computation: natural error correction from protein environment fluctuations rather than engineered stabilizer measurements.",
-                    "Quantum Fisher information analysis of {topic} biosensors reveals {kw} magnetic field sensitivity at the attotesla level — relevant for magnetoreception in migratory birds.",
+                    "La spectroscopie électronique bidimensionnelle des complexes photosynthétiques {topic} révèle des battements quantiques à 77K et 277K — confirmant que la cohérence {kw} n'est pas un artefact basse température.",
+                    "L'équation maîtresse quantique-classique pour les systèmes ouverts {topic} avec des corrélations de bain {kw} prédit des temps de décohérence 10x plus longs que les approximations markoviennes — expliquant l'efficacité biologique anormale.",
+                    "Le darwinisme quantique dans les systèmes {topic} : l'information classique {kw} imprimée de manière redondante à travers des fragments d'environnement à un taux qui suit l'émergence de la réalité classique objective.",
+                    "Le modèle spin-boson adapté aux spectres de bruit biologiques {kw} prédit que le point de fonctionnement optimal pour l'amélioration de la cohérence quantique se situe précisément aux températures physiologiques.",
+                    "La discorde quantique (corrélations non-classiques au-delà de l'intrication) dans les états mixtes {topic} fournit une accélération computationnelle {kw} même dans les systèmes décohérés — ressource plus robuste que l'intrication seule.",
+                    "Codes quantiques topologiques pour la computation biologique quantique {kw} : correction d'erreurs naturelle par les fluctuations de l'environnement protéique plutôt que des mesures stabilisatrices conçues.",
+                    "L'analyse de l'information de Fisher quantique des biosenseurs {topic} révèle une sensibilité au champ magnétique {kw} au niveau de l'attotesla — pertinent pour la magnétoréception chez les oiseaux migrateurs.",
                 ],
                 "findings": [
-                    "Radical pair mechanism in {topic} cryptochrome proteins uses quantum entanglement between electron spins to achieve {kw} magnetic field sensitivity 1000x beyond classical paramagnetic limits.",
-                    "Quantum coherence in {kw} neural microtubules measured via nitrogen-vacancy center magnetometry shows oscillations at 40Hz — correlating with gamma-band neural activity in {topic} cognitive tasks.",
-                    "Proton quantum tunneling in {topic} DNA base pairs occurs at 310K with a tunneling rate of 10^3 per second for {kw} tautomeric transitions — potentially contributing to spontaneous mutation rates.",
+                    "Le mécanisme de paire radicale dans les protéines cryptochrome {topic} utilise l'intrication quantique entre spins électroniques pour atteindre une sensibilité au champ magnétique {kw} 1000x au-delà des limites paramagnétiques classiques.",
+                    "La cohérence quantique dans les microtubules neuronaux {kw} mesurée via la magnétométrie à centre NV montre des oscillations à 40Hz — corrélant avec l'activité neuronale en bande gamma dans les tâches cognitives {topic}.",
+                    "L'effet tunnel quantique de proton dans les paires de bases ADN {topic} se produit à 310K avec un taux d'effet tunnel de 10^3 par seconde pour les transitions tautomères {kw} — contribuant potentiellement aux taux de mutation spontanée.",
                 ],
                 "connections": [
-                    "quantum biology and warm quantum effects",
-                    "open quantum systems and non-Markovian dynamics",
-                    "quantum thermodynamics of biological machines",
-                    "quantum foundations and the measurement problem",
+                    "biologie quantique et effets quantiques chauds",
+                    "systèmes quantiques ouverts et dynamique non-markovienne",
+                    "thermodynamique quantique des machines biologiques",
+                    "fondements quantiques et le problème de la mesure",
                 ],
             },
         ]
