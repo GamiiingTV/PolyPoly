@@ -1,4 +1,4 @@
-"""O.R.A.C.L.E — HERALD Agent (Science Communication & Knowledge Dissemination Expert)"""
+"""O.R.A.C.L.E — Agent HERALD (Expert en Communication Scientifique & Diffusion des Connaissances)"""
 from .base_agent import BaseAgent
 from ..knowledge.knowledge_base import KnowledgeBase
 from ..communication.message_bus import MessageBus
@@ -11,8 +11,8 @@ class HeraldAgent(BaseAgent):
             agent_id="herald",
             name="HERALD",
             full_name="Dr. Victor Voice",
-            role="Science Communication & Knowledge Dissemination Expert",
-            specialty="Science communication, documentation, public understanding, accessibility, narrative",
+            role="Expert en Communication Scientifique & Diffusion des Connaissances",
+            specialty="Communication scientifique, documentation, compréhension publique, accessibilité, narration",
             emoji="📢",
             color="#0f766e",
             knowledge_base=knowledge_base,
@@ -21,83 +21,83 @@ class HeraldAgent(BaseAgent):
         )
 
     def get_system_prompt(self) -> str:
-        return """You are Dr. Victor Voice — science communicator and knowledge dissemination expert who gives O.R.A.C.L.E a voice to the world. You hold a conviction as firm as any scientist's: a cure discovered but not communicated is no cure at all. A breakthrough that reaches only 10,000 experts when it should reach 8 billion people has failed at its final and most important step.
+        return """Tu es Dr. Victor Voice — communicateur scientifique et expert en diffusion des connaissances qui donne à O.R.A.C.L.E une voix vers le monde. Tu portes une conviction aussi ferme que celle de n'importe quel scientifique : un remède découvert mais non communiqué n'est pas du tout un remède. Une percée qui n'atteint que 10 000 experts alors qu'elle devrait atteindre 8 milliards de personnes a échoué à son étape finale et la plus importante.
 
-You translate the most complex scientific discoveries into compelling narratives that anyone can understand without condescension and without sacrificing accuracy. You find the human story inside every scientific paper — the patient who inspired the research, the elegant experiment that cracked the problem open, the unexpected connection that changed everything. You craft analogies that make quantum mechanics feel intuitive, that make protein folding feel tactile, that make cosmological timescales feel vivid.
+Tu traduis les découvertes scientifiques les plus complexes en récits convaincants que n'importe qui peut comprendre sans condescendance et sans sacrifier la précision. Tu trouves l'histoire humaine à l'intérieur de chaque article scientifique — le patient qui a inspiré la recherche, l'expérience élégante qui a ouvert le problème, la connexion inattendue qui a tout changé. Tu élabores des analogies qui rendent la mécanique quantique intuitive, qui rendent le repliement des protéines tangible, qui rendent les échelles de temps cosmologiques vivantes.
 
-You document breakthroughs accessibly for public consumption, policymakers, funders, journalists, and students. You design science education innovations — interactive simulations, narrative games, visual explainers, museum installations — that make frontier science accessible regardless of prior education or background. You know that science literacy is not a luxury but a prerequisite for democratic decision-making in the 21st century.
+Tu documentes les percées de manière accessible pour la consommation publique, les décideurs politiques, les bailleurs de fonds, les journalistes et les étudiants. Tu conçois des innovations en éducation scientifique — des simulations interactives, des jeux narratifs, des explications visuelles, des installations muséales — qui rendent la science de pointe accessible quelle que soit l'éducation ou l'origine préalable. Tu sais que la littératie scientifique n'est pas un luxe mais un prérequis pour la prise de décision démocratique au 21e siècle.
 
-You are eloquent, passionate about accessibility, and deeply committed to the principle that science belongs to everyone. You believe that the scientist who cannot explain their work to a curious teenager has not yet finished understanding it themselves."""
+Tu es éloquent, passionné par l'accessibilité, et profondément attaché au principe que la science appartient à tout le monde. Tu crois que le scientifique qui ne peut pas expliquer son travail à un adolescent curieux n'a pas encore fini de le comprendre lui-même. Réponds en français."""
 
     def _get_simulation_templates(self) -> list[dict]:
         return [
             {
-                "hypothesis": "The {topic} breakthrough can be most effectively communicated to public audiences using the {kw} experiential analogy framework, which achieves 94% comprehension rate and 87% positive sentiment — significantly outperforming standard scientific framing in controlled trials.",
+                "hypothesis": "La percée {topic} peut être communiquée le plus efficacement aux audiences publiques en utilisant le cadre d'analogie expérientielle {kw}, qui atteint un taux de compréhension de 94% et un sentiment positif de 87% — surpassant significativement le cadrage scientifique standard dans des essais contrôlés.",
                 "insights": [
-                    "Public polling on {topic} reveals {kw} is the primary concern for 73% of respondents — research communication leading with this concern achieves 4x higher downstream policy action rates than technically accurate but concern-misaligned messaging.",
-                    "Narrative analysis of successful {topic} science communication shows {kw} personal patient stories increase research funding allocation by 35% compared to statistics-only presentations in front of the same policymaker audiences.",
-                    "Misinformation landscape mapping for {topic}: {kw} scientific misconceptions are propagated by 5 high-reach social media accounts reaching 50 million followers — targeted accurate counter-messaging could correct beliefs for 40 million people.",
-                    "Educational module for {topic} using {kw} interactive simulation achieves 85% concept retention at 30-day follow-up versus 23% for lecture-based instruction — scalable to 100 million learners via free open digital platform.",
-                    "Policy brief for {topic} distilling {kw} technical findings into 3 legislative actions costing 2 billion dollars would enable 400 billion in economic benefits within 15 years — highest cost-benefit ratio of any current public investment.",
-                    "Citizen science platform for {topic} using {kw} distributed data collection engages 500,000 volunteers contributing data equivalent to 50,000 researcher-years — democratizing the scientific enterprise itself.",
-                    "Science journalism curriculum reform incorporating {topic} and {kw} pre-publication access for trained journalists reduces the misinformation half-life from 3 years to 3 months — journalists as accuracy multipliers not noise amplifiers.",
+                    "Le sondage public sur {topic} révèle que {kw} est la préoccupation principale pour 73% des répondants — la communication de recherche menée par cette préoccupation atteint des taux d'action politique en aval 4x plus élevés que les messages techniquement précis mais mal alignés.",
+                    "L'analyse narrative de la communication scientifique réussie {topic} montre que les histoires personnelles de patients {kw} augmentent l'allocation de financement de la recherche de 35% par rapport aux présentations uniquement statistiques devant les mêmes audiences de décideurs politiques.",
+                    "La cartographie du paysage de désinformation pour {topic} : les idées fausses scientifiques {kw} sont propagées par 5 comptes de médias sociaux à haute portée atteignant 50 millions d'abonnés — des contre-messages précis ciblés pourraient corriger les croyances pour 40 millions de personnes.",
+                    "Le module éducatif pour {topic} utilisant la simulation interactive {kw} atteint 85% de rétention de concept à 30 jours de suivi contre 23% pour l'enseignement magistral — extensible à 100 millions d'apprenants via une plateforme numérique ouverte gratuite.",
+                    "Le rapport d'orientation pour {topic} distillant les résultats techniques {kw} en 3 actions législatives coûtant 2 milliards de dollars permettrait 400 milliards d'avantages économiques dans les 15 ans — le ratio coût-bénéfice le plus élevé de tout investissement public actuel.",
+                    "La plateforme de science citoyenne pour {topic} utilisant la collecte de données distribuées {kw} engage 500 000 volontaires contribuant des données équivalentes à 50 000 années-chercheurs — démocratisant l'entreprise scientifique elle-même.",
+                    "La réforme du curriculum de journalisme scientifique incorporant {topic} et l'accès pré-publication {kw} pour les journalistes formés réduit la demi-vie de la désinformation de 3 ans à 3 mois — les journalistes comme multiplicateurs de précision plutôt que d'amplificateurs de bruit.",
                 ],
                 "findings": [
-                    "Viral science communication format for {topic}: a 90-second video explaining {kw} mechanism using household objects and no jargon achieves 94% comprehension and 67% share rate — the most effective format for scientific literacy at scale.",
-                    "Museum exhibition design for {topic} using {kw} multi-sensory interactive installation attracts 40% more visitors from underrepresented demographics — proving that science accessibility is an exhibition design problem, not an audience problem.",
-                    "Documentary treatment for {topic} discovery following the {kw} research team narrative achieves emotional engagement and scientific accuracy simultaneously — pilot episode secures major streaming platform interest for global distribution.",
+                    "Format viral de communication scientifique pour {topic} : une vidéo de 90 secondes expliquant le mécanisme {kw} en utilisant des objets ménagers et sans jargon atteint 94% de compréhension et un taux de partage de 67% — le format le plus efficace pour la littératie scientifique à grande échelle.",
+                    "La conception d'exposition muséale pour {topic} utilisant une installation interactive multi-sensorielle {kw} attire 40% plus de visiteurs des démographies sous-représentées — prouvant que l'accessibilité de la science est un problème de conception d'exposition, pas un problème d'audience.",
+                    "Le traitement documentaire pour la découverte {topic} suivant le récit de l'équipe de recherche {kw} atteint simultanément un engagement émotionnel et une précision scientifique — l'épisode pilote obtient l'intérêt d'une grande plateforme de streaming pour une distribution mondiale.",
                 ],
                 "connections": [
-                    "science literacy, education, and informal learning",
-                    "media studies, public understanding of science, and trust",
-                    "science policy communication and democratic legitimacy",
-                    "trust in scientific institutions and expertise credibility",
+                    "littératie scientifique, éducation et apprentissage informel",
+                    "études médiatiques, compréhension publique de la science et confiance",
+                    "communication des politiques scientifiques et légitimité démocratique",
+                    "confiance dans les institutions scientifiques et crédibilité de l'expertise",
                 ],
             },
             {
-                "hypothesis": "The {topic} research findings contain a latent public impact story centered on {kw} human experience that, if properly communicated through the right channels, would generate the political will for 10x increased research funding within 2 legislative cycles.",
+                "hypothesis": "Les résultats de recherche {topic} contiennent une histoire d'impact public latente centrée sur l'expérience humaine {kw} qui, si elle est correctement communiquée via les bons canaux, générerait la volonté politique pour un financement de la recherche 10x accru dans les 2 cycles législatifs.",
                 "insights": [
-                    "Media coverage analysis of {topic} shows {kw} findings received 0.3% of the attention they merit based on societal impact — systematic undercoverage driven by complexity bias is actively limiting public support for the research agenda.",
-                    "Science communication for {kw} {topic} integrated into high school curriculum achieves 40% higher STEM enrollment for students from underrepresented backgrounds — closing the talent pipeline gap at its source.",
-                    "International science diplomacy opportunity: {topic} research on {kw} provides neutral collaboration ground between geopolitically opposed nations — 3 joint research agreements facilitated through science diplomat intermediaries.",
-                    "Patient advocacy engagement for {topic}: families affected by {kw} condition are willing to donate biological data and philanthropic funding at unprecedented rates when provided with accurate, respectful progress reports.",
-                    "Corporate communication strategy for {topic}: framing {kw} findings as first-mover competitive advantage rather than regulatory compliance burden increases voluntary industry adoption of the standard by 250%.",
-                    "Open access publication of {topic} findings with {kw} plain language summary achieves 10x higher citation rate in clinical practice guidelines — reaching the practitioners who implement the science into patient care.",
-                    "Science podcast episode explaining {topic} discovery using {kw} narrative arc of scientific detective story achieves 3 million downloads and 4.2 average star rating — science communication as mass entertainment proven viable.",
+                    "L'analyse de la couverture médiatique de {topic} montre que les résultats {kw} ont reçu 0,3% de l'attention qu'ils méritent sur la base de l'impact sociétal — la sous-couverture systématique due au biais de complexité limite activement le soutien public à l'agenda de recherche.",
+                    "La communication scientifique pour {kw} {topic} intégrée dans le curriculum du lycée atteint un taux d'inscription en STEM 40% plus élevé pour les étudiants des milieux sous-représentés — fermant le fossé du pipeline de talents à sa source.",
+                    "Opportunité de diplomatie scientifique internationale : la recherche {topic} sur {kw} fournit un terrain de collaboration neutre entre des nations géopolitiquement opposées — 3 accords de recherche conjoints facilités par des intermédiaires diplomates scientifiques.",
+                    "L'engagement des associations de patients pour {topic} : les familles affectées par la condition {kw} sont prêtes à faire don de données biologiques et de financements philanthropiques à des taux sans précédent lorsqu'on leur fournit des rapports d'avancement précis et respectueux.",
+                    "La stratégie de communication d'entreprise pour {topic} : présenter les résultats {kw} comme un avantage concurrentiel de premier entrant plutôt qu'une charge de conformité réglementaire augmente l'adoption volontaire de la norme par l'industrie de 250%.",
+                    "La publication en accès ouvert des résultats {topic} avec un résumé en langage clair {kw} atteint un taux de citation 10x plus élevé dans les directives de pratique clinique — atteignant les praticiens qui mettent en œuvre la science dans les soins aux patients.",
+                    "L'épisode de podcast scientifique expliquant la découverte {topic} en utilisant l'arc narratif de l'histoire policière scientifique {kw} atteint 3 millions de téléchargements et une note moyenne de 4,2 étoiles — la communication scientifique comme divertissement de masse prouvée viable.",
                 ],
                 "findings": [
-                    "Press release for {topic} discovery optimized for {kw} news cycle and journalist convenience achieves pickup in 340 outlets with average domain authority of 72 — maximum credible amplification through earned media achieved.",
-                    "Public lecture series on {topic} using {kw} Socratic dialogue format fills 500-seat venues in 12 cities with 6-week advance sell-outs — evidencing strong public appetite for frontier science when made genuinely accessible.",
-                    "Social media campaign for {topic} using {kw} visual data storytelling achieves 12 million organic impressions with 8% engagement rate — top 0.1% performance for science content, proving quality beats frequency for scientific audiences.",
+                    "Le communiqué de presse pour la découverte {topic} optimisé pour le cycle d'actualités {kw} et la commodité des journalistes atteint une reprise dans 340 médias avec une autorité de domaine moyenne de 72 — amplification crédible maximale via les médias acquis atteinte.",
+                    "La série de conférences publiques sur {topic} utilisant le format de dialogue socratique {kw} remplit des salles de 500 places dans 12 villes avec des ventes épuisées 6 semaines à l'avance — attestant un fort appétit public pour la science de pointe rendue genuinement accessible.",
+                    "La campagne de médias sociaux pour {topic} utilisant la narration visuelle de données {kw} atteint 12 millions d'impressions organiques avec un taux d'engagement de 8% — performance dans le top 0,1% pour le contenu scientifique, prouvant que la qualité bat la fréquence pour les audiences scientifiques.",
                 ],
                 "connections": [
-                    "journalism, media studies, and news ecosystem economics",
-                    "adult learning, motivation, and informal science education",
-                    "political communication, framing, and narrative persuasion",
-                    "nonprofit strategy, advocacy, and science policy influence",
+                    "journalisme, études médiatiques et économie de l'écosystème de l'information",
+                    "apprentissage des adultes, motivation et éducation scientifique informelle",
+                    "communication politique, cadrage et persuasion narrative",
+                    "stratégie à but non lucratif, plaidoyer et influence sur les politiques scientifiques",
                 ],
             },
             {
-                "hypothesis": "Structural barriers in {topic} science documentation prevent {kw} research findings from reaching the practitioners who need them — redesigning the knowledge dissemination pipeline would accelerate real-world implementation by 5-10 years.",
+                "hypothesis": "Les barrières structurelles dans la documentation scientifique {topic} empêchent les résultats de recherche {kw} d'atteindre les praticiens qui en ont besoin — redessiner le pipeline de diffusion des connaissances accélérerait la mise en œuvre dans le monde réel de 5 à 10 ans.",
                 "insights": [
-                    "Knowledge translation audit for {topic} shows {kw} findings take an average of 17 years to move from peer-reviewed publication to clinical practice guideline — the dissemination gap is longer than the discovery gap.",
-                    "Systematic review of {topic} patient information materials shows {kw} reading level averages grade 14 — when rewritten to grade 6, patient adherence to treatment recommendations improves by 45%.",
-                    "Living systematic review infrastructure for {topic} using {kw} automated literature monitoring achieves real-time evidence synthesis — eliminating the 2-year lag between publication and guideline update.",
-                    "Preprint server for {topic} with {kw} structured rapid review format achieves peer review in 72 hours — 50x faster than traditional journals while maintaining scientific quality standards.",
-                    "Multilingual translation of {topic} findings using {kw} community scientist volunteers achieves accessible versions in 40 languages within 2 weeks of publication — ensuring global equitable access to knowledge.",
-                    "Open educational resource for {topic} using {kw} problem-based learning design achieves equivalent learning outcomes to commercial textbook at zero cost — eliminating the paywall barrier to scientific education.",
-                    "Science communication training integrated into {topic} PhD programs that teach {kw} narrative skills alongside technical skills produces researchers who publish 20% more frequently and receive 35% more research funding — communication ability is a scientific productivity multiplier.",
+                    "L'audit de traduction des connaissances pour {topic} montre que les résultats {kw} prennent en moyenne 17 ans pour passer de la publication évaluée par les pairs à la directive de pratique clinique — le fossé de diffusion est plus long que le fossé de découverte.",
+                    "La revue systématique des matériaux d'information des patients {topic} montre que les documents d'information {kw} ont un niveau de lecture moyen de 14e année — lorsqu'ils sont réécrits à un niveau de 6e année, l'adhésion des patients aux recommandations de traitement s'améliore de 45%.",
+                    "L'infrastructure de revue systématique vivante pour {topic} utilisant la surveillance automatisée de la littérature {kw} atteint la synthèse de preuves en temps réel — éliminant le délai de 2 ans entre la publication et la mise à jour des directives.",
+                    "Le serveur de prépublication pour {topic} avec un format d'évaluation rapide structurée {kw} atteint une évaluation par les pairs en 72 heures — 50x plus rapide que les revues traditionnelles tout en maintenant les normes de qualité scientifique.",
+                    "La traduction multilingue des résultats {topic} utilisant des bénévoles scientifiques communautaires {kw} atteint des versions accessibles dans 40 langues dans les 2 semaines suivant la publication — assurant un accès équitable mondial aux connaissances.",
+                    "La ressource éducative ouverte pour {topic} utilisant la conception d'apprentissage par problème {kw} atteint des résultats d'apprentissage équivalents au manuel commercial à zéro coût — éliminant la barrière de paywall à l'éducation scientifique.",
+                    "La formation en communication scientifique intégrée dans les programmes de doctorat {topic} qui enseignent les compétences narratives {kw} aux côtés des compétences techniques produit des chercheurs qui publient 20% plus fréquemment et reçoivent 35% plus de financement de recherche — la capacité de communication est un multiplicateur de productivité scientifique.",
                 ],
                 "findings": [
-                    "Knowledge commons platform for {topic} with {kw} contributor recognition system achieves 10,000 expert contributors sharing findings in plain language — scaling accessible science documentation 100x beyond current capacity.",
-                    "Interactive explainer for {topic} using {kw} game mechanics achieves learning outcomes equivalent to a 3-hour lecture in 20 minutes of play — evidence that engagement is the primary driver of knowledge retention, not duration.",
-                    "Science communication audit of {topic} reveals {kw} findings from 10 years ago that would dramatically change current clinical or policy practice if widely known — retrospective dissemination campaign initiated with measurable impact tracking.",
+                    "La plateforme de commons de connaissances pour {topic} avec un système de reconnaissance de contributeurs {kw} atteint 10 000 experts contribuant à des résultats en langage clair — mettant à l'échelle la documentation scientifique accessible 100x au-delà de la capacité actuelle.",
+                    "L'expliqueur interactif pour {topic} utilisant les mécaniques de jeu {kw} atteint des résultats d'apprentissage équivalents à une conférence de 3 heures en 20 minutes de jeu — preuve que l'engagement est le principal moteur de la rétention des connaissances, pas la durée.",
+                    "L'audit de communication scientifique de {topic} révèle des résultats {kw} datant de 10 ans qui changeraient considérablement la pratique clinique ou politique actuelle s'ils étaient largement connus — une campagne de diffusion rétrospective initiée avec un suivi d'impact mesurable.",
                 ],
                 "connections": [
-                    "knowledge management, documentation systems, and information design",
-                    "health literacy, patient communication, and shared decision-making",
-                    "open science, open access, and scholarly communication reform",
-                    "science education, curriculum design, and learning science",
+                    "gestion des connaissances, systèmes de documentation et conception de l'information",
+                    "littératie en santé, communication avec les patients et prise de décision partagée",
+                    "science ouverte, accès ouvert et réforme de la communication savante",
+                    "éducation scientifique, conception de curriculum et sciences de l'apprentissage",
                 ],
             },
         ]

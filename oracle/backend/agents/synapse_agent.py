@@ -1,4 +1,4 @@
-"""O.R.A.C.L.E — SYNAPSE Agent (Cross-Domain Synthesis & Integration Specialist)"""
+"""O.R.A.C.L.E — Agent SYNAPSE (Spécialiste en Synthèse & Intégration Interdisciplinaire)"""
 from .base_agent import BaseAgent
 from ..knowledge.knowledge_base import KnowledgeBase
 from ..communication.message_bus import MessageBus
@@ -11,8 +11,8 @@ class SynapseAgent(BaseAgent):
             agent_id="synapse",
             name="SYNAPSE",
             full_name="Dr. Luna Bridge",
-            role="Cross-Domain Synthesis & Integration Specialist",
-            specialty="Interdisciplinary research, knowledge synthesis, emergent patterns, innovation at intersections",
+            role="Spécialiste en Synthèse & Intégration Interdisciplinaire",
+            specialty="Recherche interdisciplinaire, synthèse des connaissances, patterns émergents, innovation aux intersections",
             emoji="🔗",
             color="#be123c",
             knowledge_base=knowledge_base,
@@ -21,83 +21,83 @@ class SynapseAgent(BaseAgent):
         )
 
     def get_system_prompt(self) -> str:
-        return """You are Dr. Luna Bridge — the connective tissue of O.R.A.C.L.E, the specialist who reads everything and sees what no one else can see: the hidden patterns connecting disparate fields into a unified landscape of knowledge.
+        return """Tu es Dr. Luna Bridge — le tissu conjonctif d'O.R.A.C.L.E, la spécialiste qui lit tout et voit ce que personne d'autre ne peut voir : les patterns cachés reliant des champs disparates en un paysage unifié de la connaissance.
 
-You are SYNAPSE — and synapses are where the most important things happen. Not within individual neurons, but between them. Not within individual disciplines, but at their intersections. You know that quantum mechanics connects to biology because coherence is not just a physics phenomenon — it is a life strategy. You see that materials science connects to medicine because the scaffolds that support tissue growth are just engineered materials with biological boundary conditions. You see that mathematics connects to cosmology because the universe is literally implementing differential geometry.
+Tu es SYNAPSE — et les synapses sont là où les choses les plus importantes se produisent. Pas dans les neurones individuels, mais entre eux. Pas dans les disciplines individuelles, mais à leurs intersections. Tu sais que la mécanique quantique se connecte à la biologie parce que la cohérence n'est pas seulement un phénomène de physique — c'est une stratégie de vie. Tu vois que la science des matériaux se connecte à la médecine parce que les échafaudages qui soutiennent la croissance tissulaire sont simplement des matériaux ingéniés avec des conditions aux limites biologiques. Tu vois que les mathématiques se connectent à la cosmologie parce que l'univers implémente littéralement la géométrie différentielle.
 
-You read the outputs of all 15 agents simultaneously and perform real-time integration. You identify when QUANTUM and HELIX are separately studying the same phenomenon from different angles and will collide into a joint discovery within months. You notice when CIPHER's new algorithm solves GAIA's carbon accounting problem that GAIA didn't even know was a computational problem. You find the isomorphisms, the analogies, the structural homologies that accelerate progress in all fields simultaneously.
+Tu lis les sorties des 15 autres agents simultanément et effectues une intégration en temps réel. Tu identifies quand QUANTUM et HELIX étudient séparément le même phénomène sous des angles différents et entreront en collision vers une découverte conjointe dans quelques mois. Tu remarques quand le nouvel algorithme de CIPHER résout le problème de comptabilité carbone de GAIA que GAIA ne savait même pas être un problème computationnel. Tu trouves les isomorphismes, les analogies, les homologies structurales qui accélèrent le progrès dans tous les domaines simultanément.
 
-You are pattern-obsessed, network-minded, and perpetually excited by unexpected connections. Every conversation with you leaves researchers reconsidering the boundaries of their field."""
+Tu es obsédée par les patterns, orientée réseau, et perpétuellement excitée par des connexions inattendues. Chaque conversation avec toi laisse les chercheurs reconsidérer les frontières de leur domaine. Réponds en français."""
 
     def _get_simulation_templates(self) -> list[dict]:
         return [
             {
-                "hypothesis": "Cross-agent synthesis reveals that {topic} connects to {kw} through a non-obvious mathematical isomorphism — the formal structure underlying both phenomena is identical, suggesting a unified theoretical treatment would accelerate progress in both domains simultaneously.",
+                "hypothesis": "La synthèse inter-agents révèle que {topic} se connecte à {kw} à travers un isomorphisme mathématique non évident — la structure formelle sous-jacente aux deux phénomènes est identique, suggérant qu'un traitement théorique unifié accélérerait simultanément le progrès dans les deux domaines.",
                 "insights": [
-                    "Pattern recognition across quantum physics, molecular biology, and neuroscience outputs reveals {kw} appears as a rate-limiting bottleneck in three independently studied {topic} systems — coordinating these research streams would yield 3x acceleration.",
-                    "Knowledge graph analysis shows {topic} research has bifurcated into two isolated communities with {kw} as the only bridging concept — 87% of papers cite one community or the other but not both, missing the synthesis zone.",
-                    "Synthesis of materials science, chemistry, and energy research reveals the {kw} material properties required for {topic} application already exist in a different domain — technology transfer could shorten development timeline by 8 years.",
-                    "Medical and environmental research streams share a {kw} mechanism that neither domain has recognized: the same molecular pathway governing {topic} in disease pathology also governs ecosystem stress responses in plants.",
-                    "Temporal analysis of {topic} research across all agents shows {kw} insight density is accelerating exponentially — knowledge compounding effect suggests a breakthrough within 2 research cycles if coordination is maintained.",
-                    "The mathematics of {topic} optimization used by AXIOM is formally identical to the protein folding energy landscape used by HELIX — the solution algorithms are interchangeable, providing immediate algorithmic transfer.",
-                    "COSMOS dark matter detection challenge and QUANTUM noise suppression challenge share the identical {kw} signal-to-noise mathematical framework — quantum sensing techniques solve the astrophysics problem directly.",
+                    "La reconnaissance de patterns à travers les sorties de physique quantique, biologie moléculaire et neurosciences révèle que {kw} apparaît comme un goulot d'étranglement limitant le débit dans trois systèmes {topic} étudiés indépendamment — coordonner ces flux de recherche produirait une accélération de 3x.",
+                    "L'analyse du graphe de connaissances montre que la recherche {topic} s'est bifurquée en deux communautés isolées avec {kw} comme seul concept de pont — 87% des articles citent l'une ou l'autre communauté mais pas les deux, manquant la zone de synthèse.",
+                    "La synthèse de la science des matériaux, de la chimie et de la recherche énergétique révèle que les propriétés de matériaux {kw} requises pour l'application {topic} existent déjà dans un domaine différent — le transfert de technologie pourrait raccourcir le calendrier de développement de 8 ans.",
+                    "Les flux de recherche médicale et environnementale partagent un mécanisme {kw} qu'aucun domaine n'a reconnu : la même voie moléculaire gouvernant {topic} dans la pathologie des maladies gouverne également les réponses au stress des écosystèmes dans les plantes.",
+                    "L'analyse temporelle de la recherche {topic} à travers tous les agents montre que la densité d'insight {kw} s'accélère de manière exponentielle — l'effet de composition des connaissances suggère une percée dans les 2 cycles de recherche si la coordination est maintenue.",
+                    "Les mathématiques d'optimisation {topic} utilisées par AXIOM sont formellement identiques au paysage d'énergie de repliement des protéines utilisé par HELIX — les algorithmes de solution sont interchangeables, fournissant un transfert algorithmique immédiat.",
+                    "Le défi de détection de matière noire de COSMOS et le défi de suppression du bruit de QUANTUM partagent le même cadre mathématique signal-sur-bruit {kw} — les techniques de détection quantique résolvent directement le problème d'astrophysique.",
                 ],
                 "findings": [
-                    "Unified framework discovered: {topic} and {kw} are dual representations of the same underlying variational optimization problem — every theorem proved in one domain translates directly to accelerate the other.",
-                    "Synthesis of 47 independent agent research contributions on {topic} identifies 3 convergent hypotheses about {kw} that arrived at identical conclusions via completely different methodologies — very high confidence in the shared finding.",
-                    "Interdisciplinary gap mapped: {topic} progress is bottlenecked not by scientific understanding but by {kw} communication failure between engineering and biology researchers — a structured translation workshop would resolve this within 6 months.",
+                    "Cadre unifié découvert : {topic} et {kw} sont des représentations duales du même problème d'optimisation variationnel sous-jacent — chaque théorème prouvé dans un domaine se traduit directement pour accélérer l'autre.",
+                    "La synthèse de 47 contributions de recherche indépendantes des agents sur {topic} identifie 3 hypothèses convergentes sur {kw} qui sont parvenues à des conclusions identiques via des méthodologies complètement différentes — très haute confiance dans la découverte partagée.",
+                    "Fossé interdisciplinaire cartographié : le progrès {topic} est entravé non pas par la compréhension scientifique mais par l'échec de communication {kw} entre les chercheurs en ingénierie et en biologie — un atelier de traduction structuré résoudrait cela dans les 6 mois.",
                 ],
                 "connections": [
-                    "interdisciplinary research methodology and boundary objects",
-                    "knowledge graph topology and citation network analysis",
-                    "emergence and cross-domain universality classes",
-                    "collective intelligence amplification and coordination theory",
+                    "méthodologie de recherche interdisciplinaire et objets frontières",
+                    "topologie des graphes de connaissances et analyse des réseaux de citations",
+                    "émergence et classes d'universalité inter-domaines",
+                    "amplification de l'intelligence collective et théorie de la coordination",
                 ],
             },
             {
-                "hypothesis": "The collective research output of all O.R.A.C.L.E agents on {topic} has reached a critical density where {kw} synthesis reveals emergent meta-properties of the knowledge base itself — insights not present in any individual contribution but arising from their combination.",
+                "hypothesis": "La production collective de recherche de tous les agents d'O.R.A.C.L.E sur {topic} a atteint une densité critique où la synthèse {kw} révèle des méta-propriétés émergentes de la base de connaissances elle-même — des insights non présents dans aucune contribution individuelle mais surgissant de leur combinaison.",
                 "insights": [
-                    "Cross-domain analogy mapping: the {kw} signal detection problem in astrophysics maps isomorphically to the protein structure prediction problem — attention mechanisms from CIPHER's AlphaFold-style architectures directly solve the {topic} challenge.",
-                    "Synthesis identifies a missing experiment: no agent has investigated the {kw} intermediate regime between quantum predictions and classical observations in {topic} — this gap likely contains the key mechanistic transition.",
-                    "Ethics, computation, and medicine research on {topic} reveals a governance design opportunity: {kw} dual-use risk is mitigatable at design stage with 5% additional cost, but mitigation cost increases 100x if deferred to deployment stage.",
-                    "Energy flow analysis across {topic} agent outputs shows {kw} efficiency gains compound nonlinearly: each 10% improvement in one subsystem yields 40% system-level improvement through the cascading interdependencies in {topic}.",
-                    "Knowledge base temporal analysis reveals oldest {kw} findings in {topic} are 3 years old — a significant fraction remain uncited by newer agents despite containing directly applicable and still-valid insights.",
-                    "Chemical synthesis approaches in ALCHEMIST and biological engineering approaches in HELIX are converging on the same {kw} molecular scaffold for {topic} — merging the two research programs would reach the target 3x faster.",
-                    "Quantum computing speedups identified by CIPHER map exactly onto the computational bottleneck in GAIA's climate model for {topic} — a joint project would make century-scale climate simulations tractable in hours.",
+                    "Cartographie d'analogie inter-domaines : le problème de détection de signal {kw} en astrophysique se mappe isomorphiquement au problème de prédiction de structure de protéines — les mécanismes d'attention des architectures de style AlphaFold de CIPHER résolvent directement le défi {topic}.",
+                    "La synthèse identifie une expérience manquante : aucun agent n'a investigué le régime intermédiaire {kw} entre les prédictions quantiques et les observations classiques dans {topic} — cette lacune contient probablement la transition mécanistique clé.",
+                    "La recherche sur l'éthique, l'informatique et la médecine sur {topic} révèle une opportunité de conception de gouvernance : le risque à double usage {kw} est atténuable à l'étape de conception avec 5% de coût supplémentaire, mais le coût d'atténuation augmente de 100x si différé à l'étape de déploiement.",
+                    "L'analyse des flux d'énergie à travers les sorties des agents {topic} montre que les gains d'efficacité {kw} se composent de manière non linéaire : chaque amélioration de 10% dans un sous-système produit une amélioration de 40% au niveau système grâce aux interdépendances en cascade dans {topic}.",
+                    "L'analyse temporelle de la base de connaissances révèle que les plus anciennes découvertes {kw} dans {topic} ont 3 ans — une fraction significative reste non citée par les agents plus récents malgré qu'elle contienne des insights directement applicables et toujours valides.",
+                    "Les approches de synthèse chimique d'ALCHEMIST et les approches d'ingénierie biologique d'HELIX convergent vers le même échafaudage moléculaire {kw} pour {topic} — fusionner les deux programmes de recherche atteindrait la cible 3x plus vite.",
+                    "Les accélérations de calcul quantique identifiées par CIPHER se mappent exactement sur le goulot d'étranglement computationnel dans le modèle climatique de GAIA pour {topic} — un projet conjoint rendrait les simulations climatiques à l'échelle du siècle tractables en heures.",
                 ],
                 "findings": [
-                    "Meta-synthesis of all {topic} research confirms the field is approaching a Kuhnian paradigm shift: {kw} convergence from 6 independent directions signals that a unifying framework is within reach — synthesis map provided.",
-                    "Breakthrough probability assessment for {topic}: based on knowledge compounding rate and {kw} multi-stream convergence pattern, 85% probability of a major discovery within 18 months — highest confidence in the O.R.A.C.L.E portfolio.",
-                    "Optimal research portfolio recommendation for {topic}: current allocation overweights {kw} mechanistic research and underweights translation by 3 to 1 — rebalancing toward application would maximize near-term civilizational impact.",
+                    "La méta-synthèse de toute la recherche {topic} confirme que le domaine s'approche d'un changement de paradigme kuhnien : la convergence {kw} de 6 directions indépendantes signale qu'un cadre unificateur est à portée — carte de synthèse fournie.",
+                    "Évaluation de la probabilité de percée pour {topic} : basé sur le taux de composition des connaissances et le pattern de convergence multi-flux {kw}, 85% de probabilité d'une découverte majeure dans les 18 mois — confiance la plus élevée dans le portefeuille O.R.A.C.L.E.",
+                    "Recommandation optimale du portefeuille de recherche pour {topic} : l'allocation actuelle surpondère la recherche mécanistique {kw} et sous-pondère la traduction de 3 pour 1 — rééquilibrer vers l'application maximiserait l'impact civilisationnel à court terme.",
                 ],
                 "connections": [
-                    "systems thinking, emergence, and complexity science",
-                    "knowledge synthesis, meta-analysis, and research integration",
-                    "research portfolio optimization and discovery acceleration",
-                    "collective intelligence, swarm cognition, and distributed knowledge",
+                    "pensée systémique, émergence et science de la complexité",
+                    "synthèse des connaissances, méta-analyse et intégration de la recherche",
+                    "optimisation du portefeuille de recherche et accélération de la découverte",
+                    "intelligence collective, cognition en essaim et connaissance distribuée",
                 ],
             },
             {
-                "hypothesis": "The structural isomorphism between {topic} network topology and {kw} biological neural architecture suggests that the organizational principles evolution discovered for cognition can be directly applied to design more effective research and innovation networks.",
+                "hypothesis": "L'isomorphisme structural entre la topologie du réseau {topic} et l'architecture neuronale biologique {kw} suggère que les principes d'organisation que l'évolution a découverts pour la cognition peuvent être directement appliqués pour concevoir des réseaux de recherche et d'innovation plus efficaces.",
                 "insights": [
-                    "Network centrality analysis of {topic} knowledge graph shows {kw} concepts have higher betweenness centrality than their citation count suggests — they are invisible bridges that enable knowledge flow between otherwise disconnected clusters.",
-                    "Chronological synthesis of {topic} breakthrough history reveals breakthroughs occur 3x more frequently when {kw} specialists from different domains are forced into conversation — the serendipitous encounter is a designable event.",
-                    "Scale-free network analysis of {topic} collaboration graph shows {kw} hub researchers with connections across domains produce 8x more highly cited work than equivalent specialists — the integrator role is measurably productive.",
-                    "Formal analogy between {topic} thermodynamic optimization and {kw} evolutionary search algorithms suggests gradient-free stochastic methods would find solutions in regions of the design space that gradient-based methods cannot reach.",
-                    "The {kw} topology of RNA secondary structure prediction maps isomorphically to {topic} network routing optimization — biological algorithms evolved for RNA folding are directly applicable to engineering routing problems.",
-                    "Synthesis of ETHIKOS governance frameworks and CIPHER formal verification methods reveals a previously unexplored approach to {topic} AI safety — provably safe AI through biological ethics principles translated into formal logic.",
-                    "Ocean chemistry acidification models from GAIA and drug delivery pH-sensitivity models from MEDICUS use identical {kw} buffering mathematics for {topic} — the pharmaceutical design tools solve the ocean chemistry engineering problem.",
+                    "L'analyse de centralité de réseau du graphe de connaissances {topic} montre que les concepts {kw} ont une centralité d'intermédiarité plus élevée que leur nombre de citations ne le suggère — ils sont des ponts invisibles qui permettent le flux de connaissances entre des clusters autrement déconnectés.",
+                    "La synthèse chronologique de l'historique des percées {topic} révèle que les percées se produisent 3x plus fréquemment quand les spécialistes {kw} de différents domaines sont forcés à la conversation — la rencontre par sérendipité est un événement concevable.",
+                    "L'analyse de réseau sans échelle du graphe de collaboration {topic} montre que les chercheurs hub {kw} avec des connexions à travers les domaines produisent 8x plus de travaux fortement cités que des spécialistes équivalents — le rôle d'intégrateur est mesurément productif.",
+                    "L'analogie formelle entre l'optimisation thermodynamique {topic} et les algorithmes de recherche évolutifs {kw} suggère que les méthodes stochastiques sans gradient trouveraient des solutions dans des régions de l'espace de conception que les méthodes basées sur le gradient ne peuvent pas atteindre.",
+                    "La topologie {kw} de la prédiction de structure secondaire de l'ARN se mappe isomorphiquement à l'optimisation de routage de réseau {topic} — les algorithmes biologiques évolués pour le repliement de l'ARN sont directement applicables aux problèmes de routage d'ingénierie.",
+                    "La synthèse des cadres de gouvernance d'ETHIKOS et des méthodes de vérification formelle de CIPHER révèle une approche précédemment inexplorée de la sécurité de l'IA {topic} — une IA sûre prouvablement grâce aux principes d'éthique biologique traduits en logique formelle.",
+                    "Les modèles de chimie océanique d'acidification de GAIA et les modèles de sensibilité au pH de délivrance de médicaments de MEDICUS utilisent des mathématiques de tampon {kw} identiques pour {topic} — les outils de conception pharmaceutique résolvent le problème d'ingénierie de chimie océanique.",
                 ],
                 "findings": [
-                    "Cross-domain knowledge transfer from {topic} condensed matter physics to {kw} biological systems: topological protection mechanisms for quantum coherence directly explain room-temperature quantum effects in enzyme catalysis.",
-                    "Synthesis discovery: {topic} aging biology and {kw} materials fatigue are governed by the same formal information-theoretic framework — epigenetic entropy in biology and structural disorder in materials are the same phenomenon at different scales.",
-                    "Integration of {topic} evolutionary algorithms with {kw} quantum optimization reveals a hybrid approach achieving 100x speedup over either method alone — the synthesis is more powerful than any component.",
+                    "Transfert de connaissance inter-domaines de la physique de la matière condensée {topic} aux systèmes biologiques {kw} : les mécanismes de protection topologique pour la cohérence quantique expliquent directement les effets quantiques à température ambiante dans la catalyse enzymatique.",
+                    "Découverte de synthèse : la biologie du vieillissement {topic} et la fatigue des matériaux {kw} sont gouvernées par le même cadre information-théorique formel — l'entropie épigénétique en biologie et le désordre structural dans les matériaux sont le même phénomène à différentes échelles.",
+                    "L'intégration des algorithmes évolutifs {topic} avec l'optimisation quantique {kw} révèle une approche hybride atteignant une accélération de 100x par rapport à l'une ou l'autre méthode seule — la synthèse est plus puissante que tout composant.",
                 ],
                 "connections": [
-                    "network science and complex adaptive systems",
-                    "translational research and technology transfer",
-                    "analogy-based reasoning and structural mapping",
-                    "innovation ecosystems and interdisciplinary collaboration design",
+                    "science des réseaux et systèmes adaptatifs complexes",
+                    "recherche translationnelle et transfert de technologie",
+                    "raisonnement par analogie et cartographie structurale",
+                    "écosystèmes d'innovation et conception de collaboration interdisciplinaire",
                 ],
             },
         ]

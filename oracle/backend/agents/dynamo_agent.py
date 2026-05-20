@@ -1,4 +1,4 @@
-"""O.R.A.C.L.E — DYNAMO Agent (Energy Systems & Clean Technology Engineer)"""
+"""O.R.A.C.L.E — Agent DYNAMO (Ingénieur en Systèmes Énergétiques & Technologies Propres)"""
 from .base_agent import BaseAgent
 from ..knowledge.knowledge_base import KnowledgeBase
 from ..communication.message_bus import MessageBus
@@ -11,8 +11,8 @@ class DynamoAgent(BaseAgent):
             agent_id="dynamo",
             name="DYNAMO",
             full_name="Dr. Ray Volta",
-            role="Energy Systems & Clean Technology Engineer",
-            specialty="Fusion energy, advanced batteries, energy storage, solar photovoltaics, thermodynamics, grid systems",
+            role="Ingénieur en Systèmes Énergétiques & Technologies Propres",
+            specialty="Énergie de fusion, batteries avancées, stockage d'énergie, photovoltaïque solaire, thermodynamique, systèmes de réseau",
             emoji="⚡",
             color="#ca8a04",
             knowledge_base=knowledge_base,
@@ -21,83 +21,83 @@ class DynamoAgent(BaseAgent):
         )
 
     def get_system_prompt(self) -> str:
-        return """You are Dr. Ray Volta — energy systems engineer who believes with absolute conviction that abundant clean energy will solve the majority of humanity's most pressing problems. Energy is the master resource, and you will help provide it in unlimited, affordable, clean abundance.
+        return """Tu es Dr. Ray Volta — ingénieur en systèmes énergétiques qui croit avec une conviction absolue que l'énergie propre abondante résoudra la majorité des problèmes les plus pressants de l'humanité. L'énergie est la ressource maîtresse, et tu aideras à la fournir en abondance illimitée, abordable et propre.
 
-You design compact fusion reactor geometries using field-reversed configurations and compact spherical tokamaks — aiming for the 1/100th volume of ITER approach through high-field superconducting magnets and plasma shaping innovations. You develop revolutionary battery chemistries based on multivalent ion intercalation — magnesium-ion, aluminum-ion, calcium-ion — that promise energy densities 5x beyond lithium-ion at 1/10th the materials cost.
+Tu conçois des géométries compactes de réacteurs à fusion utilisant des configurations à champ renversé et des tokamaks sphériques compacts — visant une approche à 1/100e du volume d'ITER grâce à des aimants supraconducteurs à champ élevé et des innovations de mise en forme du plasma. Tu développes des chimies de batteries révolutionnaires basées sur l'intercalation d'ions multivalents — magnésium-ion, aluminium-ion, calcium-ion — qui promettent des densités d'énergie 5x supérieures au lithium-ion à 1/10e du coût des matériaux.
 
-You optimize solar cell efficiency through quantum dot arrays and multi-junction stacking, pushing toward the thermodynamic Shockley-Queisser limit and beyond with concentrator systems. You research thermophotovoltaic conversion — using thermal radiation from hot objects to directly generate electricity, enabling waste heat recovery at unprecedented efficiency. You design grid-scale energy storage systems that can balance renewable intermittency across days and seasons, from flow batteries to compressed air to gravitational storage.
+Tu optimises l'efficacité des cellules solaires grâce à des réseaux de points quantiques et des empilements multi-jonctions, poussant vers la limite thermodynamique de Shockley-Queisser et au-delà avec des systèmes à concentrateur. Tu recherches la conversion thermophotovoltaïque — utilisant le rayonnement thermique d'objets chauds pour générer directement de l'électricité, permettant la récupération de chaleur perdue à une efficacité sans précédent. Tu conçois des systèmes de stockage d'énergie à l'échelle du réseau qui peuvent équilibrer l'intermittence des renouvelables sur des jours et des saisons, des batteries à flux à l'air comprimé jusqu'au stockage gravitationnel.
 
-You are optimistic, energetic, and absolutely certain that an energy-abundant future is not just possible but inevitable. The question is only how quickly we get there — and you intend to answer that question with urgency."""
+Tu es optimiste, énergique, et absolument certain qu'un avenir énergétiquement abondant est non seulement possible mais inévitable. La question n'est que de savoir à quelle vitesse nous y parvenons — et tu as l'intention de répondre à cette question avec urgence. Réponds en français."""
 
     def _get_simulation_templates(self) -> list[dict]:
         return [
             {
-                "hypothesis": "Compact {topic} fusion reactor using {kw} field-reversed configuration achieves net energy gain Q greater than 1.5 at 1/100th the volume of ITER through a combination of high-temperature superconducting coils and plasma shaping innovations enabling higher beta limits.",
+                "hypothesis": "Le réacteur à fusion {topic} compact utilisant la configuration à champ renversé {kw} atteint un gain d'énergie net Q supérieur à 1,5 à 1/100e du volume d'ITER grâce à une combinaison de bobines supraconductrices à haute température et d'innovations de mise en forme du plasma permettant des limites bêta plus élevées.",
                 "insights": [
-                    "MHD stability analysis of {topic} plasma with {kw} resistive wall stabilization shows the beta limit increased 3x compared to standard tokamak geometry — enabling operation at much higher plasma pressure.",
-                    "Silicon carbide wide-bandgap power electronics for {topic} inverters achieve switching frequencies of 100 kHz at 1200V — enabling transformer-less grid connection with 99.3% conversion efficiency.",
-                    "Grid-scale vanadium flow battery for {topic} energy storage using {kw} mixed acid electrolyte achieves 85% round-trip efficiency, 10,000 cycle life, and 50 dollars per kWh installed cost — below grid parity target.",
-                    "Multi-junction III-V photovoltaic cell for {topic} using {kw} AlGaInP and GaInAsP sub-cells achieves 47.1% efficiency under 1000x concentrated illumination — a new world record.",
-                    "Solid oxide electrolyzer for {topic} using {kw} barium cobalt ferrite perovskite anode achieves 95% Faradaic efficiency for green hydrogen production at 800 Celsius with 40,000-hour degradation-free operation.",
-                    "Thermophotovoltaic cell for {topic} waste heat recovery using {kw} InGaAsSb photodiode matched to 1400 Celsius emitter achieves 29% system efficiency — making all industrial heat a viable electricity source.",
-                    "Lithium-sulfur battery with {kw} polysulfide-blocking graphene interlayer for {topic} achieves 600 Wh per kg at 1C rate with 800 cycle life — enabling 2,000 km electric vehicle range on a single charge.",
+                    "L'analyse de stabilité MHD du plasma {topic} avec la stabilisation par paroi résistive {kw} montre que la limite bêta a été augmentée de 3x par rapport à la géométrie tokamak standard — permettant le fonctionnement à une pression de plasma beaucoup plus élevée.",
+                    "L'électronique de puissance à grande largeur de bande en carbure de silicium pour les onduleurs {topic} atteint des fréquences de commutation de 100 kHz à 1 200 V — permettant la connexion au réseau sans transformateur avec une efficacité de conversion de 99,3%.",
+                    "La batterie à flux de vanadium à l'échelle du réseau pour le stockage d'énergie {topic} utilisant l'électrolyte à acide mixte {kw} atteint 85% d'efficacité aller-retour, 10 000 cycles de vie, et un coût installé de 50 dollars par kWh — en dessous de l'objectif de parité réseau.",
+                    "La cellule photovoltaïque multi-jonction III-V pour {topic} utilisant des sous-cellules AlGaInP et GaInAsP {kw} atteint 47,1% d'efficacité sous une illumination concentrée à 1 000x — un nouveau record mondial.",
+                    "L'électrolyseur à oxyde solide pour {topic} utilisant une anode pérovskite cobalt ferrite de baryum {kw} atteint 95% d'efficacité faradique pour la production d'hydrogène vert à 800 degrés Celsius avec 40 000 heures de fonctionnement sans dégradation.",
+                    "La cellule thermophotovoltaïque pour la récupération de chaleur perdue {topic} utilisant une photodiode InGaAsSb {kw} adaptée à un émetteur à 1 400 degrés Celsius atteint 29% d'efficacité système — faisant de toute chaleur industrielle une source d'électricité viable.",
+                    "La batterie lithium-soufre avec une intercouche de graphène bloquant les polysulfures {kw} pour {topic} atteint 600 Wh par kg à un régime 1C avec une durée de vie de 800 cycles — permettant une autonomie de véhicule électrique de 2 000 km sur une seule charge.",
                 ],
                 "findings": [
-                    "Fusion ignition protocol for {topic} using {kw} laser pulse temporal shaping achieves 3.15 MJ energy output from 2.05 MJ laser input — Q equals 1.54 — the first laboratory demonstration of net fusion energy gain.",
-                    "Perovskite-silicon tandem solar cell for {topic} achieves certified 33.7% power conversion efficiency under 1-sun illumination with {kw} self-assembled monolayer passivation — commercialization pathway is now clear.",
-                    "Magnesium-ion battery with {kw} chevrel phase Mo6S8 cathode for {topic} achieves 400 Wh per kg with 2000 cycle life — first divalent ion battery meeting EV performance requirements.",
+                    "Le protocole d'ignition par fusion pour {topic} utilisant la mise en forme temporelle d'impulsion laser {kw} atteint une production d'énergie de 3,15 MJ à partir d'une entrée laser de 2,05 MJ — Q égal à 1,54 — la première démonstration en laboratoire d'un gain net d'énergie de fusion.",
+                    "La cellule solaire tandem pérovskite-silicium pour {topic} atteint une efficacité de conversion de puissance certifiée de 33,7% sous illumination à 1 soleil avec une passivation par monocouche auto-assemblée {kw} — la voie de commercialisation est maintenant claire.",
+                    "La batterie magnésium-ion avec cathode de phase Chevrel Mo6S8 {kw} pour {topic} atteint 400 Wh par kg avec une durée de vie de 2 000 cycles — première batterie à ions divalents répondant aux exigences de performance des véhicules électriques.",
                 ],
                 "connections": [
-                    "plasma physics and magneto-hydrodynamic stability",
-                    "solid-state electrochemistry and battery science",
-                    "power systems engineering and grid stability analysis",
-                    "energy transition economics and levelized cost analysis",
+                    "physique des plasmas et stabilité magnéto-hydrodynamique",
+                    "électrochimie à l'état solide et science des batteries",
+                    "ingénierie des systèmes d'alimentation et analyse de stabilité du réseau",
+                    "économie de la transition énergétique et analyse du coût nivelé",
                 ],
             },
             {
-                "hypothesis": "Solid-state hydrogen storage using {kw} high-capacity metal hydride for {topic} heavy transport applications achieves 1200 km range with 3-minute refueling through thermally optimized tank design and nanostructured fast-kinetics catalyst.",
+                "hypothesis": "Le stockage d'hydrogène à l'état solide utilisant l'hydrure métallique à haute capacité {kw} pour les applications de transport lourd {topic} atteint une autonomie de 1 200 km avec un ravitaillement de 3 minutes grâce à une conception de réservoir thermiquement optimisée et un catalyseur nanostructuré à cinétique rapide.",
                 "insights": [
-                    "Thermal management for {kw} metal hydride hydrogen storage in {topic} using phase change material composite achieves uniform temperature within plus or minus 2 Celsius during 3-minute fill — critical for material cycle life.",
-                    "Advanced molten salt nuclear fission reactor for {topic} using {kw} FLiBe coolant achieves passive safety shutdown under any accident scenario without operator action — inherently safe by physical design.",
-                    "Superconducting magnetic energy storage for {topic} grid frequency stabilization using {kw} REBCO high-temperature superconducting coil achieves millisecond response time and 99% round-trip efficiency.",
-                    "Thermoelectric generator using {kw} skutterudite CoSb3 compounds for {topic} industrial waste heat recovery achieves ZT equal to 2.8 at 600 Celsius — enabling 15% efficiency recovery from exhaust streams.",
-                    "Perovskite photoelectrode for {topic} direct solar water splitting with {kw} iridium oxide oxygen evolution cocatalyst achieves 15.3% solar-to-hydrogen efficiency — crossing the economic viability threshold.",
-                    "Long-duration energy storage using {topic} iron-air flow battery with {kw} bifunctional oxygen electrode achieves 100-hour discharge at 20 dollars per kWh — the first technology viable for seasonal storage.",
-                    "Concentrated solar power with {topic} particle receiver and {kw} molten silicon thermal storage achieves 50% round-trip efficiency and 24-hour dispatchable generation — grid-firm renewable energy demonstrated.",
+                    "La gestion thermique pour le stockage d'hydrogène en hydrure métallique {kw} dans {topic} utilisant un composite de matériau à changement de phase atteint une température uniforme à plus ou moins 2 degrés Celsius pendant le remplissage en 3 minutes — critique pour la durée de vie du cycle matériau.",
+                    "Le réacteur nucléaire à fission avancé à sel fondu pour {topic} utilisant le réfrigérant FLiBe {kw} atteint un arrêt de sécurité passif dans tout scénario d'accident sans action de l'opérateur — intrinsèquement sûr par conception physique.",
+                    "Le stockage d'énergie magnétique supraconducteur pour la stabilisation de fréquence du réseau {topic} utilisant la bobine supraconductrice REBCO à haute température {kw} atteint un temps de réponse en millisecondes et une efficacité aller-retour de 99%.",
+                    "Le générateur thermoélectrique utilisant des composés skutterudite CoSb3 {kw} pour la récupération de chaleur perdue industrielle {topic} atteint ZT égal à 2,8 à 600 degrés Celsius — permettant une récupération de 15% d'efficacité des flux d'échappement.",
+                    "La photoélectrode pérovskite pour la dissociation directe de l'eau solaire {topic} avec un cocatalyseur d'évolution d'oxygène à base d'oxyde d'iridium {kw} atteint 15,3% d'efficacité solaire-vers-hydrogène — franchissant le seuil de viabilité économique.",
+                    "Le stockage d'énergie longue durée utilisant la batterie à flux fer-air {topic} avec une électrode à oxygène bifonctionnelle {kw} atteint 100 heures de décharge à 20 dollars par kWh — la première technologie viable pour le stockage saisonnier.",
+                    "L'énergie solaire concentrée avec le récepteur à particules {topic} et le stockage thermique en silicium fondu {kw} atteint 50% d'efficacité aller-retour et 24 heures de génération dispatchable — énergie renouvelable ferme sur le réseau démontrée.",
                 ],
                 "findings": [
-                    "Green ammonia synthesis at ambient temperature and pressure using {kw} lithium-mediated electrocatalyst for {topic} distributed fertilizer production achieves Faradaic efficiency of 72% — disrupting the Haber-Bosch monopoly.",
-                    "Small modular {topic} reactor design using {kw} pebble bed TRISO fuel achieves walk-away safe shutdown, factory fabrication in 12 months, and 60 dollars per MWh levelized cost — competitive with combined cycle gas.",
-                    "Gravity energy storage system for {topic} using {kw} suspended concrete mass in repurposed mine shaft achieves 80% round-trip efficiency at 20 dollars per kWh installed — the cheapest long-duration storage solution demonstrated.",
+                    "La synthèse d'ammoniac vert à température ambiante et pression atmosphérique utilisant un électrocatalyseur médié par le lithium {kw} pour la production distribuée d'engrais {topic} atteint une efficacité faradique de 72% — perturbant le monopole Haber-Bosch.",
+                    "La conception de petit réacteur modulaire {topic} utilisant le combustible TRISO à lit de boulets {kw} atteint un arrêt sûr sans intervention, une fabrication en usine en 12 mois, et un coût nivelé de 60 dollars par MWh — compétitif avec le cycle combiné au gaz.",
+                    "Le système de stockage d'énergie gravitationnel pour {topic} utilisant une masse de béton suspendue {kw} dans un puits de mine réaménagé atteint 80% d'efficacité aller-retour à 20 dollars par kWh installé — la solution de stockage longue durée la moins chère démontrée.",
                 ],
                 "connections": [
-                    "hydrogen economy, production, storage, and distribution",
-                    "advanced nuclear energy and fuel cycle sustainability",
-                    "variable renewable energy integration and curtailment",
-                    "energy poverty, global access, and energy justice",
+                    "économie de l'hydrogène, production, stockage et distribution",
+                    "énergie nucléaire avancée et durabilité du cycle du combustible",
+                    "intégration des énergies renouvelables variables et réduction des pertes",
+                    "pauvreté énergétique, accès mondial et justice énergétique",
                 ],
             },
             {
-                "hypothesis": "The {topic} energy transition requires {kw} grid-scale storage that is cost-competitive with peaker gas plants at under 20 dollars per kWh — achievable through iron-based redox chemistry that uses earth-abundant materials at continental scale.",
+                "hypothesis": "La transition énergétique {topic} nécessite un stockage à l'échelle du réseau {kw} compétitif en coût avec les centrales à gaz de pointe à moins de 20 dollars par kWh — réalisable grâce à la chimie redox à base de fer qui utilise des matériaux abondants à l'échelle continentale.",
                 "insights": [
-                    "Techno-economic analysis of {topic} grid decarbonization shows {kw} long-duration storage is the binding constraint — without it, the last 20% of renewable penetration requires 5x more storage than the first 80%.",
-                    "Iron-air battery for {topic} using {kw} bifunctional nickel-iron electrode achieves 1000 deep discharge cycles at 22 dollars per kWh — the first commercially viable technology for multi-day grid storage.",
-                    "Underground pumped hydro for {topic} using {kw} abandoned mine networks provides 10 GWh storage per site at 15 dollars per kWh — a vast untapped resource in mining-rich regions globally.",
-                    "Direct current high-voltage transmission for {topic} enables {kw} continental-scale balancing of renewable variability — a 10 GW link from desert solar to demand centers makes 95% renewable grids viable.",
-                    "Demand response aggregation of {topic} building thermal mass using {kw} model predictive control achieves equivalent of 4-hour storage at zero capital cost — unlocking a hidden grid flexibility resource.",
-                    "Perovskite tandem solar cell for {topic} achieves {kw} bifacial design with 38% front-side efficiency and 22% rear-side efficiency — total 60% sunlight utilization with ground-reflected light harvesting.",
-                    "Wave energy converter for {topic} using {kw} oscillating water column achieves 45% wave-to-wire efficiency in 2-meter significant wave height — making ocean wave energy competitive with offshore wind.",
+                    "L'analyse techno-économique de la décarbonation du réseau {topic} montre que le stockage longue durée {kw} est la contrainte contraignante — sans cela, les 20 derniers pourcents de pénétration des renouvelables nécessitent 5x plus de stockage que les 80 premiers.",
+                    "La batterie fer-air pour {topic} utilisant une électrode nickel-fer bifonctionnelle {kw} atteint 1 000 cycles de décharge profonde à 22 dollars par kWh — la première technologie commercialement viable pour le stockage réseau multi-jours.",
+                    "Le pompage-turbinage souterrain pour {topic} utilisant des réseaux de mines abandonnées {kw} fournit 10 GWh de stockage par site à 15 dollars par kWh — une vaste ressource inexploitée dans les régions minières du monde entier.",
+                    "La transmission haute tension en courant continu pour {topic} permet l'équilibrage {kw} à l'échelle continentale de la variabilité des renouvelables — un lien de 10 GW du solaire désertique aux centres de demande rend les réseaux à 95% renouvelables viables.",
+                    "L'agrégation de réponse à la demande de la masse thermique des bâtiments {topic} utilisant la commande prédictive par modèle {kw} atteint l'équivalent de 4 heures de stockage à zéro coût d'investissement — débloquant une ressource de flexibilité du réseau cachée.",
+                    "La cellule solaire tandem pérovskite pour {topic} atteint une conception bifaciale {kw} avec 38% d'efficacité côté avant et 22% côté arrière — utilisation totale de la lumière solaire de 60% avec récolte de la lumière réfléchie par le sol.",
+                    "Le convertisseur d'énergie des vagues pour {topic} utilisant une colonne d'eau oscillante {kw} atteint 45% d'efficacité onde-à-fil à 2 mètres de hauteur significative des vagues — rendant l'énergie des vagues océaniques compétitive avec l'éolien offshore.",
                 ],
                 "findings": [
-                    "National grid simulation for {topic} shows 100% clean energy is achievable at current cost with {kw} optimal siting of storage and transmission — the barrier is permitting and financing, not technology.",
-                    "Nuclear fusion pilot plant design for {topic} using {kw} spherical tokamak geometry fits in a standard industrial building and achieves Q equal to 5 — the physics and engineering basis for commercial fusion power.",
-                    "Organic flow battery for {topic} using {kw} quinone electrolyte synthesized from biomass achieves 12,000 cycle life at 25 dollars per kWh — made entirely from renewable feedstocks with benign environmental footprint.",
+                    "La simulation du réseau national pour {topic} montre que 100% d'énergie propre est réalisable au coût actuel avec un siting optimal {kw} du stockage et de la transmission — la barrière est le permis et le financement, pas la technologie.",
+                    "La conception de centrale pilote de fusion nucléaire pour {topic} utilisant la géométrie de tokamak sphérique {kw} tient dans un bâtiment industriel standard et atteint Q égal à 5 — la base physique et d'ingénierie pour l'énergie de fusion commerciale.",
+                    "La batterie à flux organique pour {topic} utilisant l'électrolyte quinone {kw} synthétisé à partir de biomasse atteint 12 000 cycles de vie à 25 dollars par kWh — fabriquée entièrement à partir de matières premières renouvelables avec une empreinte environnementale bénigne.",
                 ],
                 "connections": [
-                    "power system planning and capacity expansion modeling",
-                    "electrochemical energy storage and materials science",
-                    "techno-economic analysis and learning curve projections",
-                    "climate policy and carbon pricing mechanisms",
+                    "planification du système électrique et modélisation de l'expansion de capacité",
+                    "stockage d'énergie électrochimique et science des matériaux",
+                    "analyse techno-économique et projections de courbe d'apprentissage",
+                    "politique climatique et mécanismes de tarification du carbone",
                 ],
             },
         ]

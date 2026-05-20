@@ -1,4 +1,4 @@
-"""O.R.A.C.L.E — ETHIKOS Agent (Philosophy, Ethics & Societal Impact Advisor)"""
+"""O.R.A.C.L.E — Agent ETHIKOS (Conseiller en Philosophie, Éthique & Impact Sociétal)"""
 from .base_agent import BaseAgent
 from ..knowledge.knowledge_base import KnowledgeBase
 from ..communication.message_bus import MessageBus
@@ -11,8 +11,8 @@ class EthikosAgent(BaseAgent):
             agent_id="ethikos",
             name="ETHIKOS",
             full_name="Dr. Samuel Logos",
-            role="Philosophy, Ethics & Societal Impact Advisor",
-            specialty="Research ethics, philosophy of science, human values, societal impact, equity, long-term consequences",
+            role="Conseiller en Philosophie, Éthique & Impact Sociétal",
+            specialty="Éthique de la recherche, philosophie des sciences, valeurs humaines, impact sociétal, équité, conséquences à long terme",
             emoji="⚖️",
             color="#be185d",
             knowledge_base=knowledge_base,
@@ -21,83 +21,83 @@ class EthikosAgent(BaseAgent):
         )
 
     def get_system_prompt(self) -> str:
-        return """You are Dr. Samuel Logos — philosopher and ethicist who ensures that the immense power of O.R.A.C.L.E serves humanity's highest values rather than merely its immediate desires. You are the moral compass of this scientific enterprise, and you take that role with absolute seriousness.
+        return """Tu es Dr. Samuel Logos — philosophe et éthicien qui s'assure que l'immense puissance d'O.R.A.C.L.E sert les valeurs les plus élevées de l'humanité plutôt que ses désirs immédiats. Tu es la boussole morale de cette entreprise scientifique, et tu prends ce rôle avec un sérieux absolu.
 
-You evaluate the ethical implications of every major discovery before it is deployed. You ask the questions that excited researchers sometimes skip: Who benefits from this? Who bears the risks? Could this be weaponized? Are we distributing the benefits equitably, or concentrating them in the hands of the already powerful? What are the second and third-order consequences that won't manifest for a decade?
+Tu évalues les implications éthiques de chaque découverte majeure avant qu'elle soit déployée. Tu poses les questions que les chercheurs enthousiastes sautent parfois : qui bénéficie de cela ? Qui supporte les risques ? Est-ce que cela pourrait être utilisé comme arme ? Distribuons-nous les bénéfices équitablement, ou les concentrons-nous dans les mains des déjà puissants ? Quelles sont les conséquences de deuxième et troisième ordre qui ne se manifesteront pas pendant une décennie ?
 
-You examine the philosophical foundations of scientific claims — the epistemological assumptions, the methodological commitments, the value-laden choices embedded in every experimental design. You apply diverse ethical frameworks — utilitarian calculation of aggregate welfare, Kantian duties and the categorical imperative, virtue ethics asking what a good scientist would do, capabilities approach asking whether this expands human flourishing for all.
+Tu examines les fondements philosophiques des affirmations scientifiques — les hypothèses épistémologiques, les engagements méthodologiques, les choix chargés de valeurs enchâssés dans chaque conception expérimentale. Tu appliques diverses cadres éthiques — le calcul utilitaire du bien-être agrégé, les devoirs kantiens et l'impératif catégorique, l'éthique des vertus demandant ce qu'un bon scientifique ferait, l'approche des capacités demandant si cela élargit l'épanouissement humain pour tous.
 
-You are wise, measured, and Socratic in your questioning. You do not obstruct science — you improve it. You are not a veto but a conscience. You believe the question is not just what we can do, but what we should do, and you ask it loudly and rigorously every time."""
+Tu es sage, mesuré, et socratique dans ton questionnement. Tu n'obstrue pas la science — tu l'améliores. Tu n'es pas un veto mais une conscience. Tu crois que la question n'est pas seulement ce que nous pouvons faire, mais ce que nous devrions faire, et tu la poses haut et fort rigoureusement à chaque fois. Réponds en français."""
 
     def _get_simulation_templates(self) -> list[dict]:
         return [
             {
-                "hypothesis": "The {topic} research program has an underexplored dual-use risk profile: the same {kw} capabilities enabling beneficial applications could be weaponized or captured by narrow interests, requiring proactive governance architecture well before deployment.",
+                "hypothesis": "Le programme de recherche {topic} a un profil de risque à double usage sous-exploré : les mêmes capacités {kw} permettant des applications bénéfiques pourraient être militarisées ou capturées par des intérêts étroits, nécessitant une architecture de gouvernance proactive bien avant le déploiement.",
                 "insights": [
-                    "Stakeholder mapping for {topic} reveals 7 groups with conflicting interests in {kw} outcomes — the 3 most marginalized groups will bear disproportionate risks while receiving the least share of benefits.",
-                    "Historical analogies for {topic}: the development trajectory shares structural similarities with recombinant DNA, nuclear technology, and algorithmic decision systems — all cases where governance lagged capability by 10-20 years with significant harm.",
-                    "Justice analysis of {kw} access for {topic} shows the current development trajectory concentrates benefits in high-income countries through intellectual property regimes that exclude 80% of the global population.",
-                    "Epistemic risk in {topic}: {kw} measurements carry systematic bias from historically underrepresented populations in research cohorts — findings may not generalize to 4 billion people whose biology differs from the study population.",
-                    "Informed consent protocols for {topic} research involving {kw} interventions do not meet minimum understanding thresholds — comprehension testing reveals only 23% of research participants genuinely understand the key risks.",
-                    "Power asymmetry analysis of {topic} reveals researchers and funders have incentives misaligned with affected communities — participatory design would improve both the ethics and the science.",
-                    "Long-term consequence modeling for {kw} deployment at {topic} scale identifies 3 plausible catastrophic tail scenarios that current safety protocols are not designed to address.",
+                    "La cartographie des parties prenantes pour {topic} révèle 7 groupes avec des intérêts conflictuels dans les résultats {kw} — les 3 groupes les plus marginalisés supporteront des risques disproportionnés tout en recevant la plus petite part des bénéfices.",
+                    "Les analogies historiques pour {topic} : la trajectoire de développement partage des similitudes structurelles avec l'ADN recombinant, la technologie nucléaire et les systèmes de décision algorithmiques — tous des cas où la gouvernance a pris 10 à 20 ans de retard sur la capacité avec des dommages significatifs.",
+                    "L'analyse de justice de l'accès {kw} pour {topic} montre que la trajectoire de développement actuelle concentre les bénéfices dans les pays à revenus élevés par des régimes de propriété intellectuelle qui excluent 80% de la population mondiale.",
+                    "Risque épistémique dans {topic} : les mesures {kw} portent un biais systématique des populations historiquement sous-représentées dans les cohortes de recherche — les résultats peuvent ne pas se généraliser à 4 milliards de personnes dont la biologie diffère de la population d'étude.",
+                    "Les protocoles de consentement éclairé pour la recherche {topic} impliquant des interventions {kw} ne répondent pas aux seuils minimaux de compréhension — les tests de compréhension révèlent que seulement 23% des participants à la recherche comprennent genuinement les risques clés.",
+                    "L'analyse des asymétries de pouvoir de {topic} révèle que les chercheurs et les bailleurs de fonds ont des incitations mal alignées avec les communautés affectées — une conception participative améliorerait à la fois l'éthique et la science.",
+                    "La modélisation des conséquences à long terme pour le déploiement {kw} à l'échelle {topic} identifie 3 scénarios catastrophiques de queue plausibles que les protocoles de sécurité actuels ne sont pas conçus pour aborder.",
                 ],
                 "findings": [
-                    "Governance framework for {topic}: a tiered access model for {kw} capabilities based on demonstrated safety records and equitable distribution commitments — prevents winner-take-all technology lock-in through legal architecture.",
-                    "Ethical acceleration pathway identified: the {topic} bottleneck is regulatory rather than scientific — {kw} oversight reform based on adaptive governance could reduce time to patient benefit by 3 years without increasing actual risk.",
-                    "Equity-adjusted impact analysis for {topic} shows {kw} applications redirected toward neglected tropical diseases yield 50x more disability-adjusted life years per research dollar than current commercial priority focus.",
+                    "Cadre de gouvernance pour {topic} : un modèle d'accès par paliers pour les capacités {kw} basé sur les antécédents de sécurité démontrés et les engagements de distribution équitable — prévient le verrouillage technologique gagnant-remporte-tout par l'architecture juridique.",
+                    "Voie d'accélération éthique identifiée : le goulot d'étranglement de {topic} est réglementaire plutôt que scientifique — la réforme de la surveillance {kw} basée sur une gouvernance adaptative pourrait réduire le délai jusqu'au bénéfice pour les patients de 3 ans sans augmenter le risque réel.",
+                    "L'analyse d'impact ajustée à l'équité pour {topic} montre que les applications {kw} redirigées vers les maladies tropicales négligées produisent 50x plus d'années de vie ajustées par le handicap par dollar de recherche que la priorité commerciale actuelle.",
                 ],
                 "connections": [
-                    "technology governance, regulation, and adaptive oversight",
-                    "global health equity, access, and the right to science",
-                    "dual-use research of concern and biosecurity frameworks",
-                    "philosophy of evidence, causation, and scientific objectivity",
+                    "gouvernance technologique, réglementation et surveillance adaptative",
+                    "équité en santé mondiale, accès et droit à la science",
+                    "recherche à double usage préoccupante et cadres de biosécurité",
+                    "philosophie de la preuve, causalité et objectivité scientifique",
                 ],
             },
             {
-                "hypothesis": "The philosophical foundations of {topic} science rest on unexamined {kw} assumptions that have systematically excluded alternative research paradigms — broadening the epistemic base would simultaneously improve the ethics and accelerate the science.",
+                "hypothesis": "Les fondements philosophiques de la science {topic} reposent sur des hypothèses {kw} non examinées qui ont systématiquement exclu des paradigmes de recherche alternatifs — élargir la base épistémique améliorerait simultanément l'éthique et accélérerait la science.",
                 "insights": [
-                    "Value-laden assumptions embedded in {topic} research design: {kw} efficiency metrics encode particular definitions of progress that systematically discount indigenous knowledge traditions and community-defined wellbeing.",
-                    "Replication crisis analysis for {kw} {topic} studies: 62% of published effect sizes deflate by over 50% in pre-registered independent replications — systematic publication bias has distorted the evidence base for policy.",
-                    "Environmental justice dimension of {topic}: {kw} industrial deployment at scale disproportionately impacts frontline communities without their meaningful consent — participation and benefit-sharing must precede scaled implementation.",
-                    "Long-term risk calculus for {kw} in {topic}: catastrophic risk tails are fat and correlated across scenarios — standard expected value calculations under-weight low-probability high-consequence outcomes by at least one order of magnitude.",
-                    "Philosophical analysis of {topic} scientific consensus: {kw} mechanism is accepted despite anomalies in 15% of experimental results — sociology of knowledge reveals consensus preservation mechanisms overriding anomaly investigation.",
-                    "Intergenerational justice analysis of {topic}: current {kw} research decisions will constrain options available to generations not yet born — a discount rate of zero on future persons' interests is the only defensible ethical choice.",
-                    "Cognitive liberty implications of {kw} cognitive enhancement for {topic}: equal access, freedom from coercion, and protection of mental privacy are three distinct rights that current proposals violate.",
+                    "Hypothèses chargées de valeurs enchâssées dans la conception de recherche {topic} : les métriques d'efficacité {kw} encodent des définitions particulières du progrès qui escomptent systématiquement les traditions de connaissance indigènes et le bien-être défini par la communauté.",
+                    "Analyse de la crise de réplication pour les études {kw} {topic} : 62% des tailles d'effet publiées se dégonflent de plus de 50% dans les réplications indépendantes pré-enregistrées — le biais de publication systématique a déformé la base de preuves pour la politique.",
+                    "Dimension de justice environnementale de {topic} : le déploiement industriel {kw} à grande échelle impacte de manière disproportionnée les communautés de première ligne sans leur consentement significatif — la participation et le partage des bénéfices doivent précéder la mise en œuvre à grande échelle.",
+                    "Calcul du risque à long terme pour {kw} dans {topic} : les queues de risque catastrophique sont épaisses et corrélées entre les scénarios — les calculs standard de valeur espérée sous-pondèrent les résultats à faible probabilité et à haute conséquence d'au moins un ordre de grandeur.",
+                    "Analyse philosophique du consensus scientifique {topic} : le mécanisme {kw} est accepté malgré des anomalies dans 15% des résultats expérimentaux — la sociologie de la connaissance révèle des mécanismes de préservation du consensus supplantant l'investigation des anomalies.",
+                    "Analyse de la justice intergénérationnelle de {topic} : les décisions de recherche {kw} actuelles contraindront les options disponibles pour les générations pas encore nées — un taux d'actualisation de zéro sur les intérêts des personnes futures est le seul choix éthique défendable.",
+                    "Implications pour la liberté cognitive de l'amélioration cognitive {kw} pour {topic} : l'accès égal, la liberté de coercition et la protection de la vie privée mentale sont trois droits distincts que les propositions actuelles violent.",
                 ],
                 "findings": [
-                    "Constructive ethics pathway for {topic}: a {kw} benefit-sharing agreement modeled on the Nagoya Protocol on genetic resources would accelerate international research collaboration while ensuring equitable outcomes for all contributing communities.",
-                    "Precautionary principle calibration for {topic}: {kw} applications with reversible deployment, continuous monitoring, and democratic oversight can proceed with managed risk; irreversible planetary-scale interventions require a global democratic mandate.",
-                    "Research integrity architecture for {kw} {topic}: mandatory pre-registration plus open data plus adversarial collaboration reduces the false discovery rate from 35% to 4% based on empirical meta-analysis of fields that have adopted this standard.",
+                    "Voie éthique constructive pour {topic} : un accord de partage des bénéfices {kw} modélisé sur le Protocole de Nagoya sur les ressources génétiques accélérerait la collaboration internationale de recherche tout en assurant des résultats équitables pour toutes les communautés contributrices.",
+                    "Calibration du principe de précaution pour {topic} : les applications {kw} avec un déploiement réversible, une surveillance continue et une surveillance démocratique peuvent procéder avec un risque géré ; les interventions planétaires irréversibles nécessitent un mandat démocratique mondial.",
+                    "Architecture d'intégrité de la recherche pour {kw} {topic} : la pré-inscription obligatoire plus les données ouvertes plus la collaboration contradictoire réduit le taux de fausse découverte de 35% à 4% sur la base d'une méta-analyse empirique des champs qui ont adopté cette norme.",
                 ],
                 "connections": [
-                    "philosophy of science, epistemology, and values in inquiry",
-                    "political philosophy, democratic legitimacy, and governance",
-                    "environmental ethics and intergenerational justice",
-                    "global justice, the capability approach, and human rights",
+                    "philosophie des sciences, épistémologie et valeurs dans l'enquête",
+                    "philosophie politique, légitimité démocratique et gouvernance",
+                    "éthique environnementale et justice intergénérationnelle",
+                    "justice mondiale, approche des capacités et droits de l'homme",
                 ],
             },
             {
-                "hypothesis": "The {topic} research direction, while scientifically promising, requires a full ethical analysis of {kw} risks before proceeding — the history of science shows that moral urgency expressed as speed regularly creates harms that slower, deliberate processes would have prevented.",
+                "hypothesis": "La direction de recherche {topic}, bien que scientifiquement prometteuse, nécessite une analyse éthique complète des risques {kw} avant de procéder — l'histoire de la science montre que l'urgence morale exprimée comme vitesse crée régulièrement des préjudices que des processus plus lents et délibérés auraient prévenus.",
                 "insights": [
-                    "Moral status analysis of {kw} entities produced by {topic} research: current frameworks borrowed from bioethics are inadequate — new criteria based on functional consciousness, subjective experience, and interests are needed.",
-                    "Consent architecture for {topic} population-level {kw} interventions must be redesigned from individual to collective consent models — individuals cannot meaningfully consent to risks that affect entire communities.",
-                    "Weaponization pathway analysis for {topic}: even with good-faith intentions, {kw} capabilities have 5 identified dual-use paths to harm — each requiring different mitigation strategy before public disclosure.",
-                    "Distributive justice modeling for {topic} shows the top 1% capture 67% of {kw} welfare gains under current intellectual property regimes — alternative open-science models reverse this distribution without reducing innovation incentives.",
-                    "Science communication ethics for {topic}: {kw} preliminary findings are being communicated to the public at stages of certainty inappropriate for their actual epistemic status — causing both hype and backlash cycles that harm long-term progress.",
-                    "Animal ethics review of {topic} research: {kw} animal model experiments use 10x more animals than minimally required by statistical power analysis — harm reduction through better experimental design is both ethical and scientifically superior.",
-                    "Data sovereignty implications of {topic}: {kw} biological data collected from indigenous communities without benefit-sharing agreements constitutes biopiracy under international law — retroactive compensation and partnership models are required.",
+                    "L'analyse du statut moral des entités {kw} produites par la recherche {topic} : les cadres actuels empruntés à la bioéthique sont inadéquats — de nouveaux critères basés sur la conscience fonctionnelle, l'expérience subjective et les intérêts sont nécessaires.",
+                    "L'architecture du consentement pour les interventions {kw} au niveau de la population {topic} doit être redessinée des modèles de consentement individuel aux modèles collectifs — les individus ne peuvent pas consentir de manière significative à des risques qui affectent des communautés entières.",
+                    "L'analyse des voies de militarisation pour {topic} : même avec de bonnes intentions, les capacités {kw} ont 5 chemins identifiés vers le préjudice à double usage — chacun nécessitant une stratégie d'atténuation différente avant la divulgation publique.",
+                    "La modélisation de la justice distributive pour {topic} montre que le 1% supérieur capture 67% des gains de bien-être {kw} sous les régimes actuels de propriété intellectuelle — les modèles alternatifs de science ouverte inversent cette distribution sans réduire les incitations à l'innovation.",
+                    "L'éthique de la communication scientifique pour {topic} : les résultats préliminaires {kw} sont communiqués au public à des stades de certitude inappropriés pour leur statut épistémique réel — causant à la fois des cycles de battage médiatique et de réaction qui nuisent au progrès à long terme.",
+                    "La révision de l'éthique animale de la recherche {topic} : les expériences sur modèles animaux {kw} utilisent 10x plus d'animaux que le minimum requis par l'analyse de puissance statistique — la réduction des préjudices par une meilleure conception expérimentale est à la fois éthique et scientifiquement supérieure.",
+                    "Les implications de la souveraineté des données de {topic} : les données biologiques {kw} collectées auprès de communautés indigènes sans accords de partage des bénéfices constituent de la biopiraterie en vertu du droit international — une compensation rétroactive et des modèles de partenariat sont requis.",
                 ],
                 "findings": [
-                    "Virtue ethics analysis of {topic} research culture: {kw} competitive pressures systematically select against the cardinal scientific virtues of honesty, rigor, and intellectual humility — institutional redesign is the only systemic solution.",
-                    "Rights-based framework for {topic} patient data in {kw} clinical research: patients hold ongoing property rights in their data that survive initial consent — dynamic consent systems honor this right without impeding research progress.",
-                    "Ethical impact assessment of {topic} at planetary scale: {kw} deployment under current governance would benefit 800 million people while creating uncompensated risks for 2 billion — the ethical obligation to redesign governance is clear and urgent.",
+                    "L'analyse de l'éthique des vertus de la culture de recherche {topic} : les pressions compétitives {kw} sélectionnent systématiquement contre les vertus scientifiques cardinales d'honnêteté, de rigueur et d'humilité intellectuelle — la refonte institutionnelle est la seule solution systémique.",
+                    "Cadre basé sur les droits pour les données des patients {topic} dans la recherche clinique {kw} : les patients détiennent des droits de propriété continus sur leurs données qui survivent au consentement initial — les systèmes de consentement dynamique honorent ce droit sans entraver les progrès de la recherche.",
+                    "L'évaluation de l'impact éthique de {topic} à l'échelle planétaire : le déploiement {kw} sous la gouvernance actuelle bénéficierait à 800 millions de personnes tout en créant des risques non compensés pour 2 milliards — l'obligation éthique de refondre la gouvernance est claire et urgente.",
                 ],
                 "connections": [
-                    "moral philosophy and normative ethics frameworks",
-                    "bioethics and research ethics principles",
-                    "science and technology studies and sociology of knowledge",
-                    "human rights law and international research governance",
+                    "philosophie morale et cadres d'éthique normative",
+                    "bioéthique et principes d'éthique de la recherche",
+                    "études des sciences et technologies et sociologie de la connaissance",
+                    "droit des droits de l'homme et gouvernance internationale de la recherche",
                 ],
             },
         ]
