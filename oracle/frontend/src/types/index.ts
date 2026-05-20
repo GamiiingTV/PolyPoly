@@ -62,3 +62,34 @@ export interface WsMessage {
   data: Record<string, unknown>
   timestamp: string
 }
+
+// JARVIS types
+export interface JarvisContribution {
+  agent_id: string
+  agent_name: string
+  agent_emoji: string
+  contribution: string
+  key_requirement: string
+  warning: string
+  agrees_with: string[]
+  contradicts: string[]
+  timestamp: string
+}
+
+export interface JarvisContradiction {
+  agent_a: string
+  agent_a_emoji: string
+  agent_b: string
+  agent_b_emoji: string
+  topic: string
+  timestamp: string
+}
+
+export type JarvisPhase = 'idle' | 'building' | 'contributing' | 'debate' | 'synthesis' | 'ready'
+
+export interface JarvisMessage {
+  role: 'user' | 'assistant'
+  content: string
+  dispatches: { agent_id: string; task: string }[]
+  timestamp: string
+}

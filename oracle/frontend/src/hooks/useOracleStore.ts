@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import type { Agent, ActivityEntry, KnowledgeEntry, Discovery, SystemMetrics, WsMessage } from '../types'
+import type { Agent, ActivityEntry, KnowledgeEntry, Discovery, SystemMetrics, WsMessage, JarvisContribution, JarvisContradiction, JarvisPhase, JarvisMessage } from '../types'
 import { useWebSocket } from './useWebSocket'
 
 export function relativeTime(iso: string): string {
@@ -25,6 +25,12 @@ export function useOracleStore() {
   })
   const [latestDiscovery, setLatestDiscovery] = useState<Discovery | null>(null)
   const [initialized, setInitialized] = useState(false)
+
+  // JARVIS state
+  const [jarvisPhase, setJarvisPhase] = useState<JarvisPhase>('idle')
+  const [jarvisContributions, setJarvisContributions] = useState<JarvisContribution[]>([])
+  const [jarvisContradictions, setJarvisContradictions] = useState<JarvisContradiction[]>([])
+  const [jarvisMessages, setJarvisMessages] = useState<JarvisMessage[]>([])
 
   const addActivity = useCallback((entry: ActivityEntry) => {
     setActivities(prev => [entry, ...prev].slice(0, 150))
@@ -135,12 +141,97 @@ export function useOracleStore() {
         setMetrics(prev => ({ ...prev, ...(data as Partial<SystemMetrics>) }))
         break
       }
+
+      // ── JARVIS events ──────────────────────────────────────────────
+      case 'jarvis_phase': {
+        const { phase, message } = data as { phase: JarvisPhase; message: string }
+        setJarvisPhase(phase)
+        addActivity({
+          id: Math.random().toString(36).slice(2),
+          agent_id: 'jarvis',
+          agent_name: 'J.A.R.V.I.S',
+          agent_emoji: '🤖',
+          action_type: 'jarvis_phase',
+          content: `🤖 ${message}`,
+          timestamp: msg.timestamp,
+        })
+        break
+      }
+      case 'jarvis_contribution': {
+        const c = data as unknown as JarvisContribution
+        setJarvisContributions(prev => [...prev, c])
+        addActivity({
+          id: Math.random().toString(36).slice(2),
+          agent_id: c.agent_id,
+          agent_name: c.agent_name,
+          agent_emoji: c.agent_emoji,
+          action_type: 'jarvis_contribution',
+          content: `[JARVIS] ${c.key_requirement}`,
+          timestamp: msg.timestamp,
+        })
+        break
+      }
+      case 'jarvis_contradiction': {
+        const clash = data as unknown as JarvisContradiction
+        setJarvisContradictions(prev => [...prev, clash])
+        addActivity({
+          id: Math.random().toString(36).slice(2),
+          agent_id: clash.agent_a,
+          agent_name: `${clash.agent_a_emoji}⚡${clash.agent_b_emoji}`,
+          agent_emoji: '⚡',
+          action_type: 'jarvis_contradiction',
+          content: `[CONFLIT] ${clash.agent_a.toUpperCase()} vs ${clash.agent_b.toUpperCase()} — ${clash.topic}`,
+          timestamp: msg.timestamp,
+        })
+        break
+      }
+      case 'jarvis_message': {
+        const jm = data as { content: string; dispatches: { agent_id: string; task: string }[]; timestamp: string }
+        setJarvisMessages(prev => [...prev, { role: 'assistant', content: jm.content, dispatches: jm.dispatches, timestamp: jm.timestamp }])
+        if (jm.dispatches?.length) {
+          jm.dispatches.forEach(d => {
+            addActivity({
+              id: Math.random().toString(36).slice(2),
+              agent_id: 'jarvis',
+              agent_name: 'J.A.R.V.I.S',
+              agent_emoji: '🤖',
+              action_type: 'jarvis_dispatch',
+              content: `⚡ JARVIS → ${d.agent_id.toUpperCase()} : ${d.task.slice(0, 100)}`,
+              timestamp: jm.timestamp,
+            })
+          })
+        }
+        break
+      }
+
       default:
         break
     }
   }, [addActivity])
 
   const { connected, retries } = useWebSocket(handleMessage)
+
+  const sendJarvisMessage = useCallback(async (message: string) => {
+    setJarvisMessages(prev => [...prev, { role: 'user', content: message, dispatches: [], timestamp: new Date().toISOString() }])
+    try {
+      const res = await fetch('http://localhost:8000/api/jarvis/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setJarvisMessages(prev => [...prev, { role: 'assistant', content: data.content, dispatches: data.dispatches ?? [], timestamp: data.timestamp }])
+      }
+    } catch (e) {
+      console.error('JARVIS chat error', e)
+    }
+  }, [])
+
+  const buildJarvis = useCallback(async () => {
+    setJarvisPhase('building')
+    await fetch('http://localhost:8000/api/jarvis/build', { method: 'POST' })
+  }, [])
 
   return {
     agents,
@@ -152,5 +243,11 @@ export function useOracleStore() {
     retries,
     latestDiscovery,
     initialized,
+    jarvisPhase,
+    jarvisContributions,
+    jarvisContradictions,
+    jarvisMessages,
+    sendJarvisMessage,
+    buildJarvis,
   }
 }

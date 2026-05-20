@@ -1,9 +1,11 @@
-import type { SystemMetrics } from '../types'
+import type { SystemMetrics, JarvisPhase } from '../types'
 
 interface Props {
   metrics: SystemMetrics
   connected: boolean
   retries: number
+  jarvisPhase: JarvisPhase
+  onBuildJarvis: () => void
 }
 
 function formatUptime(seconds: number): string {
@@ -18,11 +20,11 @@ function formatUptime(seconds: number): string {
 }
 
 function handleStart() {
-  fetch('/api/oracle/start', { method: 'POST' }).catch(console.error)
+  fetch('http://localhost:8000/api/oracle/start', { method: 'POST' }).catch(console.error)
 }
 
 function handleStop() {
-  fetch('/api/oracle/stop', { method: 'POST' }).catch(console.error)
+  fetch('http://localhost:8000/api/oracle/stop', { method: 'POST' }).catch(console.error)
 }
 
 interface MetricChipProps {
@@ -41,7 +43,34 @@ function MetricChip({ label, value, icon }: MetricChipProps) {
   )
 }
 
-export default function OracleHeader({ metrics, connected, retries }: Props) {
+function JarvisStatusChip({ phase, onBuild }: { phase: JarvisPhase; onBuild: () => void }) {
+  if (phase === 'ready') {
+    return (
+      <div className="flex items-center gap-1.5 bg-blue-900/40 border border-blue-500/30 rounded px-2 py-1 text-[10px]">
+        <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+        <span className="text-blue-400 font-bold tracking-wider">J.A.R.V.I.S</span>
+      </div>
+    )
+  }
+  if (phase === 'building' || phase === 'contributing' || phase === 'debate' || phase === 'synthesis') {
+    return (
+      <div className="flex items-center gap-1.5 bg-blue-900/20 border border-blue-500/20 rounded px-2 py-1 text-[10px]">
+        <span className="animate-spin text-xs">⚙</span>
+        <span className="text-blue-500 font-bold tracking-wider animate-pulse">CONCEPTION...</span>
+      </div>
+    )
+  }
+  return (
+    <button
+      onClick={onBuild}
+      className="flex items-center gap-1.5 bg-blue-900/20 border border-blue-500/30 hover:bg-blue-800/40 rounded px-2 py-1 text-[10px] text-blue-400 font-bold tracking-wider transition-colors"
+    >
+      🤖 CONSTRUIRE J.A.R.V.I.S
+    </button>
+  )
+}
+
+export default function OracleHeader({ metrics, connected, retries, jarvisPhase, onBuildJarvis }: Props) {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-[72px] bg-[#0a1628]/90 backdrop-blur border-b border-indigo-500/20 px-4 flex items-center justify-between gap-4">
       {/* Left: Branding */}
@@ -78,7 +107,8 @@ export default function OracleHeader({ metrics, connected, retries }: Props) {
         <MetricChip icon="🤝" label="Msgs" value={metrics.agent_interactions} />
         <MetricChip icon="⏱" label="Durée" value={formatUptime(metrics.uptime_seconds)} />
 
-        {/* Start button */}
+        <JarvisStatusChip phase={jarvisPhase} onBuild={onBuildJarvis} />
+
         <button
           onClick={handleStart}
           className="flex items-center gap-1 px-3 py-1.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold tracking-wider transition-colors"
@@ -87,7 +117,6 @@ export default function OracleHeader({ metrics, connected, retries }: Props) {
           <span>DÉMARRER</span>
         </button>
 
-        {/* Stop button */}
         <button
           onClick={handleStop}
           className="flex items-center gap-1 px-3 py-1.5 rounded bg-slate-700 hover:bg-slate-600 text-white text-[11px] font-bold tracking-wider transition-colors"

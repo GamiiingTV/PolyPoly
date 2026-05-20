@@ -16,6 +16,8 @@ from fastapi.responses import FileResponse, JSONResponse
 from loguru import logger
 
 from .orchestrator import OracleOrchestrator
+from .jarvis.core import JarvisCore
+from .jarvis.design_session import run_design_session
 
 
 # ------------------------------------------------------------------
@@ -55,6 +57,8 @@ class WebSocketManager:
 
 ws_manager = WebSocketManager()
 orchestrator: OracleOrchestrator | None = None
+jarvis: JarvisCore | None = None
+_jarvis_phase: str = "idle"  # idle | building | ready
 
 
 # ------------------------------------------------------------------
@@ -221,6 +225,74 @@ async def oracle_challenge(body: dict):
             await agent.assign_task(challenge)
 
     return JSONResponse({"status": "assigned", "agents": chosen})
+
+
+# ------------------------------------------------------------------
+# JARVIS endpoints
+# ------------------------------------------------------------------
+
+@app.get("/api/jarvis/status")
+async def jarvis_status():
+    return JSONResponse({
+        "phase": _jarvis_phase,
+        "online": _jarvis_phase == "ready",
+    })
+
+
+@app.post("/api/jarvis/build")
+async def jarvis_build():
+    global jarvis, _jarvis_phase
+    if _jarvis_phase != "idle":
+        return JSONResponse({"status": _jarvis_phase})
+
+    if not orchestrator:
+        raise HTTPException(status_code=503, detail="Orchestrator not initialized")
+
+    _jarvis_phase = "building"
+
+    async def _run():
+        global jarvis, _jarvis_phase
+        try:
+            await run_design_session(orchestrator._broadcast_ws)
+            jarvis = JarvisCore(orchestrator.knowledge_base)
+            jarvis.set_orchestrator(orchestrator)
+            orchestrator.set_jarvis(jarvis)
+            _jarvis_phase = "ready"
+        except Exception as exc:
+            logger.error(f"JARVIS build failed: {exc}")
+            _jarvis_phase = "idle"
+
+    asyncio.create_task(_run())
+    return JSONResponse({"status": "building"})
+
+
+@app.post("/api/jarvis/chat")
+async def jarvis_chat(body: dict):
+    global jarvis
+    if not jarvis:
+        raise HTTPException(status_code=503, detail="J.A.R.V.I.S n'est pas encore en ligne")
+
+    message = body.get("message", "").strip()
+    if not message:
+        raise HTTPException(status_code=400, detail="'message' requis")
+
+    result = await jarvis.chat(message)
+
+    # Broadcast JARVIS message so activity feed shows it
+    await orchestrator._broadcast_ws("jarvis_message", {
+        "content": result["content"],
+        "dispatches": result["dispatches"],
+        "timestamp": result["timestamp"],
+    })
+
+    return JSONResponse(result)
+
+
+@app.get("/api/jarvis/conversation")
+async def jarvis_conversation():
+    if not jarvis:
+        return JSONResponse([])
+    return JSONResponse(jarvis.get_conversation())
 
 
 # ------------------------------------------------------------------

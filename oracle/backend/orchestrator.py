@@ -68,6 +68,10 @@ class OracleOrchestrator:
         self._challenge_counter: int = 0
         self._synthesis_counter: int = 0
 
+        # JARVIS integration
+        self.jarvis = None  # set to JarvisCore when design session completes
+        self._jarvis_mode: bool = False
+
     # ------------------------------------------------------------------
     # Lifecycle
     # ------------------------------------------------------------------
@@ -149,19 +153,31 @@ class OracleOrchestrator:
     # Background loops
     # ------------------------------------------------------------------
 
+    def set_jarvis(self, jarvis) -> None:
+        self.jarvis = jarvis
+        self._jarvis_mode = True
+        logger.info("J.A.R.V.I.S prend le contrôle de l'agenda de recherche")
+
     async def _challenge_loop(self):
         await asyncio.sleep(15)  # Initial warm-up
         used_indices: list[int] = []
         while self.running:
-            # Pick unused challenge
-            available = [i for i in range(len(self.research_challenges)) if i not in used_indices]
-            if not available:
-                used_indices = []
-                available = list(range(len(self.research_challenges)))
-
-            idx = random.choice(available)
-            used_indices.append(idx)
-            challenge = self.research_challenges[idx]
+            # JARVIS mode: let JARVIS decide the challenge
+            if self._jarvis_mode and self.jarvis:
+                try:
+                    challenge = await self.jarvis.decide_next_challenge()
+                except Exception as exc:
+                    logger.warning(f"JARVIS challenge decision failed: {exc}")
+                    challenge = random.choice(self.research_challenges)
+            else:
+                # Pick unused challenge from the built-in list
+                available = [i for i in range(len(self.research_challenges)) if i not in used_indices]
+                if not available:
+                    used_indices = []
+                    available = list(range(len(self.research_challenges)))
+                idx = random.choice(available)
+                used_indices.append(idx)
+                challenge = self.research_challenges[idx]
 
             # Determine which agents get this challenge based on keywords
             agents_to_assign = self._select_agents_for_challenge(challenge)
