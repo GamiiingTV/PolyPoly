@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Optional
 
 import aiosqlite
@@ -9,7 +10,8 @@ from loguru import logger
 
 from ..models.schemas import Discovery, KnowledgeEntry
 
-DB_PATH = "/home/user/PolyPoly/oracle/oracle.db"
+# Resolves to oracle/oracle.db regardless of OS or working directory
+DB_PATH = str(Path(__file__).parent.parent.parent / "oracle.db")
 
 
 class KnowledgeBase:
