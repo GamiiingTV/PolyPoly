@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dye DAM — Dashboard Entretien v3</title>
+  <title>Dye DAM — Dashboard Entretien v4</title>
   <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
@@ -15,13 +15,14 @@
 <header class="site-header" role="banner">
   <div class="header-inner">
     <div class="header-logo">
-      <svg class="logo-icon" viewBox="0 0 44 44" aria-hidden="true">
-        <rect x="2" y="17" width="32" height="11" rx="3" fill="#e63946"/>
-        <rect x="30" y="19" width="12" height="7" rx="2" fill="#c1121f"/>
-        <rect x="8" y="9" width="5" height="8" rx="1" fill="#457b9d"/>
-        <rect x="11" y="28" width="7" height="9" rx="1" fill="#1d3557"/>
-        <circle cx="5" cy="22" r="2.5" fill="#ffd166"/>
-        <circle cx="38" cy="22" r="4" fill="#0d1117" stroke="#457b9d" stroke-width="1.5"/>
+      <svg class="logo-icon" viewBox="0 0 28 28" aria-hidden="true" fill="none">
+        <rect x="2" y="10" width="18" height="8" rx="2" fill="#4a9eff" opacity=".9"/>
+        <rect x="18" y="11.5" width="8" height="5" rx="1.5" fill="#2f6ec4"/>
+        <rect x="6" y="5" width="3.5" height="5" rx="1" fill="#2dd4bf" opacity=".8"/>
+        <rect x="7" y="18" width="5" height="6" rx="1" fill="#1e2538"/>
+        <circle cx="3.5" cy="14" r="1.8" fill="#f59e0b" opacity=".9"/>
+        <circle cx="24" cy="14" r="3" fill="#07090f" stroke="#4a9eff" stroke-width="1.2"/>
+        <circle cx="24" cy="14" r="1.2" fill="#4a9eff"/>
       </svg>
       <div>
         <span class="logo-title">Dye DAM</span>
@@ -57,7 +58,6 @@
       </button>
     </nav>
 
-    <!-- Ball counter widget -->
     <div class="header-right">
       <div class="profile-badge" id="profile-badge" hidden>
         <span class="profile-badge-dot"></span>
@@ -66,7 +66,7 @@
       <div class="ball-widget" id="ball-widget" aria-label="Compteur de billes">
         <div class="bw-track">
           <span class="bw-label">Billes</span>
-          <button class="bw-edit" id="bw-edit-btn" aria-label="Modifier le compteur">✏️</button>
+          <button class="bw-edit" id="bw-edit-btn" aria-label="Modifier le compteur">✏</button>
         </div>
         <div class="bw-count" id="bw-count" aria-live="polite">0</div>
         <div class="bw-bar" role="progressbar" aria-label="Progression vers prochain entretien" aria-valuemin="0" aria-valuemax="5000" aria-valuenow="0" id="bw-progress">
@@ -83,9 +83,9 @@
   <div class="modal">
     <h2 id="ball-modal-title">Compteur de billes</h2>
     <div class="ball-btns">
-      <button class="ball-add-btn" data-add="100">+ 100</button>
-      <button class="ball-add-btn" data-add="500">+ 500</button>
-      <button class="ball-add-btn ball-add-btn--accent" data-add="1000">+ 1 000</button>
+      <button class="ball-add-btn" data-add="100">+100</button>
+      <button class="ball-add-btn" data-add="500">+500</button>
+      <button class="ball-add-btn ball-add-btn--accent" data-add="1000">+1 000</button>
     </div>
     <div class="modal-input-row">
       <label for="ball-custom">Valeur exacte</label>
@@ -215,26 +215,26 @@
     <div class="terrain-overlay-timer">
       <div class="terrain-timer-display" id="overlay-timer-display">00:00:00</div>
       <div class="terrain-timer-controls">
-        <button class="terrain-ctrl-btn" id="overlay-timer-start">▶ Start</button>
-        <button class="terrain-ctrl-btn" id="overlay-timer-pause">⏸ Pause</button>
-        <button class="terrain-ctrl-btn" id="overlay-timer-reset">↺ Reset</button>
+        <button class="terrain-ctrl-btn" id="overlay-timer-start">&#9654; Start</button>
+        <button class="terrain-ctrl-btn" id="overlay-timer-pause">&#9646;&#9646; Pause</button>
+        <button class="terrain-ctrl-btn" id="overlay-timer-reset">&#8635; Reset</button>
       </div>
     </div>
     <div class="terrain-overlay-actions">
-      <button class="terrain-overlay-big-btn" id="overlay-checklist-btn">📋 Checklist</button>
-      <button class="terrain-overlay-big-btn" id="overlay-diag-btn">🔧 Diagnostic</button>
+      <button class="terrain-overlay-big-btn" id="overlay-checklist-btn">Checklist</button>
+      <button class="terrain-overlay-big-btn" id="overlay-diag-btn">Diagnostic</button>
     </div>
   </div>
 </div>
 
 <!-- ===== ALERT BANNER ===== -->
 <div class="alert-banner" id="alert-banner" hidden role="alert" aria-live="assertive">
-  <span class="alert-icon" aria-hidden="true">⚠️</span>
+  <span class="alert-icon" aria-hidden="true">⚠</span>
   <span id="alert-text"></span>
-  <button class="alert-dismiss" aria-label="Fermer l'alerte">✕</button>
+  <button class="alert-dismiss" id="alert-dismiss" aria-label="Fermer l'alerte">✕</button>
 </div>
 
-<!-- ===== TOOLBAR (guide only) ===== -->
+<!-- ===== TOOLBAR ===== -->
 <div class="toolbar" id="toolbar" role="toolbar" aria-label="Navigation des étapes">
   <div class="toolbar-inner">
     <div class="progress-wrap">
@@ -264,16 +264,14 @@
         <svg viewBox="0 0 24 24" fill="currentColor" id="play-icon"><polygon points="5 3 19 12 5 21 5 3"/></svg>
       </button>
     </div>
-    <p class="kb-hint" aria-hidden="true">← → naviguer · Espace lecture auto · 1–8 saut direct</p>
+    <p class="kb-hint" aria-hidden="true">← → naviguer · Espace lecture · 1–8 saut direct</p>
   </div>
 </div>
 
 <!-- ===== MAIN ===== -->
 <main id="main-content" class="main">
 
-  <!-- ===========================
-       SECTION : GUIDE
-       =========================== -->
+  <!-- SECTION: GUIDE -->
   <section id="section-demontage" class="guide-section active" aria-labelledby="guide-title">
     <div class="section-hero">
       <div class="section-hero-text">
@@ -286,41 +284,39 @@
         </div>
       </div>
       <div class="section-hero-vis" aria-label="Vue Dye DAM">
-        <svg viewBox="0 0 500 260" role="img" aria-label="Schéma latéral Dye DAM">
+        <svg viewBox="0 0 500 200" role="img" aria-label="Schéma latéral Dye DAM">
           <defs>
-            <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2d3561"/><stop offset="100%" stop-color="#1a1f3a"/></linearGradient>
-            <linearGradient id="g2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#1a1f3a"/><stop offset="100%" stop-color="#3d4585"/></linearGradient>
-            <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="hg1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#1e2538"/><stop offset="100%" stop-color="#252d40"/></linearGradient>
+            <filter id="hglow"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
           </defs>
-          <rect x="18" y="102" width="190" height="16" rx="4" fill="url(#g2)" stroke="#3d4585" stroke-width="1"/>
-          <rect x="18" y="104" width="190" height="4" rx="2" fill="#4a5299" opacity=".5"/>
-          <circle cx="22" cy="110" r="5.5" fill="#111" stroke="#333"/>
-          <rect x="205" y="90" width="175" height="85" rx="8" fill="url(#g1)" stroke="#3d4585" stroke-width="1.5"/>
-          <rect x="205" y="93" width="175" height="7" rx="3" fill="#3d4585" opacity=".6"/>
-          <path d="M265 175 L265 238 Q265 252 278 252 L308 252 Q322 252 322 238 L322 175 Z" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.5"/>
-          <rect x="272" y="187" width="44" height="4" rx="2" fill="#2d3561" opacity=".8"/>
-          <rect x="272" y="197" width="44" height="4" rx="2" fill="#2d3561" opacity=".8"/>
-          <rect x="272" y="207" width="44" height="4" rx="2" fill="#2d3561" opacity=".8"/>
-          <rect x="272" y="217" width="44" height="4" rx="2" fill="#2d3561" opacity=".8"/>
-          <path d="M282 175 L276 208 L288 208 L294 175 Z" fill="#e63946" stroke="#c1121f"/>
-          <path d="M263 173 Q263 218 268 224 Q294 228 322 224 Q327 218 327 173" fill="none" stroke="#3d4585" stroke-width="2"/>
-          <rect x="316" y="60" width="38" height="34" rx="5" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.5"/>
-          <rect x="321" y="65" width="28" height="24" rx="3" fill="#111" stroke="#222"/>
-          <circle cx="420" cy="133" r="21" fill="#1a1f3a" stroke="#457b9d" stroke-width="2"/>
-          <circle cx="420" cy="133" r="13" fill="#0d1117" stroke="#2d6a8f" stroke-width="1.5"/>
-          <circle cx="420" cy="133" r="6" fill="#457b9d" filter="url(#glow)"/>
-          <rect x="208" y="85" width="168" height="8" rx="2" fill="#252b50" stroke="#3d4585"/>
-          <rect x="213" y="86" width="10" height="6" rx="1" fill="#1a1f3a"/><rect x="228" y="86" width="10" height="6" rx="1" fill="#1a1f3a"/>
-          <rect x="243" y="86" width="10" height="6" rx="1" fill="#1a1f3a"/><rect x="258" y="86" width="10" height="6" rx="1" fill="#1a1f3a"/>
-          <rect x="273" y="86" width="10" height="6" rx="1" fill="#1a1f3a"/><rect x="288" y="86" width="10" height="6" rx="1" fill="#1a1f3a"/>
-          <rect x="303" y="86" width="10" height="6" rx="1" fill="#1a1f3a"/><rect x="318" y="86" width="10" height="6" rx="1" fill="#1a1f3a"/>
-          <rect x="333" y="86" width="10" height="6" rx="1" fill="#1a1f3a"/><rect x="348" y="86" width="10" height="6" rx="1" fill="#1a1f3a"/>
-          <path d="M378 95 L445 100 L450 168 L378 176 Z" fill="#141828" stroke="#2d3561" stroke-width="1.5"/>
-          <text x="228" y="142" font-family="Arial Black,sans-serif" font-size="20" font-weight="900" fill="#e63946" opacity=".9" letter-spacing="2">DYE</text>
-          <text x="228" y="160" font-family="Arial,sans-serif" font-size="9" fill="#457b9d" letter-spacing="3">D·A·M</text>
-          <circle cx="346" cy="104" r="4" fill="#06d6a0" filter="url(#glow)" class="pulse-dot"/>
-          <circle cx="218" cy="115" r="2.5" fill="#2d3561" stroke="#4a5299"/><circle cx="375" cy="115" r="2.5" fill="#2d3561" stroke="#4a5299"/>
-          <circle cx="375" cy="155" r="2.5" fill="#2d3561" stroke="#4a5299"/><circle cx="218" cy="155" r="2.5" fill="#2d3561" stroke="#4a5299"/>
+          <!-- Dot grid -->
+          <pattern id="hdots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+            <circle cx="1" cy="1" r="0.8" fill="#4a9eff" opacity="0.08"/>
+          </pattern>
+          <rect width="500" height="200" fill="url(#hdots)"/>
+          <!-- Barrel -->
+          <rect x="10" y="80" width="160" height="12" rx="3" fill="url(#hg1)" stroke="#252d40" stroke-width="1"/>
+          <rect x="10" y="82" width="160" height="3" rx="1" fill="#2f3a52" opacity=".5"/>
+          <!-- Body -->
+          <rect x="168" y="58" width="148" height="74" rx="6" fill="url(#hg1)" stroke="#252d40" stroke-width="1.2"/>
+          <rect x="168" y="58" width="148" height="8" rx="3" fill="#2f3a52" opacity=".5"/>
+          <!-- Feed neck -->
+          <rect x="222" y="34" width="42" height="24" rx="2" fill="#1e2538" stroke="#2f3a52" stroke-width="1"/>
+          <!-- Grip -->
+          <path d="M226 132 L226 172 Q226 180 233 180 L258 180 Q265 180 265 172 L265 132 Z" fill="#1e2538" stroke="#252d40" stroke-width="1"/>
+          <!-- Trigger guard -->
+          <path d="M236 132 Q236 155 243 160 Q253 160 260 155 Q265 152 265 132" fill="none" stroke="#252d40" stroke-width="1.5"/>
+          <!-- Regulator circle -->
+          <circle cx="340" cy="158" r="22" fill="#1e2538" stroke="#f59e0b" stroke-width="1.5"/>
+          <circle cx="340" cy="158" r="14" fill="#111624" stroke="#f59e0b" stroke-width="1"/>
+          <circle cx="340" cy="158" r="6" fill="#252d40"/>
+          <!-- Solenoid -->
+          <rect x="180" y="58" width="70" height="6" rx="1" fill="#111624" stroke="#2f3a52" stroke-width=".8"/>
+          <!-- DYE text -->
+          <text x="210" y="105" font-family="Arial Black,sans-serif" font-size="16" font-weight="900" fill="#e63946" opacity=".9" letter-spacing="1">DYE</text>
+          <text x="210" y="118" font-family="Arial,sans-serif" font-size="7" fill="#4a9eff" letter-spacing="4">D·A·M</text>
+          <!-- Status dot -->
+          <circle cx="294" cy="68" r="3.5" fill="#2dd4bf" filter="url(#hglow)"/>
         </svg>
       </div>
     </div>
@@ -338,164 +334,80 @@
           <div class="step-check" aria-hidden="true"></div>
         </div>
         <div class="step-visual">
-                    <svg viewBox="0 0 520 235" role="img" aria-label="Dye DAM — Étape 1 : Mise en sécurité — localisation du chargeur, bouteille de gaz et gâchette de purge" style="width:100%;height:auto;display:block;">
+          <svg viewBox="0 0 600 260" role="img" aria-label="Étape 1 — Mise en sécurité" style="width:100%;height:100%;display:block;">
             <defs>
-
-              <marker id="s1_b" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#457b9d"/></marker>
-              <marker id="s1_y" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#ffd166"/></marker>
-              <marker id="s1_g" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#06d6a0"/></marker>
+              <pattern id="s1dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="0.9" fill="#4a9eff" opacity="0.06"/>
+              </pattern>
             </defs>
-            <rect width="520" height="235" fill="#0b0d18"/>
-  <!-- BARREL -->
-  <rect x="6" y="112" width="7" height="15" rx="2" fill="#1e2345" stroke="#2d3461" stroke-width="1.2"/>
-  <rect x="11" y="115" width="156" height="9" rx="2.5" fill="#1e2345" stroke="#2d3461" stroke-width="1.2"/>
-  <rect x="15" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="21" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="27" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="33" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="39" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="163" y="110" width="11" height="19" rx="1.5" fill="#252b50" stroke="#2d3461" stroke-width="1"/>
-  <!-- BODY -->
-  <path d="M172 98 L306 98 L306 150 L172 150 Z" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.5"/>
-  <path d="M168 98 L174 150 L172 150 L165 98 Z" fill="#252b50" stroke="#3d4585" stroke-width="0.8"/>
-  <rect x="304" y="98" width="5" height="52" rx="1" fill="#252b50" stroke="#457b9d" stroke-width="0.8"/>
-  <rect x="174" y="92" width="132" height="6" rx="1" fill="#2d3561" stroke="#457b9d" stroke-width="0.8"/>
-  <rect x="177" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="185" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="193" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="201" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="209" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="217" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="225" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="233" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="241" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="249" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="257" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="265" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="273" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="281" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="289" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="297" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="193" y="118" width="24" height="12" rx="1" fill="#0d1020" stroke="#252b50" stroke-width="0.8"/>
-  <rect x="282" y="93" width="8" height="5" rx="1" fill="#141828" stroke="#3d4585" stroke-width="0.7"/>
-  <!-- SOLENOID -->
-  <rect x="188" y="98" width="80" height="8" rx="1.5" fill="#111825" stroke="#2d3461" stroke-width="0.8"/>
-  <rect x="264" y="95" width="10" height="10" rx="1" fill="#0d2018" stroke="#2d3461" stroke-width="0.8"/>
-  <!-- FEED NECK -->
-  <rect x="224" y="64" width="48" height="34" rx="3" fill="#1d3a5c" stroke="#457b9d" stroke-width="2.0"/>
-  <rect x="222" y="64" width="52" height="6" rx="2" fill="#252b50" stroke="#457b9d" stroke-width="1"/>
-  <rect x="222" y="90" width="52" height="4" rx="2" fill="#1a2040" stroke="#457b9d" stroke-width="0.8"/>
-  <ellipse cx="248" cy="64" rx="21" ry="5.5" fill="#0d1020" stroke="#457b9d" stroke-width="1"/>
-  <!-- HOPPER -->
-  <ellipse cx="248" cy="50" rx="32" ry="18" fill="#0d2a45" stroke="#457b9d" stroke-width="2.0"/>
-  <ellipse cx="248" cy="40" rx="22" ry="12" fill="#0a1828" stroke="#457b9d" stroke-width="0.8"/>
-  <!-- LOWER RECEIVER -->
-  <path d="M174 150 L174 182 L278 182 L278 150 Z" fill="#141828" stroke="#3d4585" stroke-width="1.2"/>
-  <path d="M200 182 Q208 200 238 200 Q266 200 266 182" fill="none" stroke="#252b50" stroke-width="2.2"/>
-  <polygon points="232,155 237,155 237,179 232,179" fill="#c8c8c8" opacity="0.7"/>
-  <rect x="208" y="158" width="5" height="8" rx="1" fill="#e63946" opacity="0.7"/>
-  <!-- MAGAZINE -->
-  <rect x="185" y="182" width="52" height="42" rx="3" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.0"/>
-  <line x1="189" y1="185" x2="189" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="193" y1="185" x2="193" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="197" y1="185" x2="197" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="201" y1="185" x2="201" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="205" y1="185" x2="205" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="209" y1="185" x2="209" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="213" y1="185" x2="213" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="217" y1="185" x2="217" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="221" y1="185" x2="221" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="225" y1="185" x2="225" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <rect x="183" y="222" width="56" height="5" rx="2" fill="#252b50" stroke="#3d4585" stroke-width="0.8"/>
-  <!-- GRIP -->
-  <path d="M278 150 L278 212 C278 216 282 220 287 220 L308 220 C313 220 316 216 316 212 L316 150 Z" fill="#141828" stroke="#3d4585" stroke-width="1.2"/>
-  <line x1="280" y1="162" x2="315" y2="162" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="168" x2="315" y2="168" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="174" x2="315" y2="174" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="180" x2="315" y2="180" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="186" x2="315" y2="186" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="192" x2="315" y2="192" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="198" x2="315" y2="198" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="204" x2="315" y2="204" stroke="#1e2345" stroke-width="0.8"/>
-  <rect x="306" y="152" width="10" height="24" rx="2" fill="#0d1020" stroke="#457b9d" stroke-width="0.8"/>
-  <circle cx="311" cy="157" r="2.2" fill="#06d6a0" opacity="0.85"/>
-  <circle cx="311" cy="163" r="2" fill="#ffd166" opacity="0.65"/>
-  <rect x="308" y="168" width="6" height="3" rx="1" fill="#252b50"/>
-  <rect x="308" y="173" width="6" height="3" rx="1" fill="#252b50"/>
-  <!-- ASA -->
-  <ellipse cx="297" cy="220" rx="16" ry="6" fill="#3a2800" stroke="#ffd166" stroke-width="2.0"/>
-  <!-- REGULATOR -->
-  <rect x="316" y="160" width="5" height="50" rx="1.5" fill="#1a1f3a" stroke="#3d4585" stroke-width="0.8"/>
-  <circle cx="345" cy="193" r="26" fill="#1a1200" stroke="#ffd166" stroke-width="2.5"/>
-  <circle cx="345" cy="193" r="18" fill="#111827" stroke="#ffd166" stroke-width="1.2"/>
-  <circle cx="345" cy="193" r="10" fill="#1a1f3a" stroke="#ffd166" stroke-width="1"/>
-  <circle cx="345" cy="193" r="4.5" fill="#252b50"/>
-  <line x1="367.0" y1="193.0" x2="362.0" y2="193.0" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="356.0" y1="212.1" x2="353.5" y2="207.7" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="334.0" y1="212.1" x2="336.5" y2="207.7" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="323.0" y1="193.0" x2="328.0" y2="193.0" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="334.0" y1="173.9" x2="336.5" y2="178.3" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="356.0" y1="173.9" x2="353.5" y2="178.3" stroke="#ffd166" stroke-width="1.5"/>
-  <!-- STEP 1 ANNOTATIONS -->
-  <!-- ① Chargeur arrow (upward from hopper) -->
-  <line x1="248" y1="30" x2="248" y2="8" stroke="#457b9d" stroke-width="2" stroke-dasharray="4,2" marker-end="url(#s1_b)"/>
-  <rect x="180" y="2" width="136" height="16" rx="3" fill="#457b9d" fill-opacity="0.2" stroke="#457b9d" stroke-width="1"/>
-  <text x="248" y="14" font-family="sans-serif" font-size="9" fill="#90caf9" text-anchor="middle" font-weight="bold">① Retirez le chargeur</text>
-  <!-- Hopper label -->
-  <text x="294" y="48" font-family="sans-serif" font-size="8" fill="#457b9d">Chargeur</text>
-  <line x1="280" y1="46" x2="270" y2="46" stroke="#457b9d" stroke-width="1.2" marker-end="url(#s1_b)"/>
-
-  <!-- ② Bouteille arrow -->
-  <line x1="345" y1="220" x2="415" y2="230" stroke="#ffd166" stroke-width="2" marker-end="url(#s1_y)"/>
-  <rect x="368" y="178" width="148" height="30" rx="3" fill="#ffd166" fill-opacity="0.1" stroke="#ffd166" stroke-width="1"/>
-  <text x="442" y="190" font-family="sans-serif" font-size="9" fill="#ffd166" text-anchor="middle" font-weight="bold">② Dévissez la</text>
-  <text x="442" y="202" font-family="sans-serif" font-size="9" fill="#ffd166" text-anchor="middle" font-weight="bold">bouteille de gaz</text>
-  <!-- Reg label -->
-  <text x="380" y="165" font-family="sans-serif" font-size="8" fill="#ffd166">Régulateur</text>
-  <text x="380" y="174" font-family="sans-serif" font-size="7" fill="#9d7b00">(bouteille se visse ici)</text>
-
-  <!-- ③ Purge at trigger -->
-  <rect x="70" y="205" width="148" height="26" rx="3" fill="#06d6a0" fill-opacity="0.1" stroke="#06d6a0" stroke-width="1"/>
-  <text x="144" y="217" font-family="sans-serif" font-size="9" fill="#06d6a0" text-anchor="middle" font-weight="bold">③ Appuyez sur la gâchette</text>
-  <text x="144" y="228" font-family="sans-serif" font-size="9" fill="#06d6a0" text-anchor="middle">5× pour purger le gaz</text>
-  <line x1="218" y1="217" x2="234" y2="175" stroke="#06d6a0" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#s1_g)"/>
-  <!-- Trigger label -->
-  <text x="155" y="165" font-family="sans-serif" font-size="8" fill="#06d6a0">← Gâchette</text>
-
-  <!-- SAFETY WARNING -->
-  <rect x="8" y="88" width="130" height="18" rx="3" fill="#e63946" fill-opacity="0.12" stroke="#e63946" stroke-width="1"/>
-  <text x="73" y="97" font-family="sans-serif" font-size="8" fill="#e63946" text-anchor="middle" font-weight="bold">⚠ Ne jamais</text>
-  <text x="73" y="108" font-family="sans-serif" font-size="8" fill="#e63946" text-anchor="middle">ouvrir sous pression</text>
+            <rect width="600" height="260" fill="#07090f"/>
+            <rect width="600" height="260" fill="url(#s1dots)"/>
+            <!-- Watermark -->
+            <text x="300" y="190" font-family="Arial Black,sans-serif" font-size="160" font-weight="900" fill="#4a9eff" opacity="0.03" text-anchor="middle">01</text>
+            <!-- Panel dividers -->
+            <line x1="200" y1="30" x2="200" y2="230" stroke="#252d40" stroke-width="1"/>
+            <line x1="400" y1="30" x2="400" y2="230" stroke="#252d40" stroke-width="1"/>
+            <!-- Panel 1: Remove loader -->
+            <text x="100" y="55" font-family="system-ui,sans-serif" font-size="10" fill="#f59e0b" text-anchor="middle" font-weight="700" letter-spacing="0.08em">① RETIRER</text>
+            <!-- Loader dome -->
+            <ellipse cx="100" cy="130" rx="52" ry="36" fill="#111624" stroke="#4a9eff" stroke-width="2"/>
+            <ellipse cx="100" cy="118" rx="38" ry="24" fill="#0c0f1a" stroke="#2f3a52" stroke-width="1"/>
+            <!-- Feed neck -->
+            <rect x="82" y="150" width="36" height="20" rx="2" fill="#1e2538" stroke="#2f3a52" stroke-width="1"/>
+            <!-- Up arrow -->
+            <line x1="100" y1="90" x2="100" y2="68" stroke="#4a9eff" stroke-width="2" stroke-dasharray="4,3"/>
+            <polygon points="100,60 94,72 106,72" fill="#4a9eff"/>
+            <text x="100" y="205" font-family="system-ui,sans-serif" font-size="11" fill="#4a9eff" text-anchor="middle">Chargeur</text>
+            <text x="100" y="220" font-family="system-ui,sans-serif" font-size="10" fill="#404860" text-anchor="middle">Tirez vers le haut</text>
+            <!-- Panel 2: Gas bottle -->
+            <text x="300" y="55" font-family="system-ui,sans-serif" font-size="10" fill="#f59e0b" text-anchor="middle" font-weight="700" letter-spacing="0.08em">② DÉVISSER</text>
+            <!-- Cylinder body -->
+            <rect x="258" y="80" width="44" height="110" rx="10" fill="#1e2538" stroke="#f59e0b" stroke-width="2"/>
+            <rect x="264" y="86" width="32" height="98" rx="7" fill="#111624" stroke="#252d40" stroke-width="1"/>
+            <!-- Regulator ring -->
+            <ellipse cx="280" cy="80" rx="22" ry="8" fill="#252d40" stroke="#f59e0b" stroke-width="1.5"/>
+            <!-- Pressure lines -->
+            <line x1="268" y1="110" x2="292" y2="110" stroke="#f59e0b" stroke-width="1" opacity=".4"/>
+            <line x1="268" y1="120" x2="292" y2="120" stroke="#f59e0b" stroke-width="1" opacity=".4"/>
+            <line x1="268" y1="130" x2="292" y2="130" stroke="#f59e0b" stroke-width="1" opacity=".4"/>
+            <!-- Rotation arc -->
+            <path d="M 302 85 A 30 30 0 0 0 260 95" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+            <polygon points="256,98 258,88 265,94" fill="#f59e0b"/>
+            <text x="300" y="205" font-family="system-ui,sans-serif" font-size="11" fill="#f59e0b" text-anchor="middle">Bouteille HPA</text>
+            <text x="300" y="220" font-family="system-ui,sans-serif" font-size="10" fill="#404860" text-anchor="middle">Sens antihoraire</text>
+            <!-- Panel 3: Trigger purge -->
+            <text x="500" y="55" font-family="system-ui,sans-serif" font-size="10" fill="#f59e0b" text-anchor="middle" font-weight="700" letter-spacing="0.08em">③ PURGER 5×</text>
+            <!-- Trigger shape -->
+            <path d="M475 90 L510 90 L516 140 L506 165 L498 165 L498 140 L488 140 L488 165 L480 165 L475 140 Z" fill="#1e2538" stroke="#2dd4bf" stroke-width="2"/>
+            <!-- Guard -->
+            <path d="M478 165 Q490 180 502 165" fill="none" stroke="#2dd4bf" stroke-width="1.5"/>
+            <!-- Sound waves from purge -->
+            <path d="M 520 125 Q 530 115 530 130 Q 530 145 520 135" fill="none" stroke="#2dd4bf" stroke-width="1.5" opacity=".8"/>
+            <path d="M 524 120 Q 540 108 540 130 Q 540 152 524 140" fill="none" stroke="#2dd4bf" stroke-width="1.2" opacity=".5"/>
+            <path d="M 528 115 Q 552 100 552 130 Q 552 160 528 145" fill="none" stroke="#2dd4bf" stroke-width="1" opacity=".3"/>
+            <text x="500" y="205" font-family="system-ui,sans-serif" font-size="11" fill="#2dd4bf" text-anchor="middle">Gâchette</text>
+            <text x="500" y="220" font-family="system-ui,sans-serif" font-size="10" fill="#404860" text-anchor="middle">Appuyez 5× — purge gaz</text>
+            <!-- Warning bar bottom -->
+            <rect x="20" y="238" width="560" height="16" rx="4" fill="rgba(230,57,70,0.08)" stroke="rgba(230,57,70,0.2)" stroke-width="1"/>
+            <text x="300" y="250" font-family="system-ui,sans-serif" font-size="10" fill="#e63946" text-anchor="middle" font-weight="600">⚠  Ne jamais démonter sous pression — vérifier le silence de la gâchette</text>
           </svg>
         </div>
         <div class="step-body">
-          <div class="step-location">📍 <strong>Où agir :</strong> Partez de l'arrière du lanceur — la grosse pièce cylindrique vissée en bas à l'arrière, c'est la bouteille de gaz. Juste au-dessus, il y a la coupole transparente (le chargeur). En dessous, à l'avant, se trouve le magasin rectangulaire (le MAG).</div>
+          <div class="step-location"><strong>Où agir :</strong> Partez de l'arrière du lanceur. La grosse pièce cylindrique vissée en bas = la bouteille de gaz. La coupole transparente sur le dessus = le chargeur. Sous l'avant du lanceur = le MAG.</div>
           <ol class="step-list">
-            <li>
-              <strong>Retirez le chargeur de billes.</strong>
-              <span class="step-detail">Si vous avez un chargeur électrique (la grosse coupole transparente posée sur le dessus), tirez-le simplement vers le haut — il se détache sans outil. Si vous avez un magasin rectangulaire sous l'avant du lanceur (<span class="term" title="MAG = Magazine, le chargeur à billes sous le lanceur">MAG</span>), appuyez sur le bouton de déverrouillage sur son côté et tirez-le vers le bas.</span>
-            </li>
-            <li>
-              <strong>Dévissez la bouteille de gaz (<span class="term" title="HPA = High Pressure Air = bouteille d'air comprimé haute pression (jusqu'à 3000 PSI / 207 bars)">HPA</span>) ou la cartouche CO₂.</strong>
-              <span class="step-detail">C'est la grosse pièce ronde et longue vissée en bas à l'arrière du lanceur — souvent verte, noire ou en fibre de carbone. Tournez-la dans le sens antihoraire (sens inverse des aiguilles d'une montre, comme pour ouvrir un bocal) jusqu'à ce qu'elle se décroche. Posez-la à part sur votre tapis.</span>
-            </li>
-            <li>
-              <strong>Purgez le gaz résiduel qui reste dans les canaux internes.</strong>
-              <span class="step-detail">Pointez le lanceur vers le bas ou vers le sol, loin de vous et de toute personne. Appuyez sur la gâchette 4 à 5 fois de suite. Les premières pressions peuvent produire un léger "pschitt" — c'est tout à fait normal, c'est le gaz résiduel coincé dans les micro-canaux qui s'échappe. Recommencez jusqu'à ne plus entendre aucun bruit.</span>
-            </li>
-            <li>
-              <strong>Installez le lanceur sur votre tapis de travail, canon (le tube avant) orienté à gauche.</strong>
-              <span class="step-detail">Placez immédiatement un petit récipient (pot de yaourt vide, boîte à pilules, plateau magnétique) à portée de main pour y poser les petites vis au fur et à mesure. Sans ça, vous en perdrez une dès la première étape.</span>
-            </li>
+            <li><strong>Retirez le chargeur de billes.</strong><span class="step-detail">Chargeur électrique : tirez vers le haut. MAG rectangulaire : bouton de déverrouillage sur le côté puis tirez vers le bas.</span></li>
+            <li><strong>Dévissez la bouteille HPA ou CO₂.</strong><span class="step-detail">La grande pièce ronde en bas à l'arrière. Tournez en sens antihoraire jusqu'à décrochage. Posez sur le tapis.</span></li>
+            <li><strong>Purgez le gaz résiduel.</strong><span class="step-detail">Pointez vers le bas, loin de tout. Appuyez la gâchette 4–5 fois jusqu'à ne plus entendre aucun "pschitt".</span></li>
+            <li><strong>Installez sur le tapis, canon à gauche.</strong><span class="step-detail">Préparez un petit pot pour les vis — vous en perdrez une sans ça.</span></li>
           </ol>
-          <div class="step-verify">✅ <strong>Comment savoir que c'est bon :</strong> Appuyez encore une fois sur la gâchette — vous ne devez plus entendre le moindre "pschitt" ni sentir de souffle d'air. Si vous entendez encore quelque chose, appuyez 5 fois de plus. Le lanceur est dépressurisé seulement quand la gâchette est silencieuse.</div>
-          <div class="tip-box">💡 <strong>Conseil :</strong> Un tapis magnétique (vendu en quincaillerie ou en modélisme, ~10€) retient automatiquement les petites vis en métal et évite qu'elles roulent par terre.</div>
-          <div class="warn-box">⚠️ <strong>Sécurité absolue :</strong> Ne passez jamais à l'étape suivante si le lanceur est encore sous pression. En cas de doute, recommencez la purge (gâchette ×5 supplémentaires).</div>
+          <div class="step-verify"><strong>Vérification :</strong> Appuyez encore une fois sur la gâchette — silence total. Pas de souffle d'air = dépressurisé.</div>
+          <div class="tip-box"><strong>Conseil :</strong> Un tapis magnétique (~10€ en modélisme) retient automatiquement les petites vis.</div>
+          <div class="warn-box"><strong>Sécurité absolue :</strong> Ne passez jamais à l'étape suivante si le lanceur est encore sous pression.</div>
         </div>
         <div class="step-footer">
-          <div class="step-tools"><span class="tool">🧲 Tapis</span><span class="tool">🥤 Pot à vis</span></div>
+          <div class="step-tools"><span class="tool">Tapis magnétique</span><span class="tool">Pot à vis</span></div>
           <div class="step-actions">
-            <button class="note-btn" data-step="1" aria-label="Ajouter une note à l'étape 1">📝 Note</button>
+            <button class="note-btn" data-step="1" aria-label="Ajouter une note à l'étape 1">Note</button>
             <button class="complete-btn" data-step="1" aria-label="Valider étape 1">✓ Valider</button>
           </div>
         </div>
@@ -515,163 +427,78 @@
           <div class="step-check" aria-hidden="true"></div>
         </div>
         <div class="step-visual">
-                    <svg viewBox="0 0 520 235" role="img" aria-label="Dye DAM — Étape 2 : Retrait du canon — rotation antihoraire, joint torique #006" style="width:100%;height:auto;display:block;">
+          <svg viewBox="0 0 600 260" role="img" aria-label="Étape 2 — Retrait du canon" style="width:100%;height:100%;display:block;">
             <defs>
-
-              <marker id="s2_y" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#ffd166"/></marker>
-              <marker id="s2_r" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#e63946"/></marker>
-              <marker id="s2_g" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#06d6a0"/></marker>
+              <pattern id="s2dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="0.9" fill="#4a9eff" opacity="0.06"/>
+              </pattern>
+              <marker id="s2arr" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto">
+                <polygon points="0 0,8 3.5,0 7" fill="#4a9eff"/>
+              </marker>
+              <marker id="s2arrr" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto">
+                <polygon points="0 0,8 3.5,0 7" fill="#e63946"/>
+              </marker>
             </defs>
-            <rect width="520" height="235" fill="#0b0d18"/>
-  <!-- BARREL -->
-  <rect x="6" y="112" width="7" height="15" rx="2" fill="#ffd166" stroke="#ffaa00" stroke-width="2.0"/>
-  <rect x="11" y="115" width="156" height="9" rx="2.5" fill="#ffd166" stroke="#ffaa00" stroke-width="2.0"/>
-  <rect x="15" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="21" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="27" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="33" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="39" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="163" y="110" width="11" height="19" rx="1.5" fill="#252b50" stroke="#ffaa00" stroke-width="1"/>
-  <!-- BODY -->
-  <path d="M172 98 L306 98 L306 150 L172 150 Z" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.5"/>
-  <path d="M168 98 L174 150 L172 150 L165 98 Z" fill="#252b50" stroke="#3d4585" stroke-width="0.8"/>
-  <rect x="304" y="98" width="5" height="52" rx="1" fill="#252b50" stroke="#457b9d" stroke-width="0.8"/>
-  <rect x="174" y="92" width="132" height="6" rx="1" fill="#2d3561" stroke="#457b9d" stroke-width="0.8"/>
-  <rect x="177" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="185" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="193" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="201" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="209" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="217" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="225" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="233" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="241" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="249" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="257" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="265" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="273" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="281" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="289" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="297" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="193" y="118" width="24" height="12" rx="1" fill="#0d1020" stroke="#252b50" stroke-width="0.8"/>
-  <rect x="282" y="93" width="8" height="5" rx="1" fill="#141828" stroke="#3d4585" stroke-width="0.7"/>
-  <!-- SOLENOID -->
-  <rect x="188" y="98" width="80" height="8" rx="1.5" fill="#111825" stroke="#2d3461" stroke-width="0.8"/>
-  <rect x="264" y="95" width="10" height="10" rx="1" fill="#0d2018" stroke="#2d3461" stroke-width="0.8"/>
-  <!-- FEED NECK -->
-  <rect x="224" y="64" width="48" height="34" rx="3" fill="#141828" stroke="#3d4585" stroke-width="1.2"/>
-  <rect x="222" y="64" width="52" height="6" rx="2" fill="#252b50" stroke="#3d4585" stroke-width="1"/>
-  <rect x="222" y="90" width="52" height="4" rx="2" fill="#1a2040" stroke="#3d4585" stroke-width="0.8"/>
-  <ellipse cx="248" cy="64" rx="21" ry="5.5" fill="#0d1020" stroke="#3d4585" stroke-width="1"/>
-  <!-- LOWER RECEIVER -->
-  <path d="M174 150 L174 182 L278 182 L278 150 Z" fill="#141828" stroke="#3d4585" stroke-width="1.2"/>
-  <path d="M200 182 Q208 200 238 200 Q266 200 266 182" fill="none" stroke="#252b50" stroke-width="2.2"/>
-  <polygon points="232,155 237,155 237,179 232,179" fill="#c8c8c8" opacity="0.7"/>
-  <rect x="208" y="158" width="5" height="8" rx="1" fill="#e63946" opacity="0.7"/>
-  <!-- MAGAZINE -->
-  <rect x="185" y="182" width="52" height="42" rx="3" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.0"/>
-  <line x1="189" y1="185" x2="189" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="193" y1="185" x2="193" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="197" y1="185" x2="197" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="201" y1="185" x2="201" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="205" y1="185" x2="205" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="209" y1="185" x2="209" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="213" y1="185" x2="213" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="217" y1="185" x2="217" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="221" y1="185" x2="221" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="225" y1="185" x2="225" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <rect x="183" y="222" width="56" height="5" rx="2" fill="#252b50" stroke="#3d4585" stroke-width="0.8"/>
-  <!-- GRIP -->
-  <path d="M278 150 L278 212 C278 216 282 220 287 220 L308 220 C313 220 316 216 316 212 L316 150 Z" fill="#141828" stroke="#3d4585" stroke-width="1.2"/>
-  <line x1="280" y1="162" x2="315" y2="162" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="168" x2="315" y2="168" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="174" x2="315" y2="174" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="180" x2="315" y2="180" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="186" x2="315" y2="186" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="192" x2="315" y2="192" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="198" x2="315" y2="198" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="204" x2="315" y2="204" stroke="#1e2345" stroke-width="0.8"/>
-  <rect x="306" y="152" width="10" height="24" rx="2" fill="#0d1020" stroke="#457b9d" stroke-width="0.8"/>
-  <circle cx="311" cy="157" r="2.2" fill="#06d6a0" opacity="0.85"/>
-  <circle cx="311" cy="163" r="2" fill="#ffd166" opacity="0.65"/>
-  <rect x="308" y="168" width="6" height="3" rx="1" fill="#252b50"/>
-  <rect x="308" y="173" width="6" height="3" rx="1" fill="#252b50"/>
-  <!-- ASA -->
-  <ellipse cx="297" cy="220" rx="16" ry="6" fill="#1a2040" stroke="#457b9d" stroke-width="1.2"/>
-  <!-- REGULATOR -->
-  <rect x="316" y="160" width="5" height="50" rx="1.5" fill="#1a1f3a" stroke="#3d4585" stroke-width="0.8"/>
-  <circle cx="345" cy="193" r="26" fill="#0d1117" stroke="#457b9d" stroke-width="1.8"/>
-  <circle cx="345" cy="193" r="18" fill="#111827" stroke="#457b9d" stroke-width="1.2"/>
-  <circle cx="345" cy="193" r="10" fill="#1a1f3a" stroke="#457b9d" stroke-width="1"/>
-  <circle cx="345" cy="193" r="4.5" fill="#252b50"/>
-  <line x1="367.0" y1="193.0" x2="362.0" y2="193.0" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="356.0" y1="212.1" x2="353.5" y2="207.7" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="334.0" y1="212.1" x2="336.5" y2="207.7" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="323.0" y1="193.0" x2="328.0" y2="193.0" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="334.0" y1="173.9" x2="336.5" y2="178.3" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="356.0" y1="173.9" x2="353.5" y2="178.3" stroke="#c8c8c8" stroke-width="1.5"/>
-  <!-- STEP 2 — BARREL SEPARATION -->
-  <!-- Gap between barrel and body (showing separation) -->
-  <rect x="169" y="107" width="8" height="25" rx="1" fill="#0b0d18" stroke="#ffd166" stroke-width="1" stroke-dasharray="3,2"/>
-
-  <!-- Pull-out arrow (barrel moving left) -->
-  <line x1="90" y1="119" x2="14" y2="119" stroke="#ffd166" stroke-width="2.2" stroke-dasharray="5,3" marker-end="url(#s2_y)"/>
-  <text x="52" y="112" font-family="sans-serif" font-size="8.5" fill="#ffd166" text-anchor="middle">Tirez vers l'avant</text>
-
-  <!-- Quarter-turn rotation arc at barrel base -->
-  <path d="M 167 106 A 16 16 0 0 0 151 106" fill="none" stroke="#ffd166" stroke-width="2.5" stroke-linecap="round" marker-end="url(#s2_y)"/>
-  <text x="137" y="100" font-family="sans-serif" font-size="8" fill="#ffd166">¼ tour</text>
-  <text x="137" y="109" font-family="sans-serif" font-size="8" fill="#ffd166">antihoraire</text>
-
-  <!-- Joint torique callout (red circle at barrel base) -->
-  <circle cx="171" cy="119" r="7" fill="none" stroke="#e63946" stroke-width="2.5"/>
-  <line x1="178" y1="115" x2="220" y2="92" stroke="#e63946" stroke-width="1.5" marker-end="url(#s2_r)"/>
-  <rect x="220" y="78" width="136" height="28" rx="3" fill="#e63946" fill-opacity="0.12" stroke="#e63946" stroke-width="1"/>
-  <text x="288" y="88" font-family="sans-serif" font-size="9" fill="#ff8a8a" text-anchor="middle" font-weight="bold">Joint torique #006</text>
-  <text x="288" y="100" font-family="sans-serif" font-size="8" fill="#e63946" text-anchor="middle">⚠ À ne PAS perdre !</text>
-
-  <!-- Barrel label -->
-  <rect x="20" y="128" width="138" height="26" rx="3" fill="#ffd166" fill-opacity="0.1" stroke="#ffd166" stroke-width="1"/>
-  <text x="89" y="139" font-family="sans-serif" font-size="9" fill="#ffd166" text-anchor="middle" font-weight="bold">Canon Dye Ultralite 14"</text>
-  <text x="89" y="150" font-family="sans-serif" font-size="8" fill="#9d7b00" text-anchor="middle">Filetage Autococker ⅞"</text>
-
-  <!-- Body label (stays) -->
-  <text x="238" y="132" font-family="sans-serif" font-size="8" fill="#457b9d" text-anchor="middle">Corps — fixe</text>
-
-  <!-- Feed neck reminder -->
-  <text x="248" y="80" font-family="sans-serif" font-size="7.5" fill="#2d5f8a" text-anchor="middle">Tour chargeur</text>
-
-  <!-- INSET: O-ring close-up -->
-  <rect x="376" y="140" width="134" height="70" rx="5" fill="#0d1020" stroke="#e63946" stroke-width="1.5"/>
-  <text x="443" y="154" font-family="sans-serif" font-size="8" fill="#e63946" text-anchor="middle" font-weight="bold">Joint torique (gros plan)</text>
-  <circle cx="443" cy="185" r="22" fill="none" stroke="#e63946" stroke-width="4"/>
-  <circle cx="443" cy="185" r="10" fill="#0b0d18"/>
-  <text x="443" y="216" font-family="sans-serif" font-size="7.5" fill="#c8c8c8" text-anchor="middle">Bague noire en caoutchouc</text>
+            <rect width="600" height="260" fill="#07090f"/>
+            <rect width="600" height="260" fill="url(#s2dots)"/>
+            <text x="300" y="200" font-family="Arial Black,sans-serif" font-size="160" font-weight="900" fill="#4a9eff" opacity="0.03" text-anchor="middle">02</text>
+            <!-- Body block (right, fixed) -->
+            <rect x="300" y="90" width="140" height="80" rx="6" fill="#1e2538" stroke="#252d40" stroke-width="1.5"/>
+            <text x="370" y="136" font-family="system-ui,sans-serif" font-size="11" fill="#7a8299" text-anchor="middle">Corps</text>
+            <text x="370" y="151" font-family="system-ui,sans-serif" font-size="10" fill="#404860" text-anchor="middle">fixe</text>
+            <!-- Gap highlight -->
+            <rect x="282" y="88" width="20" height="84" rx="2" fill="none" stroke="#4a9eff" stroke-width="1.5" stroke-dasharray="5,3"/>
+            <text x="292" y="82" font-family="system-ui,sans-serif" font-size="9" fill="#4a9eff" text-anchor="middle">Gap</text>
+            <!-- Barrel (left, being removed) -->
+            <rect x="60" y="108" width="226" height="44" rx="4" fill="#4a9eff" opacity="0.15" stroke="#4a9eff" stroke-width="2"/>
+            <!-- Barrel vents -->
+            <line x1="80" y1="112" x2="80" y2="148" stroke="#07090f" stroke-width="2"/>
+            <line x1="96" y1="112" x2="96" y2="148" stroke="#07090f" stroke-width="2"/>
+            <line x1="112" y1="112" x2="112" y2="148" stroke="#07090f" stroke-width="2"/>
+            <line x1="128" y1="112" x2="128" y2="148" stroke="#07090f" stroke-width="2"/>
+            <!-- End cap -->
+            <rect x="44" y="105" width="18" height="50" rx="3" fill="#4a9eff" opacity="0.3" stroke="#4a9eff" stroke-width="1.5"/>
+            <!-- Barrel label -->
+            <rect x="60" y="160" width="230" height="28" rx="5" fill="rgba(74,158,255,0.08)" stroke="rgba(74,158,255,0.2)" stroke-width="1"/>
+            <text x="175" y="172" font-family="system-ui,sans-serif" font-size="11" fill="#4a9eff" text-anchor="middle" font-weight="600">Canon Dye Ultralite 14"</text>
+            <text x="175" y="184" font-family="system-ui,sans-serif" font-size="10" fill="#404860" text-anchor="middle">Filetage Autococker ⅞"</text>
+            <!-- Pull arrow -->
+            <line x1="250" y1="130" x2="60" y2="130" stroke="#4a9eff" stroke-width="2.5" stroke-dasharray="6,3" marker-end="url(#s2arr)"/>
+            <text x="155" y="106" font-family="system-ui,sans-serif" font-size="11" fill="#4a9eff" text-anchor="middle" font-weight="600">Tirez vers l'avant</text>
+            <!-- Rotation arc at barrel base -->
+            <path d="M 290 102 A 20 20 0 0 0 268 108" fill="none" stroke="#4a9eff" stroke-width="2.5" stroke-linecap="round"/>
+            <polygon points="264,112 266,100 274,107" fill="#4a9eff"/>
+            <text x="248" y="95" font-family="system-ui,sans-serif" font-size="10" fill="#4a9eff" text-anchor="middle">¼ tour</text>
+            <text x="248" y="107" font-family="system-ui,sans-serif" font-size="10" fill="#404860" text-anchor="middle">antihoraire</text>
+            <!-- O-ring callout -->
+            <circle cx="295" cy="130" r="10" fill="none" stroke="#e63946" stroke-width="2.5"/>
+            <line x1="305" y1="122" x2="360" y2="85" stroke="#e63946" stroke-width="1.5" marker-end="url(#s2arrr)"/>
+            <rect x="362" y="60" width="160" height="48" rx="6" fill="rgba(230,57,70,0.08)" stroke="rgba(230,57,70,0.25)" stroke-width="1"/>
+            <text x="442" y="76" font-family="system-ui,sans-serif" font-size="11" fill="#e63946" text-anchor="middle" font-weight="700">Joint torique #006</text>
+            <text x="442" y="91" font-family="system-ui,sans-serif" font-size="10" fill="#e63946" text-anchor="middle">⚠ À ne PAS perdre !</text>
+            <text x="442" y="103" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">Bague noire ~5mm ø</text>
+            <!-- O-ring close-up inset -->
+            <rect x="420" y="160" width="140" height="80" rx="6" fill="#0c0f1a" stroke="#e63946" stroke-width="1.5"/>
+            <text x="490" y="178" font-family="system-ui,sans-serif" font-size="9" fill="#e63946" text-anchor="middle">Gros plan O-ring</text>
+            <circle cx="490" cy="210" r="24" fill="none" stroke="#e63946" stroke-width="4.5"/>
+            <circle cx="490" cy="210" r="10" fill="#07090f"/>
+            <text x="490" y="248" font-family="system-ui,sans-serif" font-size="9" fill="#7a8299" text-anchor="middle">Caoutchouc NBR</text>
           </svg>
         </div>
         <div class="step-body">
-          <div class="step-location">📍 <strong>Où agir :</strong> Le canon, c'est le long tube qui dépasse à l'avant du lanceur — il mesure environ 35 cm. Il se visse à l'avant du corps principal. Le joint torique (une petite bague en caoutchouc) se trouve à la base du canon, là où il entre dans le corps.</div>
+          <div class="step-location"><strong>Où agir :</strong> Le canon = le long tube à l'avant (~35 cm). Il se visse à l'avant du corps. Le joint torique se trouve à la base du canon, à la jonction avec le corps.</div>
           <ol class="step-list">
-            <li>
-              <strong>Saisissez le canon à deux mains et tournez-le d'un quart de tour dans le sens antihoraire.</strong>
-              <span class="step-detail">Un quart de tour = 90°, soit exactement un côté d'une horloge imaginaire. Le canon a un filetage spécial (<span class="term" title="Filetage Autococker ⅞-14 UNS : standard de l'industrie paintball, compatible avec la majorité des canons du marché">Autococker ⅞"</span>) qui se déverrouille rapidement. Vous sentirez un léger déclic quand c'est déverrouillé.</span>
-            </li>
-            <li>
-              <strong>Tirez le canon droit vers l'avant pour le dégager du corps.</strong>
-              <span class="step-detail">Ne le tordez pas ni ne le penchez — tirez en ligne droite, dans l'axe du canon. S'il résiste légèrement, vérifiez que vous avez bien fait le quart de tour antihoraire complet avant de forcer.</span>
-            </li>
-            <li>
-              <strong>Récupérez immédiatement le petit joint en caoutchouc (<span class="term" title="Joint torique = bague ronde en caoutchouc qui assure l'étanchéité — aussi appelé O-ring">joint torique</span>) à la base du canon.</strong>
-              <span class="step-detail">Ce petit anneau noir (environ 5 mm de diamètre, 1 mm d'épaisseur) peut tomber sur le tapis ou rester dans l'orifice du corps. Cherchez-le attentivement et placez-le dans un petit sachet ou pot — si vous le perdez, le canon fuira à la remise en pression.</span>
-            </li>
+            <li><strong>Tournez le canon d'un quart de tour antihoraire.</strong><span class="step-detail">90° exactement. Le filetage <span class="term" title="Filetage Autococker ⅞-14 UNS : standard paintball">Autococker ⅞"</span> se déverrouille vite. Vous sentirez un léger déclic.</span></li>
+            <li><strong>Tirez le canon droit vers l'avant.</strong><span class="step-detail">En ligne droite, sans tordre. Si ça résiste, vérifiez le quart de tour complet.</span></li>
+            <li><strong>Récupérez immédiatement le <span class="term" title="Joint torique = O-ring, bague ronde en caoutchouc assurant l'étanchéité">joint torique</span>.</strong><span class="step-detail">Ce petit anneau noir (~5 mm ø, 1 mm épaisseur) peut rester sur le tapis ou dans l'orifice. Placez-le dans un sachet — si perdu, le canon fuira.</span></li>
           </ol>
-          <div class="step-verify">✅ <strong>Comment savoir que c'est bon :</strong> Le canon doit être sorti proprement, et vous devez tenir le petit joint torique en main (ou l'avoir vu rester dans l'orifice du corps). Regardez dans l'orifice du corps avec une lampe pour vérifier que le joint n'est pas resté coincé et tordu.</div>
-          <div class="tip-box">💡 Si le canon résiste après le quart de tour, ne forcez pas — vérifiez l'alignement et recommencez la rotation. Le filetage Autococker est délicat si on tire en biais.</div>
+          <div class="step-verify"><strong>Vérification :</strong> Canon sorti proprement, joint torique récupéré. Regardez dans l'orifice avec une lampe — le joint ne doit pas rester coincé.</div>
+          <div class="tip-box">Si le canon résiste après le quart de tour, vérifiez l'alignement. Le filetage Autococker est délicat si on tire en biais.</div>
         </div>
         <div class="step-footer">
-          <div class="step-tools"><span class="tool">👐 Mains</span><span class="tool">🔴 O-ring #006</span></div>
+          <div class="step-tools"><span class="tool">Mains nues</span><span class="tool">O-ring #006</span></div>
           <div class="step-actions">
-            <button class="note-btn" data-step="2" aria-label="Note étape 2">📝 Note</button>
+            <button class="note-btn" data-step="2" aria-label="Note étape 2">Note</button>
             <button class="complete-btn" data-step="2" aria-label="Valider étape 2">✓ Valider</button>
           </div>
         </div>
@@ -691,176 +518,78 @@
           <div class="step-check" aria-hidden="true"></div>
         </div>
         <div class="step-visual">
-                    <svg viewBox="0 0 520 235" role="img" aria-label="Dye DAM — Étape 3 : Capuchon arrière et percuteur (bolt OOPS) — 2 vis hexagonales 3mm, 3 joints toriques" style="width:100%;height:auto;display:block;">
+          <svg viewBox="0 0 600 260" role="img" aria-label="Étape 3 — Capuchon arrière et percuteur" style="width:100%;height:100%;display:block;">
             <defs>
-
-              <marker id="s3_y" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#ffd166"/></marker>
-              <marker id="s3_b" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#457b9d"/></marker>
-              <marker id="s3_r" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#e63946"/></marker>
+              <pattern id="s3dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="0.9" fill="#4a9eff" opacity="0.06"/>
+              </pattern>
+              <marker id="s3arb" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto">
+                <polygon points="0 0,8 3.5,0 7" fill="#4a9eff"/>
+              </marker>
+              <marker id="s3ary" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto">
+                <polygon points="0 0,8 3.5,0 7" fill="#f59e0b"/>
+              </marker>
             </defs>
-            <rect width="520" height="235" fill="#0b0d18"/>
-  <!-- BARREL -->
-  <rect x="6" y="112" width="7" height="15" rx="2" fill="#1e2345" stroke="#2d3461" stroke-width="1.2"/>
-  <rect x="11" y="115" width="156" height="9" rx="2.5" fill="#1e2345" stroke="#2d3461" stroke-width="1.2"/>
-  <rect x="15" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="21" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="27" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="33" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="39" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="163" y="110" width="11" height="19" rx="1.5" fill="#252b50" stroke="#2d3461" stroke-width="1"/>
-  <!-- BODY -->
-  <path d="M172 98 L306 98 L306 150 L172 150 Z" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.5"/>
-  <path d="M168 98 L174 150 L172 150 L165 98 Z" fill="#252b50" stroke="#3d4585" stroke-width="0.8"/>
-  <rect x="304" y="98" width="5" height="52" rx="1" fill="#3a2800" stroke="#ffd166" stroke-width="2.0"/>
-  <rect x="174" y="92" width="132" height="6" rx="1" fill="#2d3561" stroke="#457b9d" stroke-width="0.8"/>
-  <rect x="177" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="185" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="193" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="201" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="209" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="217" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="225" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="233" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="241" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="249" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="257" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="265" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="273" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="281" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="289" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="297" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="193" y="118" width="24" height="12" rx="1" fill="#0d1020" stroke="#252b50" stroke-width="0.8"/>
-  <rect x="282" y="93" width="8" height="5" rx="1" fill="#141828" stroke="#3d4585" stroke-width="0.7"/>
-  <!-- SOLENOID -->
-  <rect x="188" y="98" width="80" height="8" rx="1.5" fill="#111825" stroke="#2d3461" stroke-width="0.8"/>
-  <rect x="264" y="95" width="10" height="10" rx="1" fill="#0d2018" stroke="#2d3461" stroke-width="0.8"/>
-  <!-- FEED NECK -->
-  <rect x="224" y="64" width="48" height="34" rx="3" fill="#141828" stroke="#3d4585" stroke-width="1.2"/>
-  <rect x="222" y="64" width="52" height="6" rx="2" fill="#252b50" stroke="#3d4585" stroke-width="1"/>
-  <rect x="222" y="90" width="52" height="4" rx="2" fill="#1a2040" stroke="#3d4585" stroke-width="0.8"/>
-  <ellipse cx="248" cy="64" rx="21" ry="5.5" fill="#0d1020" stroke="#3d4585" stroke-width="1"/>
-  <!-- LOWER RECEIVER -->
-  <path d="M174 150 L174 182 L278 182 L278 150 Z" fill="#141828" stroke="#3d4585" stroke-width="1.2"/>
-  <path d="M200 182 Q208 200 238 200 Q266 200 266 182" fill="none" stroke="#252b50" stroke-width="2.2"/>
-  <polygon points="232,155 237,155 237,179 232,179" fill="#c8c8c8" opacity="0.7"/>
-  <rect x="208" y="158" width="5" height="8" rx="1" fill="#e63946" opacity="0.7"/>
-  <!-- MAGAZINE -->
-  <rect x="185" y="182" width="52" height="42" rx="3" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.0"/>
-  <line x1="189" y1="185" x2="189" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="193" y1="185" x2="193" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="197" y1="185" x2="197" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="201" y1="185" x2="201" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="205" y1="185" x2="205" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="209" y1="185" x2="209" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="213" y1="185" x2="213" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="217" y1="185" x2="217" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="221" y1="185" x2="221" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="225" y1="185" x2="225" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <rect x="183" y="222" width="56" height="5" rx="2" fill="#252b50" stroke="#3d4585" stroke-width="0.8"/>
-  <!-- GRIP -->
-  <path d="M278 150 L278 212 C278 216 282 220 287 220 L308 220 C313 220 316 216 316 212 L316 150 Z" fill="#141828" stroke="#3d4585" stroke-width="1.2"/>
-  <line x1="280" y1="162" x2="315" y2="162" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="168" x2="315" y2="168" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="174" x2="315" y2="174" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="180" x2="315" y2="180" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="186" x2="315" y2="186" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="192" x2="315" y2="192" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="198" x2="315" y2="198" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="204" x2="315" y2="204" stroke="#1e2345" stroke-width="0.8"/>
-  <rect x="306" y="152" width="10" height="24" rx="2" fill="#0d1020" stroke="#457b9d" stroke-width="0.8"/>
-  <circle cx="311" cy="157" r="2.2" fill="#06d6a0" opacity="0.85"/>
-  <circle cx="311" cy="163" r="2" fill="#ffd166" opacity="0.65"/>
-  <rect x="308" y="168" width="6" height="3" rx="1" fill="#252b50"/>
-  <rect x="308" y="173" width="6" height="3" rx="1" fill="#252b50"/>
-  <!-- ASA -->
-  <ellipse cx="297" cy="220" rx="16" ry="6" fill="#1a2040" stroke="#457b9d" stroke-width="1.2"/>
-  <!-- REGULATOR -->
-  <rect x="316" y="160" width="5" height="50" rx="1.5" fill="#1a1f3a" stroke="#3d4585" stroke-width="0.8"/>
-  <circle cx="345" cy="193" r="26" fill="#0d1117" stroke="#457b9d" stroke-width="1.8"/>
-  <circle cx="345" cy="193" r="18" fill="#111827" stroke="#457b9d" stroke-width="1.2"/>
-  <circle cx="345" cy="193" r="10" fill="#1a1f3a" stroke="#457b9d" stroke-width="1"/>
-  <circle cx="345" cy="193" r="4.5" fill="#252b50"/>
-  <line x1="367.0" y1="193.0" x2="362.0" y2="193.0" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="356.0" y1="212.1" x2="353.5" y2="207.7" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="334.0" y1="212.1" x2="336.5" y2="207.7" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="323.0" y1="193.0" x2="328.0" y2="193.0" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="334.0" y1="173.9" x2="336.5" y2="178.3" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="356.0" y1="173.9" x2="353.5" y2="178.3" stroke="#c8c8c8" stroke-width="1.5"/>
-  <!-- STEP 3 — BACK CAP + BOLT -->
-  <!-- Back cap highlighted rectangle -->
-  <rect x="304" y="98" width="12" height="52" rx="2" fill="#3a2800" stroke="#ffd166" stroke-width="2.5"/>
-  <!-- 2 allen screws on back cap -->
-  <circle cx="309" cy="110" r="5" fill="#0d1020" stroke="#ffd166" stroke-width="2"/>
-  <line x1="306.5" y1="110" x2="311.5" y2="110" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="309" y1="107.5" x2="309" y2="112.5" stroke="#ffd166" stroke-width="1.5"/>
-  <circle cx="309" cy="138" r="5" fill="#0d1020" stroke="#ffd166" stroke-width="2"/>
-  <line x1="306.5" y1="138" x2="311.5" y2="138" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="309" y1="135.5" x2="309" y2="140.5" stroke="#ffd166" stroke-width="1.5"/>
-
-  <!-- Back cap callout -->
-  <line x1="316" y1="124" x2="380" y2="110" stroke="#ffd166" stroke-width="1.5" marker-end="url(#s3_y)"/>
-  <rect x="380" y="95" width="132" height="40" rx="3" fill="#ffd166" fill-opacity="0.12" stroke="#ffd166" stroke-width="1"/>
-  <text x="446" y="108" font-family="sans-serif" font-size="9" fill="#ffd166" text-anchor="middle" font-weight="bold">Capuchon arrière</text>
-  <text x="446" y="120" font-family="sans-serif" font-size="8" fill="#9d7b00" text-anchor="middle">(face arrière du corps)</text>
-  <text x="446" y="130" font-family="sans-serif" font-size="8" fill="#9d7b00" text-anchor="middle">2× vis clé 3mm</text>
-
-  <!-- Allen key 3mm icon -->
-  <rect x="382" y="142" width="30" height="6" rx="2" fill="#252b50" stroke="#c8c8c8" stroke-width="1"/>
-  <rect x="378" y="138" width="6" height="18" rx="2" fill="#252b50" stroke="#c8c8c8" stroke-width="1"/>
-  <text x="420" y="151" font-family="sans-serif" font-size="8" fill="#c8c8c8">Clé hexagonale 3mm</text>
-
-  <!-- Bolt extracted from body (arrow left) -->
-  <rect x="98" y="113" width="70" height="12" rx="3" fill="#244f7c" stroke="#457b9d" stroke-width="2"/>
-  <!-- O-rings on bolt -->
-  <ellipse cx="115" cy="119" rx="2" ry="7" fill="none" stroke="#06d6a0" stroke-width="2"/>
-  <ellipse cx="140" cy="119" rx="2" ry="7" fill="none" stroke="#06d6a0" stroke-width="2"/>
-  <ellipse cx="158" cy="119" rx="2" ry="7" fill="none" stroke="#06d6a0" stroke-width="2"/>
-  <!-- Bolt extraction arrow -->
-  <line x1="98" y1="119" x2="72" y2="119" stroke="#457b9d" stroke-width="2.2" marker-end="url(#s3_b)"/>
-  <text x="40" y="113" font-family="sans-serif" font-size="8" fill="#457b9d">Tirez</text>
-  <text x="40" y="123" font-family="sans-serif" font-size="8" fill="#457b9d">vers l'arrière</text>
-
-  <!-- Bolt label -->
-  <rect x="66" y="133" width="114" height="28" rx="3" fill="#244f7c" fill-opacity="0.15" stroke="#457b9d" stroke-width="1"/>
-  <text x="123" y="144" font-family="sans-serif" font-size="9" fill="#90caf9" text-anchor="middle" font-weight="bold">Percuteur (Bolt OOPS)</text>
-  <text x="123" y="155" font-family="sans-serif" font-size="8" fill="#457b9d" text-anchor="middle">3 joints toriques (en vert)</text>
-
-  <!-- O-ring callout -->
-  <line x1="140" y1="112" x2="140" y2="95" stroke="#06d6a0" stroke-width="1.5" marker-end="url(#s3_r)"/>
-  <text x="140" y="90" font-family="sans-serif" font-size="8" fill="#06d6a0" text-anchor="middle">3× joints toriques</text>
-
-  <!-- Tunnel in body (empty after bolt removed) -->
-  <rect x="168" y="117" width="134" height="8" rx="1" fill="#0b0d18" stroke="#252b50" stroke-width="0.8" stroke-dasharray="3,2"/>
-  <text x="235" y="112" font-family="sans-serif" font-size="7.5" fill="#252b50" text-anchor="middle">Tunnel (vide après extraction)</text>
+            <rect width="600" height="260" fill="#07090f"/>
+            <rect width="600" height="260" fill="url(#s3dots)"/>
+            <text x="300" y="200" font-family="Arial Black,sans-serif" font-size="160" font-weight="900" fill="#f59e0b" opacity="0.03" text-anchor="middle">03</text>
+            <!-- Body block -->
+            <rect x="160" y="90" width="230" height="80" rx="6" fill="#1e2538" stroke="#252d40" stroke-width="1.5"/>
+            <!-- Tunnel inside body -->
+            <rect x="164" y="111" width="222" height="38" rx="2" fill="#07090f" stroke="#252d40" stroke-width="1" stroke-dasharray="4,3"/>
+            <text x="275" y="134" font-family="system-ui,sans-serif" font-size="10" fill="#404860" text-anchor="middle">Tunnel interne</text>
+            <!-- Back cap (right face) -->
+            <rect x="388" y="88" width="28" height="84" rx="4" fill="#f59e0b" opacity="0.2" stroke="#f59e0b" stroke-width="2.5"/>
+            <!-- Screws on back cap -->
+            <circle cx="402" cy="108" r="7" fill="#07090f" stroke="#f59e0b" stroke-width="2"/>
+            <line x1="398" y1="108" x2="406" y2="108" stroke="#f59e0b" stroke-width="1.5"/>
+            <line x1="402" y1="104" x2="402" y2="112" stroke="#f59e0b" stroke-width="1.5"/>
+            <circle cx="402" cy="152" r="7" fill="#07090f" stroke="#f59e0b" stroke-width="2"/>
+            <line x1="398" y1="152" x2="406" y2="152" stroke="#f59e0b" stroke-width="1.5"/>
+            <line x1="402" y1="148" x2="402" y2="156" stroke="#f59e0b" stroke-width="1.5"/>
+            <!-- Back cap label -->
+            <line x1="418" y1="130" x2="466" y2="110" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#s3ary)"/>
+            <rect x="468" y="88" width="118" height="44" rx="5" fill="rgba(245,158,11,0.08)" stroke="rgba(245,158,11,0.25)" stroke-width="1"/>
+            <text x="527" y="104" font-family="system-ui,sans-serif" font-size="11" fill="#f59e0b" text-anchor="middle" font-weight="700">Capuchon arrière</text>
+            <text x="527" y="118" font-family="system-ui,sans-serif" font-size="10" fill="#7a8299" text-anchor="middle">2× vis Allen 3mm</text>
+            <text x="527" y="130" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">antihoraire</text>
+            <!-- Bolt extracted (left of body) -->
+            <rect x="28" y="111" width="134" height="38" rx="5" fill="#1e2538" stroke="#4a9eff" stroke-width="2"/>
+            <!-- 3 O-rings on bolt -->
+            <ellipse cx="60" cy="130" rx="3" ry="20" fill="none" stroke="#2dd4bf" stroke-width="3"/>
+            <ellipse cx="100" cy="130" rx="3" ry="20" fill="none" stroke="#2dd4bf" stroke-width="3"/>
+            <ellipse cx="140" cy="130" rx="3" ry="20" fill="none" stroke="#2dd4bf" stroke-width="3"/>
+            <!-- Extraction arrow -->
+            <line x1="158" y1="130" x2="36" y2="130" stroke="#4a9eff" stroke-width="2.5" stroke-dasharray="5,3" marker-end="url(#s3arb)"/>
+            <!-- Bolt label -->
+            <rect x="28" y="158" width="134" height="38" rx="5" fill="rgba(74,158,255,0.06)" stroke="rgba(74,158,255,0.2)" stroke-width="1"/>
+            <text x="95" y="172" font-family="system-ui,sans-serif" font-size="11" fill="#4a9eff" text-anchor="middle" font-weight="600">Percuteur OOPS</text>
+            <text x="95" y="186" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf" text-anchor="middle">3× joints toriques</text>
+            <!-- O-ring callout -->
+            <line x1="100" y1="110" x2="100" y2="86" stroke="#2dd4bf" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <rect x="30" y="60" width="140" height="22" rx="4" fill="rgba(45,212,191,0.08)" stroke="rgba(45,212,191,0.2)" stroke-width="1"/>
+            <text x="100" y="75" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf" text-anchor="middle">Photographiez avant retrait !</text>
+            <!-- Allen key icon -->
+            <rect x="468" y="148" width="36" height="8" rx="3" fill="#252d40" stroke="#7a8299" stroke-width="1"/>
+            <rect x="462" y="140" width="8" height="24" rx="3" fill="#252d40" stroke="#7a8299" stroke-width="1"/>
+            <text x="516" y="162" font-family="system-ui,sans-serif" font-size="10" fill="#7a8299">Clé Allen 3mm</text>
           </svg>
         </div>
         <div class="step-body">
-          <div class="step-location">📍 <strong>Où agir :</strong> Le percuteur (<span class="term" title="Bolt OOPS = le piston interne qui propulse la bille dans le canon — 'bolt' en anglais">bolt</span>) se trouve à l'intérieur du corps principal du lanceur, dans un long tunnel horizontal qui traverse de l'arrière vers l'avant. Pour y accéder, il faut d'abord retirer le <span class="term" title="Back cap = le bouchon vissé à l'arrière du corps du lanceur, qui retient le bolt à l'intérieur">capuchon arrière</span> (la petite pièce plate vissée sur la face arrière du corps, juste au-dessus de la poignée).</div>
+          <div class="step-location"><strong>Où agir :</strong> Le <span class="term" title="Bolt = percuteur, le piston interne qui propulse la bille">bolt</span> est dans le tunnel horizontal du corps. Accès par le <span class="term" title="Back cap = bouchon vissé à l'arrière du corps">capuchon arrière</span> — la pièce plate sur la face arrière du corps, juste au-dessus de la poignée.</div>
           <ol class="step-list">
-            <li>
-              <strong>Repérez les 2 petites vis sur le capuchon arrière (la face plate à l'arrière du corps).</strong>
-              <span class="step-detail">Ces vis sont minuscules — elles font 3 mm de diamètre et ont une empreinte hexagonale. Vous aurez besoin d'une <span class="term" title="Clé hexagonale (ou clé Allen) = clé en forme de L avec une section hexagonale, utilisée pour les vis à tête creuse">clé hexagonale</span> de 3 mm (aussi appelée "clé Allen 3mm"). Ne confondez pas avec les vis plus grosses sur les côtés du corps — ce sont les vis de fixation du grip, elles viennent plus tard.</span>
-            </li>
-            <li>
-              <strong>Dévissez les 2 vis avec la clé 3mm, en tournant dans le sens antihoraire.</strong>
-              <span class="step-detail">Dévissez progressivement en alternant les deux vis (une demi-tour sur l'une, puis l'autre) pour ne pas contraindre la pièce. Posez les deux vis dans votre pot à vis. Glissez ensuite le capuchon arrière vers l'arrière et retirez-le — il peut être légèrement serré, c'est normal.</span>
-            </li>
-            <li>
-              <strong>Saisissez la petite poignée du percuteur (le bolt handle) et tirez-le vers l'arrière pour l'extraire.</strong>
-              <span class="step-detail">Le bolt handle, c'est le petit bouton ou levier qui dépasse sur le côté ou l'arrière du percuteur. Tirez lentement et en ligne droite. Le percuteur sort d'un seul bloc avec son système interne (<span class="term" title="Système OOPS = One Piece Spool : le percuteur et son système de propulsion interne forment une seule pièce indémontable">système OOPS</span>) — ne cherchez pas à le démonter davantage.</span>
-            </li>
-            <li>
-              <strong>Récupérez les 3 joints toriques sur le percuteur sorti — notez bien leur position.</strong>
-              <span class="step-detail">Regardez attentivement le percuteur : vous verrez 3 petites rainures circulaires avec chacune un joint en caoutchouc noir. Photographiez le percuteur avant de toucher quoi que ce soit pour vous souvenir de la position exacte de chaque joint (ils n'ont pas tous le même diamètre). Glissez-les délicatement hors de leurs rainures avec le bout d'un cure-dent si nécessaire.</span>
-            </li>
+            <li><strong>Repérez les 2 petites vis hexagonales 3mm sur le capuchon arrière.</strong><span class="step-detail">Ces vis font 3mm de diamètre — clé Allen 3mm obligatoire. Ne confondez pas avec les vis du grip sur les côtés.</span></li>
+            <li><strong>Dévissez les 2 vis en alternant (demi-tour chacune).</strong><span class="step-detail">Alternez pour ne pas contraindre la pièce. Posez les vis dans le pot. Glissez le capuchon vers l'arrière.</span></li>
+            <li><strong>Tirez le bolt handle vers l'arrière pour extraire le percuteur.</strong><span class="step-detail">Le percuteur sort d'un seul bloc (<span class="term" title="OOPS = One Piece Spool : percuteur et système interne indémontables">système OOPS</span>). Tirez lentement en ligne droite.</span></li>
+            <li><strong>Récupérez les 3 joints toriques et notez leur position.</strong><span class="step-detail">Photographiez avant de retirer quoi que ce soit. Chaque joint a un diamètre précis — les confondre cause des fuites.</span></li>
           </ol>
-          <div class="step-verify">✅ <strong>Comment savoir que c'est bon :</strong> Vous devez avoir en main : le capuchon arrière, ses 2 vis, le percuteur complet avec ses 3 joints toriques identifiés. Regardez dans le tunnel arrière du corps avec une lampe — il doit être vide et propre.</div>
-          <div class="tip-box">💡 <strong>Photo indispensable :</strong> Prenez une photo des 3 joints toriques sur le percuteur avant de les retirer — ils ont chacun une position précise et les confondre peut causer des fuites.</div>
+          <div class="step-verify"><strong>Vérification :</strong> Capuchon + 2 vis + percuteur + 3 joints toriques identifiés. Le tunnel arrière doit être vide et propre.</div>
+          <div class="tip-box"><strong>Photo indispensable :</strong> Prenez une photo des 3 joints sur le percuteur avant retrait — positions exactes.</div>
         </div>
         <div class="step-footer">
-          <div class="step-tools"><span class="tool">🔩 Allen 3mm</span><span class="tool">🟢 O-rings ×3</span></div>
+          <div class="step-tools"><span class="tool">Allen 3mm</span><span class="tool">O-rings ×3</span></div>
           <div class="step-actions">
-            <button class="note-btn" data-step="3">📝 Note</button>
+            <button class="note-btn" data-step="3">Note</button>
             <button class="complete-btn" data-step="3" aria-label="Valider étape 3">✓ Valider</button>
           </div>
         </div>
@@ -880,164 +609,72 @@
           <div class="step-check" aria-hidden="true"></div>
         </div>
         <div class="step-visual">
-                    <svg viewBox="0 0 520 235" role="img" aria-label="Dye DAM — Étape 4 : Séparation poignée/corps — connecteur électrovanne à débrancher en premier, 2 vis 5/32" style="width:100%;height:auto;display:block;">
+          <svg viewBox="0 0 600 260" role="img" aria-label="Étape 4 — Séparation grip/corps" style="width:100%;height:100%;display:block;">
             <defs>
-
-              <marker id="s4_t" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#06d6a0"/></marker>
-              <marker id="s4_y" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#ffd166"/></marker>
-              <marker id="s4_r" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#e63946"/></marker>
+              <pattern id="s4dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="0.9" fill="#4a9eff" opacity="0.06"/>
+              </pattern>
+              <marker id="s4arrd" markerWidth="8" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
+                <polygon points="8 0,0 3.5,8 7" fill="#2dd4bf"/>
+              </marker>
             </defs>
-            <rect width="520" height="235" fill="#0b0d18"/>
-  <!-- BARREL -->
-  <rect x="6" y="112" width="7" height="15" rx="2" fill="#1e2345" stroke="#2d3461" stroke-width="1.2"/>
-  <rect x="11" y="115" width="156" height="9" rx="2.5" fill="#1e2345" stroke="#2d3461" stroke-width="1.2"/>
-  <rect x="15" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="21" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="27" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="33" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="39" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="163" y="110" width="11" height="19" rx="1.5" fill="#252b50" stroke="#2d3461" stroke-width="1"/>
-  <!-- BODY -->
-  <path d="M172 98 L306 98 L306 150 L172 150 Z" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.5"/>
-  <path d="M168 98 L174 150 L172 150 L165 98 Z" fill="#252b50" stroke="#3d4585" stroke-width="0.8"/>
-  <rect x="304" y="98" width="5" height="52" rx="1" fill="#252b50" stroke="#457b9d" stroke-width="0.8"/>
-  <rect x="174" y="92" width="132" height="6" rx="1" fill="#2d3561" stroke="#457b9d" stroke-width="0.8"/>
-  <rect x="177" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="185" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="193" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="201" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="209" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="217" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="225" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="233" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="241" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="249" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="257" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="265" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="273" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="281" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="289" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="297" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="193" y="118" width="24" height="12" rx="1" fill="#0d1020" stroke="#252b50" stroke-width="0.8"/>
-  <rect x="282" y="93" width="8" height="5" rx="1" fill="#141828" stroke="#3d4585" stroke-width="0.7"/>
-  <!-- SOLENOID -->
-  <rect x="188" y="98" width="80" height="8" rx="1.5" fill="#111825" stroke="#2d3461" stroke-width="0.8"/>
-  <rect x="264" y="95" width="10" height="10" rx="1" fill="#0d2018" stroke="#2d3461" stroke-width="0.8"/>
-  <!-- FEED NECK -->
-  <rect x="224" y="64" width="48" height="34" rx="3" fill="#141828" stroke="#3d4585" stroke-width="1.2"/>
-  <rect x="222" y="64" width="52" height="6" rx="2" fill="#252b50" stroke="#3d4585" stroke-width="1"/>
-  <rect x="222" y="90" width="52" height="4" rx="2" fill="#1a2040" stroke="#3d4585" stroke-width="0.8"/>
-  <ellipse cx="248" cy="64" rx="21" ry="5.5" fill="#0d1020" stroke="#3d4585" stroke-width="1"/>
-  <!-- LOWER RECEIVER -->
-  <path d="M174 150 L174 182 L278 182 L278 150 Z" fill="#1d3a5c" stroke="#457b9d" stroke-width="2.0"/>
-  <path d="M200 182 Q208 200 238 200 Q266 200 266 182" fill="none" stroke="#252b50" stroke-width="2.2"/>
-  <polygon points="232,155 237,155 237,179 232,179" fill="#c8c8c8" opacity="0.7"/>
-  <rect x="208" y="158" width="5" height="8" rx="1" fill="#e63946" opacity="0.7"/>
-  <!-- MAGAZINE -->
-  <rect x="185" y="182" width="52" height="42" rx="3" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.0"/>
-  <line x1="189" y1="185" x2="189" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="193" y1="185" x2="193" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="197" y1="185" x2="197" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="201" y1="185" x2="201" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="205" y1="185" x2="205" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="209" y1="185" x2="209" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="213" y1="185" x2="213" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="217" y1="185" x2="217" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="221" y1="185" x2="221" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="225" y1="185" x2="225" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <rect x="183" y="222" width="56" height="5" rx="2" fill="#252b50" stroke="#3d4585" stroke-width="0.8"/>
-  <!-- GRIP -->
-  <path d="M278 150 L278 212 C278 216 282 220 287 220 L308 220 C313 220 316 216 316 212 L316 150 Z" fill="#0d3a2e" stroke="#06d6a0" stroke-width="2.0"/>
-  <line x1="280" y1="162" x2="315" y2="162" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="168" x2="315" y2="168" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="174" x2="315" y2="174" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="180" x2="315" y2="180" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="186" x2="315" y2="186" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="192" x2="315" y2="192" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="198" x2="315" y2="198" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="204" x2="315" y2="204" stroke="#1e2345" stroke-width="0.8"/>
-  <rect x="306" y="152" width="10" height="24" rx="2" fill="#0d1020" stroke="#457b9d" stroke-width="0.8"/>
-  <circle cx="311" cy="157" r="2.2" fill="#06d6a0" opacity="0.85"/>
-  <circle cx="311" cy="163" r="2" fill="#ffd166" opacity="0.65"/>
-  <rect x="308" y="168" width="6" height="3" rx="1" fill="#252b50"/>
-  <rect x="308" y="173" width="6" height="3" rx="1" fill="#252b50"/>
-  <!-- ASA -->
-  <ellipse cx="297" cy="220" rx="16" ry="6" fill="#1a2040" stroke="#457b9d" stroke-width="1.2"/>
-  <!-- REGULATOR -->
-  <rect x="316" y="160" width="5" height="50" rx="1.5" fill="#1a1f3a" stroke="#3d4585" stroke-width="0.8"/>
-  <circle cx="345" cy="193" r="26" fill="#0d1117" stroke="#457b9d" stroke-width="1.8"/>
-  <circle cx="345" cy="193" r="18" fill="#111827" stroke="#457b9d" stroke-width="1.2"/>
-  <circle cx="345" cy="193" r="10" fill="#1a1f3a" stroke="#457b9d" stroke-width="1"/>
-  <circle cx="345" cy="193" r="4.5" fill="#252b50"/>
-  <line x1="367.0" y1="193.0" x2="362.0" y2="193.0" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="356.0" y1="212.1" x2="353.5" y2="207.7" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="334.0" y1="212.1" x2="336.5" y2="207.7" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="323.0" y1="193.0" x2="328.0" y2="193.0" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="334.0" y1="173.9" x2="336.5" y2="178.3" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="356.0" y1="173.9" x2="353.5" y2="178.3" stroke="#c8c8c8" stroke-width="1.5"/>
-  <!-- STEP 4 — GRIP SEPARATION -->
-  <!-- Split line between upper body and lower receiver -->
-  <line x1="174" y1="150" x2="316" y2="150" stroke="#ffd166" stroke-width="2.5" stroke-dasharray="5,3"/>
-
-  <!-- Left screw (one per side) -->
-  <circle cx="198" cy="150" r="6" fill="#3a2800" stroke="#ffd166" stroke-width="2.2"/>
-  <line x1="195" y1="150" x2="201" y2="150" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="198" y1="147" x2="198" y2="153" stroke="#ffd166" stroke-width="1.5"/>
-  <!-- Right screw -->
-  <circle cx="280" cy="150" r="6" fill="#3a2800" stroke="#ffd166" stroke-width="2.2"/>
-  <line x1="277" y1="150" x2="283" y2="150" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="280" y1="147" x2="280" y2="153" stroke="#ffd166" stroke-width="1.5"/>
-
-  <!-- Screws label -->
-  <line x1="240" y1="150" x2="240" y2="210" stroke="#ffd166" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#s4_y)"/>
-  <rect x="164" y="210" width="154" height="22" rx="3" fill="#ffd166" fill-opacity="0.12" stroke="#ffd166" stroke-width="1"/>
-  <text x="241" y="225" font-family="sans-serif" font-size="9" fill="#ffd166" text-anchor="middle">2× vis clé 5/32" (une par côté)</text>
-
-  <!-- Separation arrow (grip going down) -->
-  <line x1="248" y1="182" x2="248" y2="234" stroke="#06d6a0" stroke-width="2.2" stroke-dasharray="5,3" marker-end="url(#s4_t)"/>
-
-  <!-- Grip label -->
-  <rect x="380" y="148" width="130" height="30" rx="3" fill="#06d6a0" fill-opacity="0.1" stroke="#06d6a0" stroke-width="1"/>
-  <text x="445" y="160" font-family="sans-serif" font-size="9" fill="#06d6a0" text-anchor="middle" font-weight="bold">Poignée (Grip Frame)</text>
-  <text x="445" y="172" font-family="sans-serif" font-size="8" fill="#06d6a0" text-anchor="middle">Tirez vers le bas</text>
-  <line x1="380" y1="163" x2="317" y2="163" stroke="#06d6a0" stroke-width="1.5" marker-end="url(#s4_t)"/>
-
-  <!-- Solenoid connector (red — must disconnect first) -->
-  <rect x="264" y="92" width="16" height="14" rx="1.5" fill="#e63946" fill-opacity="0.4" stroke="#e63946" stroke-width="2"/>
-  <line x1="264" y1="99" x2="220" y2="75" stroke="#e63946" stroke-width="1.5" marker-end="url(#s4_r)"/>
-  <rect x="8" y="62" width="208" height="30" rx="3" fill="#e63946" fill-opacity="0.12" stroke="#e63946" stroke-width="1"/>
-  <text x="112" y="73" font-family="sans-serif" font-size="9" fill="#ff8a8a" text-anchor="middle" font-weight="bold">⚠ Débranchez D'ABORD</text>
-  <text x="112" y="85" font-family="sans-serif" font-size="8" fill="#e63946" text-anchor="middle">le connecteur de l'électrovanne</text>
-  <text x="112" y="95" font-family="sans-serif" font-size="7.5" fill="#c86060" text-anchor="middle">(saisissez le plastique, pas le fil !)</text>
+            <rect width="600" height="260" fill="#07090f"/>
+            <rect width="600" height="260" fill="url(#s4dots)"/>
+            <text x="300" y="200" font-family="Arial Black,sans-serif" font-size="160" font-weight="900" fill="#2dd4bf" opacity="0.03" text-anchor="middle">04</text>
+            <!-- Upper body block -->
+            <rect x="140" y="60" width="240" height="70" rx="6" fill="#1e2538" stroke="#252d40" stroke-width="1.5"/>
+            <text x="260" y="100" font-family="system-ui,sans-serif" font-size="12" fill="#7a8299" text-anchor="middle" font-weight="600">Corps principal</text>
+            <!-- Solenoid on top -->
+            <rect x="170" y="52" width="100" height="10" rx="2" fill="#111624" stroke="#2f3a52" stroke-width="1"/>
+            <!-- Separation dashed line -->
+            <line x1="100" y1="130" x2="440" y2="130" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8,4"/>
+            <text x="460" y="134" font-family="system-ui,sans-serif" font-size="10" fill="#f59e0b" font-weight="600">Ligne de séparation</text>
+            <!-- Left screw -->
+            <circle cx="168" cy="130" r="9" fill="#1e2538" stroke="#f59e0b" stroke-width="2.5"/>
+            <line x1="163" y1="130" x2="173" y2="130" stroke="#f59e0b" stroke-width="2"/>
+            <line x1="168" y1="125" x2="168" y2="135" stroke="#f59e0b" stroke-width="2"/>
+            <!-- Right screw -->
+            <circle cx="352" cy="130" r="9" fill="#1e2538" stroke="#f59e0b" stroke-width="2.5"/>
+            <line x1="347" y1="130" x2="357" y2="130" stroke="#f59e0b" stroke-width="2"/>
+            <line x1="352" y1="125" x2="352" y2="135" stroke="#f59e0b" stroke-width="2"/>
+            <!-- Screw label -->
+            <text x="260" y="116" font-family="system-ui,sans-serif" font-size="10" fill="#f59e0b" text-anchor="middle">2× vis Allen 5/32" — une par côté</text>
+            <!-- Grip block (below, being separated) -->
+            <rect x="180" y="148" width="160" height="80" rx="6" fill="#2dd4bf" opacity="0.08" stroke="#2dd4bf" stroke-width="2"/>
+            <!-- Grip texture lines -->
+            <line x1="185" y1="158" x2="335" y2="158" stroke="#2dd4bf" stroke-width="0.5" opacity=".2"/>
+            <line x1="185" y1="166" x2="335" y2="166" stroke="#2dd4bf" stroke-width="0.5" opacity=".2"/>
+            <line x1="185" y1="174" x2="335" y2="174" stroke="#2dd4bf" stroke-width="0.5" opacity=".2"/>
+            <line x1="185" y1="182" x2="335" y2="182" stroke="#2dd4bf" stroke-width="0.5" opacity=".2"/>
+            <line x1="185" y1="190" x2="335" y2="190" stroke="#2dd4bf" stroke-width="0.5" opacity=".2"/>
+            <text x="260" y="196" font-family="system-ui,sans-serif" font-size="12" fill="#2dd4bf" text-anchor="middle" font-weight="600">Grip Frame</text>
+            <!-- Down arrow -->
+            <line x1="260" y1="232" x2="260" y2="250" stroke="#2dd4bf" stroke-width="2.5" marker-end="url(#s4arrd)"/>
+            <text x="260" y="248" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf" text-anchor="middle">Tirez vers le bas</text>
+            <!-- Connector cable (red warning) -->
+            <path d="M 210 52 Q 210 40 240 40 Q 265 40 265 55" fill="none" stroke="#e63946" stroke-width="2.5" stroke-dasharray="5,3"/>
+            <circle cx="265" cy="60" r="5" fill="#e63946" opacity="0.8"/>
+            <!-- Warning callout -->
+            <rect x="20" y="28" width="180" height="38" rx="5" fill="rgba(230,57,70,0.08)" stroke="rgba(230,57,70,0.3)" stroke-width="1"/>
+            <text x="110" y="43" font-family="system-ui,sans-serif" font-size="11" fill="#e63946" text-anchor="middle" font-weight="700">⚠ Débrancher D'ABORD</text>
+            <text x="110" y="57" font-family="system-ui,sans-serif" font-size="10" fill="#e63946" text-anchor="middle">le connecteur solénoïde</text>
           </svg>
         </div>
         <div class="step-body">
-          <div class="step-location">📍 <strong>Où agir :</strong> La poignée (<span class="term" title="Grip frame = la partie que vous tenez en main, qui contient la gâchette, les boutons et l'électronique">grip frame</span>) est la partie que vous tenez en main pour tirer. Elle est fixée sous le corps principal du lanceur par 2 vis sur les côtés. L'électrovanne (<span class="term" title="Solénoïde / électrovanne = la pièce électronique qui ouvre et ferme le passage de gaz pour tirer une bille — c'est le 'cerveau' pneumatique du lanceur">solénoïde</span>) se trouve sur le dessus de la poignée, à l'avant. Un câble fin la relie au circuit électronique.</div>
+          <div class="step-location"><strong>Où agir :</strong> La <span class="term" title="Grip frame = partie tenue en main, contenant gâchette et électronique">poignée</span> est fixée sous le corps par 2 vis latérales. L'<span class="term" title="Solénoïde = électrovanne qui ouvre/ferme le gaz à chaque tir">électrovanne</span> sur le dessus de la poignée est reliée au corps par un câble délicat.</div>
           <ol class="step-list">
-            <li>
-              <strong>Avant tout, photographiez le câblage avec votre téléphone.</strong>
-              <span class="step-detail">Prenez une photo bien nette des fils connectés à l'électrovanne, depuis le dessus et depuis le côté. Cette photo sera votre référence au remontage — un mauvais branchement peut empêcher le lanceur de tirer ou griller l'électronique.</span>
-            </li>
-            <li>
-              <strong>Débranchez délicatement le connecteur de l'électrovanne.</strong>
-              <span class="step-detail">Le connecteur, c'est le petit embout plastique à l'extrémité du câble qui s'enfiche dans l'électrovanne. Pincez le corps plastique du connecteur entre le pouce et l'index et tirez doucement dans l'axe du câble. <strong>Ne tirez jamais sur le câble lui-même</strong> — vous arracheriez le fil de son connecteur, ce qui est une réparation coûteuse.</span>
-            </li>
-            <li>
-              <strong>Repérez les 2 vis sur les côtés du corps qui retiennent la poignée.</strong>
-              <span class="step-detail">Ces vis utilisent une clé hexagonale de 5/32 de pouce (environ 4 mm). Elles se trouvent une de chaque côté du lanceur, à la jonction entre le corps et la poignée. Dévissez-les en alternant (une demi-tour à gauche, une demi-tour à droite) pour ne pas contraindre l'assemblage.</span>
-            </li>
-            <li>
-              <strong>Tirez la poignée vers le bas pour la séparer du corps.</strong>
-              <span class="step-detail">La poignée peut nécessiter une légère pression de chaque côté pour se décoller — c'est souvent un joint d'étanchéité qui colle légèrement. Tirez doucement et régulièrement sans tordre. Posez la poignée sur le tapis, côté électronique vers le haut.</span>
-            </li>
+            <li><strong>Photographiez le câblage de l'électrovanne.</strong><span class="step-detail">Photo nette depuis le dessus et le côté. Référence indispensable au remontage — un mauvais branchement peut griller l'électronique.</span></li>
+            <li><strong>Débranchez délicatement le connecteur de l'électrovanne.</strong><span class="step-detail">Pincez le corps plastique du connecteur. <strong>Jamais sur le fil lui-même</strong> — arrachement = réparation 40-60€.</span></li>
+            <li><strong>Dévissez les 2 vis latérales Allen 5/32".</strong><span class="step-detail">Une de chaque côté, à la jonction corps/poignée. Alternez (demi-tour à gauche, demi-tour à droite).</span></li>
+            <li><strong>Tirez la poignée vers le bas.</strong><span class="step-detail">Légère pression des deux côtés si elle colle. Posez côté électronique vers le haut.</span></li>
           </ol>
-          <div class="step-verify">✅ <strong>Comment savoir que c'est bon :</strong> La poignée est séparée du corps et posée à part. Le câble de l'électrovanne est débranché proprement et le connecteur est intact (pas de fil arraché). Vérifiez sur votre photo que vous vous souvenez de quel côté se branche le connecteur.</div>
-          <div class="warn-box">⚠️ Le câble de l'électrovanne est la pièce la plus fragile de tout le lanceur. Une seule traction mal placée sur le fil et vous avez une réparation à 40-60€. Toujours saisir le connecteur plastique, jamais le fil.</div>
+          <div class="step-verify"><strong>Vérification :</strong> Poignée séparée et posée à part. Connecteur intact (pas de fil arraché). Vérifiez sur la photo que vous vous souvenez du sens de branchement.</div>
+          <div class="warn-box">Le câble de l'électrovanne est la pièce la plus fragile du lanceur. Toujours saisir le connecteur plastique, jamais le fil.</div>
         </div>
         <div class="step-footer">
-          <div class="step-tools"><span class="tool">🔩 Allen 5/32"</span><span class="tool">📸 Photo câblage</span></div>
+          <div class="step-tools"><span class="tool">Allen 5/32"</span><span class="tool">Photo câblage</span></div>
           <div class="step-actions">
-            <button class="note-btn" data-step="4">📝 Note</button>
+            <button class="note-btn" data-step="4">Note</button>
             <button class="complete-btn" data-step="4" aria-label="Valider étape 4">✓ Valider</button>
           </div>
         </div>
@@ -1057,174 +694,85 @@
           <div class="step-check" aria-hidden="true"></div>
         </div>
         <div class="step-visual">
-                    <svg viewBox="0 0 520 235" role="img" aria-label="Dye DAM — Étape 5 : Retrait de l'électrovanne (solénoïde) — 4 vis M2 clé 1,5mm en ordre croisé" style="width:100%;height:auto;display:block;">
+          <svg viewBox="0 0 600 260" role="img" aria-label="Étape 5 — Retrait solénoïde" style="width:100%;height:100%;display:block;">
             <defs>
-
-              <marker id="s5_t" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#06d6a0"/></marker>
-              <marker id="s5_o" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#ff9a00"/></marker>
+              <pattern id="s5dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="0.9" fill="#4a9eff" opacity="0.06"/>
+              </pattern>
+              <marker id="s5arru" markerWidth="8" markerHeight="7" refX="3.5" refY="0" orient="auto">
+                <polygon points="0 7,3.5 0,7 7" fill="#2dd4bf"/>
+              </marker>
+              <marker id="s5arro" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto">
+                <polygon points="0 0,8 3.5,0 7" fill="#f59e0b"/>
+              </marker>
             </defs>
-            <rect width="520" height="235" fill="#0b0d18"/>
-  <!-- BARREL -->
-  <rect x="6" y="112" width="7" height="15" rx="2" fill="#1e2345" stroke="#2d3461" stroke-width="1.2"/>
-  <rect x="11" y="115" width="156" height="9" rx="2.5" fill="#1e2345" stroke="#2d3461" stroke-width="1.2"/>
-  <rect x="15" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="21" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="27" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="33" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="39" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="163" y="110" width="11" height="19" rx="1.5" fill="#252b50" stroke="#2d3461" stroke-width="1"/>
-  <!-- BODY -->
-  <path d="M172 98 L306 98 L306 150 L172 150 Z" fill="#244f7c" stroke="#457b9d" stroke-width="2.0"/>
-  <path d="M168 98 L174 150 L172 150 L165 98 Z" fill="#252b50" stroke="#457b9d" stroke-width="0.8"/>
-  <rect x="304" y="98" width="5" height="52" rx="1" fill="#252b50" stroke="#457b9d" stroke-width="0.8"/>
-  <rect x="174" y="92" width="132" height="6" rx="1" fill="#2d3561" stroke="#457b9d" stroke-width="0.8"/>
-  <rect x="177" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="185" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="193" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="201" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="209" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="217" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="225" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="233" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="241" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="249" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="257" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="265" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="273" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="281" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="289" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="297" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="193" y="118" width="24" height="12" rx="1" fill="#0d1020" stroke="#252b50" stroke-width="0.8"/>
-  <rect x="282" y="93" width="8" height="5" rx="1" fill="#141828" stroke="#3d4585" stroke-width="0.7"/>
-  <!-- SOLENOID -->
-  <rect x="188" y="98" width="80" height="8" rx="1.5" fill="#0d4f3c" stroke="#06d6a0" stroke-width="2.0"/>
-  <rect x="264" y="95" width="10" height="10" rx="1" fill="#0d2018" stroke="#06d6a0" stroke-width="0.8"/>
-  <!-- FEED NECK -->
-  <rect x="224" y="64" width="48" height="34" rx="3" fill="#141828" stroke="#3d4585" stroke-width="1.2"/>
-  <rect x="222" y="64" width="52" height="6" rx="2" fill="#252b50" stroke="#3d4585" stroke-width="1"/>
-  <rect x="222" y="90" width="52" height="4" rx="2" fill="#1a2040" stroke="#3d4585" stroke-width="0.8"/>
-  <ellipse cx="248" cy="64" rx="21" ry="5.5" fill="#0d1020" stroke="#3d4585" stroke-width="1"/>
-  <!-- LOWER RECEIVER -->
-  <path d="M174 150 L174 182 L278 182 L278 150 Z" fill="#141828" stroke="#3d4585" stroke-width="1.2"/>
-  <path d="M200 182 Q208 200 238 200 Q266 200 266 182" fill="none" stroke="#252b50" stroke-width="2.2"/>
-  <polygon points="232,155 237,155 237,179 232,179" fill="#c8c8c8" opacity="0.7"/>
-  <rect x="208" y="158" width="5" height="8" rx="1" fill="#e63946" opacity="0.7"/>
-  <!-- MAGAZINE -->
-  <rect x="185" y="182" width="52" height="42" rx="3" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.0"/>
-  <line x1="189" y1="185" x2="189" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="193" y1="185" x2="193" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="197" y1="185" x2="197" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="201" y1="185" x2="201" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="205" y1="185" x2="205" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="209" y1="185" x2="209" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="213" y1="185" x2="213" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="217" y1="185" x2="217" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="221" y1="185" x2="221" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="225" y1="185" x2="225" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <rect x="183" y="222" width="56" height="5" rx="2" fill="#252b50" stroke="#3d4585" stroke-width="0.8"/>
-  <!-- GRIP -->
-  <path d="M278 150 L278 212 C278 216 282 220 287 220 L308 220 C313 220 316 216 316 212 L316 150 Z" fill="#141828" stroke="#3d4585" stroke-width="1.2"/>
-  <line x1="280" y1="162" x2="315" y2="162" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="168" x2="315" y2="168" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="174" x2="315" y2="174" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="180" x2="315" y2="180" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="186" x2="315" y2="186" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="192" x2="315" y2="192" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="198" x2="315" y2="198" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="204" x2="315" y2="204" stroke="#1e2345" stroke-width="0.8"/>
-  <rect x="306" y="152" width="10" height="24" rx="2" fill="#0d1020" stroke="#457b9d" stroke-width="0.8"/>
-  <circle cx="311" cy="157" r="2.2" fill="#06d6a0" opacity="0.85"/>
-  <circle cx="311" cy="163" r="2" fill="#ffd166" opacity="0.65"/>
-  <rect x="308" y="168" width="6" height="3" rx="1" fill="#252b50"/>
-  <rect x="308" y="173" width="6" height="3" rx="1" fill="#252b50"/>
-  <!-- ASA -->
-  <ellipse cx="297" cy="220" rx="16" ry="6" fill="#1a2040" stroke="#457b9d" stroke-width="1.2"/>
-  <!-- REGULATOR -->
-  <rect x="316" y="160" width="5" height="50" rx="1.5" fill="#1a1f3a" stroke="#3d4585" stroke-width="0.8"/>
-  <circle cx="345" cy="193" r="26" fill="#0d1117" stroke="#457b9d" stroke-width="1.8"/>
-  <circle cx="345" cy="193" r="18" fill="#111827" stroke="#457b9d" stroke-width="1.2"/>
-  <circle cx="345" cy="193" r="10" fill="#1a1f3a" stroke="#457b9d" stroke-width="1"/>
-  <circle cx="345" cy="193" r="4.5" fill="#252b50"/>
-  <line x1="367.0" y1="193.0" x2="362.0" y2="193.0" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="356.0" y1="212.1" x2="353.5" y2="207.7" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="334.0" y1="212.1" x2="336.5" y2="207.7" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="323.0" y1="193.0" x2="328.0" y2="193.0" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="334.0" y1="173.9" x2="336.5" y2="178.3" stroke="#c8c8c8" stroke-width="1.5"/>
-  <line x1="356.0" y1="173.9" x2="353.5" y2="178.3" stroke="#c8c8c8" stroke-width="1.5"/>
-  <!-- STEP 5 — SOLENOID DETAIL -->
-  <!-- Solenoid lifted off body, shown above -->
-  <rect x="186" y="55" width="82" height="18" rx="2.5" fill="#0d4f3c" stroke="#06d6a0" stroke-width="2.5"/>
-  <!-- Internal solenoid detail -->
-  <rect x="192" y="58" width="22" height="12" rx="2" fill="#1a3a5c" stroke="#457b9d" stroke-width="0.8"/>
-  <rect x="220" y="60" width="10" height="5" rx="1" fill="#e63946" opacity="0.8"/>
-  <rect x="220" y="67" width="10" height="5" rx="1" fill="#ffd166" opacity="0.7"/>
-  <circle cx="244" cy="64" r="6" fill="#1a3a5c" stroke="#457b9d" stroke-width="1"/>
-  <!-- Solenoid body label -->
-  <text x="187" y="50" font-family="sans-serif" font-size="8" fill="#06d6a0" font-weight="bold">Électrovanne (Solénoïde)</text>
-
-  <!-- Gap between solenoid and body (showing lift) -->
-  <line x1="188" y1="73" x2="188" y2="99" stroke="#06d6a0" stroke-width="1.5" stroke-dasharray="3,2"/>
-  <line x1="268" y1="73" x2="268" y2="99" stroke="#06d6a0" stroke-width="1.5" stroke-dasharray="3,2"/>
-  <!-- Lift arrows -->
-  <line x1="228" y1="97" x2="228" y2="77" stroke="#06d6a0" stroke-width="2" marker-end="url(#s5_t)"/>
-  <text x="228" y="90" font-family="sans-serif" font-size="8" fill="#06d6a0" text-anchor="middle"> </text>
-
-  <!-- 4 M2 screws on body (orange dots) -->
-  <circle cx="196" cy="100" r="4.5" fill="#0d1020" stroke="#ff9a00" stroke-width="2"/>
-  <line x1="193.8" y1="100" x2="198.2" y2="100" stroke="#ff9a00" stroke-width="1.5"/>
-  <line x1="196" y1="97.8" x2="196" y2="102.2" stroke="#ff9a00" stroke-width="1.5"/>
-  <circle cx="218" cy="100" r="4.5" fill="#0d1020" stroke="#ff9a00" stroke-width="2"/>
-  <line x1="215.8" y1="100" x2="220.2" y2="100" stroke="#ff9a00" stroke-width="1.5"/>
-  <line x1="218" y1="97.8" x2="218" y2="102.2" stroke="#ff9a00" stroke-width="1.5"/>
-  <circle cx="248" cy="100" r="4.5" fill="#0d1020" stroke="#ff9a00" stroke-width="2"/>
-  <line x1="245.8" y1="100" x2="250.2" y2="100" stroke="#ff9a00" stroke-width="1.5"/>
-  <line x1="248" y1="97.8" x2="248" y2="102.2" stroke="#ff9a00" stroke-width="1.5"/>
-  <circle cx="260" cy="100" r="4.5" fill="#0d1020" stroke="#ff9a00" stroke-width="2"/>
-  <line x1="257.8" y1="100" x2="262.2" y2="100" stroke="#ff9a00" stroke-width="1.5"/>
-  <line x1="260" y1="97.8" x2="260" y2="102.2" stroke="#ff9a00" stroke-width="1.5"/>
-
-  <!-- Screw callout -->
-  <line x1="248" y1="105" x2="320" y2="130" stroke="#ff9a00" stroke-width="1.5" marker-end="url(#s5_o)"/>
-  <rect x="320" y="118" width="190" height="32" rx="3" fill="#ff9a00" fill-opacity="0.1" stroke="#ff9a00" stroke-width="1"/>
-  <text x="415" y="130" font-family="sans-serif" font-size="9" fill="#ffcc66" text-anchor="middle" font-weight="bold">4× vis M2 — clé hexagonale 1,5mm</text>
-  <text x="415" y="142" font-family="sans-serif" font-size="8" fill="#ff9a00" text-anchor="middle">Dévissez en croix alternée</text>
-  <text x="415" y="152" font-family="sans-serif" font-size="7.5" fill="#9d6000" text-anchor="middle">(les plus petites vis du lanceur !)</text>
-
-  <!-- Allen 1.5mm icon -->
-  <rect x="8" y="155" width="22" height="4" rx="1.5" fill="#252b50" stroke="#c8c8c8" stroke-width="0.8"/>
-  <rect x="6" y="150" width="4" height="14" rx="1.5" fill="#252b50" stroke="#c8c8c8" stroke-width="0.8"/>
-  <text x="34" y="161" font-family="sans-serif" font-size="8" fill="#c8c8c8">Clé 1,5mm</text>
-
-  <!-- Cross pattern reminder -->
-  <rect x="8" y="170" width="140" height="40" rx="3" fill="#06d6a0" fill-opacity="0.08" stroke="#06d6a0" stroke-width="1"/>
-  <text x="78" y="182" font-family="sans-serif" font-size="8" fill="#06d6a0" text-anchor="middle" font-weight="bold">Ordre de dévissage en croix :</text>
-  <text x="78" y="193" font-family="sans-serif" font-size="8" fill="#06d6a0" text-anchor="middle">① haut-gauche → ② bas-droite</text>
-  <text x="78" y="204" font-family="sans-serif" font-size="8" fill="#06d6a0" text-anchor="middle">③ haut-droite → ④ bas-gauche</text>
+            <rect width="600" height="260" fill="#07090f"/>
+            <rect width="600" height="260" fill="url(#s5dots)"/>
+            <text x="300" y="200" font-family="Arial Black,sans-serif" font-size="160" font-weight="900" fill="#2dd4bf" opacity="0.03" text-anchor="middle">05</text>
+            <!-- Body (top view implied, showing solenoid seat) -->
+            <rect x="120" y="130" width="280" height="80" rx="6" fill="#1e2538" stroke="#252d40" stroke-width="1.5"/>
+            <text x="260" y="178" font-family="system-ui,sans-serif" font-size="11" fill="#7a8299" text-anchor="middle">Corps principal</text>
+            <!-- 4 screw holes on body -->
+            <circle cx="164" cy="132" r="7" fill="#07090f" stroke="#f59e0b" stroke-width="2.5"/>
+            <line x1="160" y1="132" x2="168" y2="132" stroke="#f59e0b" stroke-width="1.5"/>
+            <line x1="164" y1="128" x2="164" y2="136" stroke="#f59e0b" stroke-width="1.5"/>
+            <circle cx="210" cy="132" r="7" fill="#07090f" stroke="#f59e0b" stroke-width="2.5"/>
+            <line x1="206" y1="132" x2="214" y2="132" stroke="#f59e0b" stroke-width="1.5"/>
+            <line x1="210" y1="128" x2="210" y2="136" stroke="#f59e0b" stroke-width="1.5"/>
+            <circle cx="310" cy="132" r="7" fill="#07090f" stroke="#f59e0b" stroke-width="2.5"/>
+            <line x1="306" y1="132" x2="314" y2="132" stroke="#f59e0b" stroke-width="1.5"/>
+            <line x1="310" y1="128" x2="310" y2="136" stroke="#f59e0b" stroke-width="1.5"/>
+            <circle cx="356" cy="132" r="7" fill="#07090f" stroke="#f59e0b" stroke-width="2.5"/>
+            <line x1="352" y1="132" x2="360" y2="132" stroke="#f59e0b" stroke-width="1.5"/>
+            <line x1="356" y1="128" x2="356" y2="136" stroke="#f59e0b" stroke-width="1.5"/>
+            <!-- Screw order label -->
+            <text x="125" y="148" font-family="system-ui,sans-serif" font-size="9" fill="#f59e0b">①</text>
+            <text x="207" y="148" font-family="system-ui,sans-serif" font-size="9" fill="#f59e0b">③</text>
+            <text x="305" y="148" font-family="system-ui,sans-serif" font-size="9" fill="#f59e0b">④</text>
+            <text x="352" y="148" font-family="system-ui,sans-serif" font-size="9" fill="#f59e0b">②</text>
+            <!-- Solenoid lifted above -->
+            <rect x="120" y="50" width="280" height="52" rx="5" fill="#2dd4bf" opacity="0.1" stroke="#2dd4bf" stroke-width="2.5"/>
+            <!-- Solenoid internal detail -->
+            <rect x="130" y="58" width="60" height="36" rx="3" fill="#111624" stroke="#2f3a52" stroke-width="1"/>
+            <rect x="200" y="60" width="25" height="14" rx="2" fill="#e63946" opacity="0.7"/>
+            <rect x="200" y="78" width="25" height="14" rx="2" fill="#f59e0b" opacity="0.7"/>
+            <circle cx="260" cy="76" r="12" fill="#111624" stroke="#4a9eff" stroke-width="1.5"/>
+            <circle cx="260" cy="76" r="5" fill="#4a9eff" opacity=".4"/>
+            <text x="310" y="72" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf">Solénoïde</text>
+            <text x="310" y="84" font-family="system-ui,sans-serif" font-size="9" fill="#404860">Électrovanne 3 voies</text>
+            <!-- Lift arrows -->
+            <line x1="175" y1="126" x2="175" y2="108" stroke="#2dd4bf" stroke-width="2" stroke-dasharray="4,3"/>
+            <polygon points="175,100 169,112 181,112" fill="#2dd4bf"/>
+            <line x1="345" y1="126" x2="345" y2="108" stroke="#2dd4bf" stroke-width="2" stroke-dasharray="4,3"/>
+            <polygon points="345,100 339,112 351,112" fill="#2dd4bf"/>
+            <!-- Screw label callout -->
+            <line x1="370" y1="132" x2="430" y2="120" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#s5arro)"/>
+            <rect x="432" y="100" width="148" height="50" rx="5" fill="rgba(245,158,11,0.08)" stroke="rgba(245,158,11,0.25)" stroke-width="1"/>
+            <text x="506" y="116" font-family="system-ui,sans-serif" font-size="11" fill="#f59e0b" text-anchor="middle" font-weight="700">4× vis M2 — clé 1,5mm</text>
+            <text x="506" y="130" font-family="system-ui,sans-serif" font-size="10" fill="#7a8299" text-anchor="middle">Ordre croisé ① ② ③ ④</text>
+            <text x="506" y="143" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">Les plus petites vis du lanceur</text>
+            <!-- Cross order box -->
+            <rect x="432" y="170" width="148" height="66" rx="5" fill="rgba(45,212,191,0.06)" stroke="rgba(45,212,191,0.2)" stroke-width="1"/>
+            <text x="506" y="185" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf" text-anchor="middle" font-weight="600">Ordre de dévissage :</text>
+            <text x="506" y="200" font-family="system-ui,sans-serif" font-size="9" fill="#2dd4bf" text-anchor="middle">① haut-gauche → ② bas-droit</text>
+            <text x="506" y="214" font-family="system-ui,sans-serif" font-size="9" fill="#2dd4bf" text-anchor="middle">③ haut-droit → ④ bas-gauche</text>
+            <text x="506" y="228" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">2-3 tours par vis avant suivante</text>
           </svg>
         </div>
         <div class="step-body">
-          <div class="step-location">📍 <strong>Où agir :</strong> L'électrovanne (<span class="term" title="Solénoïde = électrovanne 3 voies qui commande l'ouverture et la fermeture du gaz à chaque tir">solénoïde</span>) est une petite pièce noire rectangulaire vissée sur le dessus du corps principal, vers l'avant-centre. Elle est facilement reconnaissable : c'est la seule pièce avec un câble électrique qui en sort. Elle est retenue par 4 toutes petites vis — les plus petites de tout le lanceur.</div>
+          <div class="step-location"><strong>Où agir :</strong> L'<span class="term" title="Solénoïde = électrovanne 3 voies commandant le gaz à chaque tir">électrovanne</span> = petite pièce noire rectangulaire vissée sur le dessus du corps, vers l'avant-centre. Reconnaissable par le câble électrique. Retenue par 4 micro-vis M2 — les plus petites du lanceur.</div>
           <ol class="step-list">
-            <li>
-              <strong>Repérez les 4 micro-vis M2 qui maintiennent l'électrovanne sur le corps.</strong>
-              <span class="step-detail">Ces vis font 2 mm de diamètre — elles sont minuscules. Vous aurez besoin d'une clé hexagonale de 1,5 mm, aussi fine qu'un cure-dent épais. Cherchez-les aux 4 coins de l'électrovanne. Si vous en voyez une sous une étiquette, décollage délicatement le bord de l'étiquette pour accéder à la vis (ne l'arrachez pas entièrement, vous en aurez besoin pour retrouver le numéro de série).</span>
-            </li>
-            <li>
-              <strong>Dévissez les 4 vis en croix, en alternant : haut-gauche, bas-droite, haut-droite, bas-gauche.</strong>
-              <span class="step-detail">Cette technique en croix évite de tordre la platine de l'électrovanne. Faites chaque vis de 2 à 3 tours seulement avant de passer à la suivante, jusqu'à ce que les 4 soient dévissées. Posez ces minuscules vis dans un compartiment séparé de votre pot à vis — elles sont très difficiles à retrouver si elles tombent.</span>
-            </li>
-            <li>
-              <strong>Soulevez l'électrovanne délicatement, en la maintenant à plat.</strong>
-              <span class="step-detail">L'électrovanne peut avoir de petits joints en dessous qui collent légèrement. Soulevez-la doucement et à plat — ne la penchez pas, sous peine de casser les petits tuyaux d'air internes. Déposez-la sur le tapis, face avec les inscriptions (le <span class="term" title="PCB = la carte électronique verte qui se trouve à l'intérieur ou à l'extérieur de l'électrovanne">circuit imprimé</span>) vers le haut.</span>
-            </li>
+            <li><strong>Repérez les 4 micro-vis M2 aux 4 coins de l'électrovanne.</strong><span class="step-detail">Diamètre 2mm — clé hexagonale 1,5mm obligatoire (fine comme un cure-dent épais). Si une vis est sous une étiquette, décollezle bord délicatement.</span></li>
+            <li><strong>Dévissez en croix : ① haut-gauche, ② bas-droit, ③ haut-droit, ④ bas-gauche.</strong><span class="step-detail">2-3 tours par vis avant de passer à la suivante — évite de tordre la platine. Posez ces 4 vis dans un compartiment séparé du pot.</span></li>
+            <li><strong>Soulevez l'électrovanne à plat, sans la pencher.</strong><span class="step-detail">Des petits joints en dessous peuvent coller légèrement. Ne penchez pas — les micro-canaux d'air internes sont fragiles. Déposez sur le tapis, <span class="term" title="PCB = circuit imprimé électronique">PCB</span> vers le haut.</span></li>
           </ol>
-          <div class="step-verify">✅ <strong>Comment savoir que c'est bon :</strong> L'électrovanne est posée à plat sur le tapis, ses 4 vis sont en sécurité dans le pot. Regardez l'emplacement sur le corps — vous devez voir les 4 petits trous de vis et éventuellement les mini-canaux d'air. Il ne doit rester aucune vis dans les trous.</div>
-          <div class="tip-box">💡 Les 4 vis M2 de l'électrovanne sont les pièces les plus facilement perdues de tout le démontage. Certains propriétaires les collent temporairement sur un bout de scotch numéroté pendant le nettoyage.</div>
+          <div class="step-verify"><strong>Vérification :</strong> Électrovanne à plat sur le tapis, 4 vis en sécurité. Les 4 trous de vis et les mini-canaux d'air sont visibles sur le corps.</div>
+          <div class="tip-box">Certains collent les 4 vis M2 sur un bout de scotch numéroté pendant le nettoyage — bonne pratique.</div>
         </div>
         <div class="step-footer">
-          <div class="step-tools"><span class="tool">🔩 Allen 1.5mm</span><span class="tool">⚡ Anti-statique</span></div>
+          <div class="step-tools"><span class="tool">Allen 1,5mm</span><span class="tool">Anti-statique</span></div>
           <div class="step-actions">
-            <button class="note-btn" data-step="5">📝 Note</button>
+            <button class="note-btn" data-step="5">Note</button>
             <button class="complete-btn" data-step="5" aria-label="Valider étape 5">✓ Valider</button>
           </div>
         </div>
@@ -1244,168 +792,72 @@
           <div class="step-check" aria-hidden="true"></div>
         </div>
         <div class="step-visual">
-                    <svg viewBox="0 0 520 235" role="img" aria-label="Dye DAM — Étape 6 : Régulateur de pression — clé à sangle, antihoraire, 2 joints toriques #010 et #012" style="width:100%;height:auto;display:block;">
+          <svg viewBox="0 0 600 260" role="img" aria-label="Étape 6 — Régulateur de pression" style="width:100%;height:100%;display:block;">
             <defs>
-
-              <marker id="s6_y" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#ffd166"/></marker>
-              <marker id="s6_r" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#e63946"/></marker>
+              <pattern id="s6dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="0.9" fill="#4a9eff" opacity="0.06"/>
+              </pattern>
+              <marker id="s6arrr" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto">
+                <polygon points="0 0,8 3.5,0 7" fill="#e63946"/>
+              </marker>
             </defs>
-            <rect width="520" height="235" fill="#0b0d18"/>
-  <!-- BARREL -->
-  <rect x="6" y="112" width="7" height="15" rx="2" fill="#1e2345" stroke="#2d3461" stroke-width="1.2"/>
-  <rect x="11" y="115" width="156" height="9" rx="2.5" fill="#1e2345" stroke="#2d3461" stroke-width="1.2"/>
-  <rect x="15" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="21" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="27" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="33" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="39" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="163" y="110" width="11" height="19" rx="1.5" fill="#252b50" stroke="#2d3461" stroke-width="1"/>
-  <!-- BODY -->
-  <path d="M172 98 L306 98 L306 150 L172 150 Z" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.5"/>
-  <path d="M168 98 L174 150 L172 150 L165 98 Z" fill="#252b50" stroke="#3d4585" stroke-width="0.8"/>
-  <rect x="304" y="98" width="5" height="52" rx="1" fill="#252b50" stroke="#457b9d" stroke-width="0.8"/>
-  <rect x="174" y="92" width="132" height="6" rx="1" fill="#2d3561" stroke="#457b9d" stroke-width="0.8"/>
-  <rect x="177" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="185" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="193" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="201" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="209" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="217" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="225" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="233" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="241" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="249" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="257" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="265" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="273" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="281" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="289" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="297" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="193" y="118" width="24" height="12" rx="1" fill="#0d1020" stroke="#252b50" stroke-width="0.8"/>
-  <rect x="282" y="93" width="8" height="5" rx="1" fill="#141828" stroke="#3d4585" stroke-width="0.7"/>
-  <!-- SOLENOID -->
-  <rect x="188" y="98" width="80" height="8" rx="1.5" fill="#111825" stroke="#2d3461" stroke-width="0.8"/>
-  <rect x="264" y="95" width="10" height="10" rx="1" fill="#0d2018" stroke="#2d3461" stroke-width="0.8"/>
-  <!-- FEED NECK -->
-  <rect x="224" y="64" width="48" height="34" rx="3" fill="#141828" stroke="#3d4585" stroke-width="1.2"/>
-  <rect x="222" y="64" width="52" height="6" rx="2" fill="#252b50" stroke="#3d4585" stroke-width="1"/>
-  <rect x="222" y="90" width="52" height="4" rx="2" fill="#1a2040" stroke="#3d4585" stroke-width="0.8"/>
-  <ellipse cx="248" cy="64" rx="21" ry="5.5" fill="#0d1020" stroke="#3d4585" stroke-width="1"/>
-  <!-- LOWER RECEIVER -->
-  <path d="M174 150 L174 182 L278 182 L278 150 Z" fill="#141828" stroke="#3d4585" stroke-width="1.2"/>
-  <path d="M200 182 Q208 200 238 200 Q266 200 266 182" fill="none" stroke="#252b50" stroke-width="2.2"/>
-  <polygon points="232,155 237,155 237,179 232,179" fill="#c8c8c8" opacity="0.7"/>
-  <rect x="208" y="158" width="5" height="8" rx="1" fill="#e63946" opacity="0.7"/>
-  <!-- MAGAZINE -->
-  <rect x="185" y="182" width="52" height="42" rx="3" fill="#1a1f3a" stroke="#3d4585" stroke-width="1.0"/>
-  <line x1="189" y1="185" x2="189" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="193" y1="185" x2="193" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="197" y1="185" x2="197" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="201" y1="185" x2="201" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="205" y1="185" x2="205" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="209" y1="185" x2="209" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="213" y1="185" x2="213" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="217" y1="185" x2="217" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="221" y1="185" x2="221" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="225" y1="185" x2="225" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <rect x="183" y="222" width="56" height="5" rx="2" fill="#252b50" stroke="#3d4585" stroke-width="0.8"/>
-  <!-- GRIP -->
-  <path d="M278 150 L278 212 C278 216 282 220 287 220 L308 220 C313 220 316 216 316 212 L316 150 Z" fill="#141828" stroke="#3d4585" stroke-width="1.2"/>
-  <line x1="280" y1="162" x2="315" y2="162" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="168" x2="315" y2="168" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="174" x2="315" y2="174" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="180" x2="315" y2="180" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="186" x2="315" y2="186" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="192" x2="315" y2="192" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="198" x2="315" y2="198" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="204" x2="315" y2="204" stroke="#1e2345" stroke-width="0.8"/>
-  <rect x="306" y="152" width="10" height="24" rx="2" fill="#0d1020" stroke="#457b9d" stroke-width="0.8"/>
-  <circle cx="311" cy="157" r="2.2" fill="#06d6a0" opacity="0.85"/>
-  <circle cx="311" cy="163" r="2" fill="#ffd166" opacity="0.65"/>
-  <rect x="308" y="168" width="6" height="3" rx="1" fill="#252b50"/>
-  <rect x="308" y="173" width="6" height="3" rx="1" fill="#252b50"/>
-  <!-- ASA -->
-  <ellipse cx="297" cy="220" rx="16" ry="6" fill="#3a2800" stroke="#ffd166" stroke-width="2.0"/>
-  <!-- REGULATOR -->
-  <rect x="316" y="160" width="5" height="50" rx="1.5" fill="#1a1f3a" stroke="#3d4585" stroke-width="0.8"/>
-  <circle cx="345" cy="193" r="26" fill="#1a1200" stroke="#ffd166" stroke-width="2.5"/>
-  <circle cx="345" cy="193" r="18" fill="#111827" stroke="#ffd166" stroke-width="1.2"/>
-  <circle cx="345" cy="193" r="10" fill="#1a1f3a" stroke="#ffd166" stroke-width="1"/>
-  <circle cx="345" cy="193" r="4.5" fill="#252b50"/>
-  <line x1="367.0" y1="193.0" x2="362.0" y2="193.0" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="356.0" y1="212.1" x2="353.5" y2="207.7" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="334.0" y1="212.1" x2="336.5" y2="207.7" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="323.0" y1="193.0" x2="328.0" y2="193.0" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="334.0" y1="173.9" x2="336.5" y2="178.3" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="356.0" y1="173.9" x2="353.5" y2="178.3" stroke="#ffd166" stroke-width="1.5"/>
-  <!-- STEP 6 — REGULATOR DETAIL -->
-  <!-- Regulator bright highlight (overdrawn) -->
-  <circle cx="345" cy="193" r="27" fill="#1a1200" stroke="#ffd166" stroke-width="3"/>
-  <circle cx="345" cy="193" r="19" fill="#111827" stroke="#ffaa00" stroke-width="1.5"/>
-  <circle cx="345" cy="193" r="11" fill="#1a1f3a" stroke="#ffd166" stroke-width="1.2"/>
-  <circle cx="345" cy="193" r="5" fill="#252b50"/>
-  <!-- PSI value -->
-  <text x="345" y="190" font-family="monospace" font-size="7.5" fill="#ffd166" text-anchor="middle" font-weight="bold">165</text>
-  <text x="345" y="199" font-family="monospace" font-size="6" fill="#9d7b00" text-anchor="middle">PSI</text>
-
-  <!-- Anticlockwise rotation arrow -->
-  <path d="M 368 182 A 26 26 0 0 0 325 174" fill="none" stroke="#ffd166" stroke-width="3" stroke-linecap="round" marker-end="url(#s6_y)"/>
-  <text x="388" y="170" font-family="sans-serif" font-size="9" fill="#ffd166" font-weight="bold">↺ antihoraire</text>
-  <text x="388" y="182" font-family="sans-serif" font-size="8" fill="#9d7b00">pour dévisser</text>
-
-  <!-- O-ring at inlet (top of reg, connecting to air line) -->
-  <ellipse cx="345" cy="167" rx="8" ry="4" fill="none" stroke="#e63946" stroke-width="2.5"/>
-  <line x1="353" y1="163" x2="395" y2="145" stroke="#e63946" stroke-width="1.5" marker-end="url(#s6_r)"/>
-  <rect x="396" y="132" width="116" height="22" rx="3" fill="#e63946" fill-opacity="0.12" stroke="#e63946" stroke-width="1"/>
-  <text x="454" y="141" font-family="sans-serif" font-size="8.5" fill="#ff8a8a" text-anchor="middle" font-weight="bold">Joint torique entrée #010</text>
-  <text x="454" y="151" font-family="sans-serif" font-size="7.5" fill="#e63946" text-anchor="middle">(côté corps du lanceur)</text>
-
-  <!-- O-ring at outlet (bottom of reg, ASA side) -->
-  <ellipse cx="345" cy="219" rx="8" ry="4" fill="none" stroke="#e63946" stroke-width="2.5"/>
-  <line x1="353" y1="222" x2="400" y2="232" stroke="#e63946" stroke-width="1.5" marker-end="url(#s6_r)"/>
-  <rect x="400" y="222" width="116" height="22" rx="3" fill="#e63946" fill-opacity="0.12" stroke="#e63946" stroke-width="1"/>
-  <text x="458" y="231" font-family="sans-serif" font-size="8.5" fill="#ff8a8a" text-anchor="middle" font-weight="bold">Joint torique sortie #012</text>
-  <text x="458" y="241" font-family="sans-serif" font-size="7.5" fill="#e63946" text-anchor="middle">(côté bouteille)</text>
-
-  <!-- Reg label -->
-  <rect x="8" y="168" width="148" height="46" rx="3" fill="#ffd166" fill-opacity="0.1" stroke="#ffd166" stroke-width="1"/>
-  <text x="82" y="180" font-family="sans-serif" font-size="9" fill="#ffd166" text-anchor="middle" font-weight="bold">Régulateur de pression</text>
-  <text x="82" y="192" font-family="sans-serif" font-size="8" fill="#9d7b00" text-anchor="middle">Clé à sangle — ne pas ouvrir</text>
-  <text x="82" y="203" font-family="sans-serif" font-size="8" fill="#9d7b00" text-anchor="middle">l'intérieur (calibré usine)</text>
-  <text x="82" y="214" font-family="sans-serif" font-size="7.5" fill="#ffd166" text-anchor="middle">Sortie : 165–175 PSI = 11–12 bars</text>
-
-  <!-- ASA label -->
-  <rect x="248" y="216" width="82" height="14" rx="3" fill="#ffd166" fill-opacity="0.15" stroke="#ffd166" stroke-width="1"/>
-  <text x="289" y="226" font-family="sans-serif" font-size="7.5" fill="#ffd166" text-anchor="middle">Adaptateur bouteille (ASA)</text>
+            <rect width="600" height="260" fill="#07090f"/>
+            <rect width="600" height="260" fill="url(#s6dots)"/>
+            <text x="220" y="200" font-family="Arial Black,sans-serif" font-size="160" font-weight="900" fill="#f59e0b" opacity="0.03" text-anchor="middle">06</text>
+            <!-- Regulator main cross-section (center) -->
+            <circle cx="220" cy="130" r="88" fill="#1e2538" stroke="#f59e0b" stroke-width="3"/>
+            <circle cx="220" cy="130" r="66" fill="#111624" stroke="#f59e0b" stroke-width="1.5"/>
+            <circle cx="220" cy="130" r="44" fill="#0c0f1a" stroke="#f59e0b" stroke-width="1"/>
+            <circle cx="220" cy="130" r="22" fill="#1e2538" stroke="#f59e0b" stroke-width="1"/>
+            <circle cx="220" cy="130" r="9" fill="#252d40"/>
+            <!-- PSI label in center -->
+            <text x="220" y="125" font-family="monospace" font-size="14" fill="#f59e0b" text-anchor="middle" font-weight="700">165</text>
+            <text x="220" y="141" font-family="monospace" font-size="10" fill="#7a8299" text-anchor="middle">PSI</text>
+            <!-- Anticlockwise rotation arc -->
+            <path d="M 305 90 A 90 90 0 0 0 150 68" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+            <polygon points="146,64 142,76 154,72" fill="#f59e0b"/>
+            <text x="340" y="76" font-family="system-ui,sans-serif" font-size="12" fill="#f59e0b" font-weight="700">↺ Clé à sangle</text>
+            <text x="340" y="90" font-family="system-ui,sans-serif" font-size="10" fill="#7a8299">Sens antihoraire</text>
+            <!-- O-ring #010 at top -->
+            <ellipse cx="220" cy="42" rx="26" ry="10" fill="none" stroke="#e63946" stroke-width="3"/>
+            <line x1="246" y1="38" x2="300" y2="22" stroke="#e63946" stroke-width="1.5" marker-end="url(#s6arrr)"/>
+            <rect x="302" y="8" width="148" height="36" rx="5" fill="rgba(230,57,70,0.08)" stroke="rgba(230,57,70,0.25)" stroke-width="1"/>
+            <text x="376" y="23" font-family="system-ui,sans-serif" font-size="11" fill="#e63946" text-anchor="middle" font-weight="700">Joint torique #010</text>
+            <text x="376" y="37" font-family="system-ui,sans-serif" font-size="10" fill="#7a8299" text-anchor="middle">Côté corps du lanceur</text>
+            <!-- O-ring #012 at bottom -->
+            <ellipse cx="220" cy="218" rx="26" ry="10" fill="none" stroke="#e63946" stroke-width="3"/>
+            <line x1="246" y1="222" x2="300" y2="238" stroke="#e63946" stroke-width="1.5" marker-end="url(#s6arrr)"/>
+            <rect x="302" y="224" width="148" height="36" rx="5" fill="rgba(230,57,70,0.08)" stroke="rgba(230,57,70,0.25)" stroke-width="1"/>
+            <text x="376" y="239" font-family="system-ui,sans-serif" font-size="11" fill="#e63946" text-anchor="middle" font-weight="700">Joint torique #012</text>
+            <text x="376" y="253" font-family="system-ui,sans-serif" font-size="10" fill="#7a8299" text-anchor="middle">Côté bouteille (ASA)</text>
+            <!-- Warning box right -->
+            <rect x="452" y="110" width="130" height="56" rx="5" fill="rgba(230,57,70,0.06)" stroke="rgba(230,57,70,0.2)" stroke-width="1"/>
+            <text x="517" y="126" font-family="system-ui,sans-serif" font-size="10" fill="#e63946" text-anchor="middle" font-weight="700">⚠ ATTENTION</text>
+            <text x="517" y="140" font-family="system-ui,sans-serif" font-size="9" fill="#e63946" text-anchor="middle">Ne pas ouvrir</text>
+            <text x="517" y="153" font-family="system-ui,sans-serif" font-size="9" fill="#e63946" text-anchor="middle">l'intérieur !</text>
+            <text x="517" y="163" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">Calibré usine</text>
+            <!-- Reg label left -->
+            <rect x="12" y="104" width="108" height="54" rx="5" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.2)" stroke-width="1"/>
+            <text x="66" y="119" font-family="system-ui,sans-serif" font-size="10" fill="#f59e0b" text-anchor="middle" font-weight="700">Régulateur</text>
+            <text x="66" y="132" font-family="system-ui,sans-serif" font-size="9" fill="#7a8299" text-anchor="middle">Sortie : 165–175</text>
+            <text x="66" y="145" font-family="system-ui,sans-serif" font-size="9" fill="#7a8299" text-anchor="middle">PSI ≈ 11–12 bars</text>
           </svg>
         </div>
         <div class="step-body">
-          <div class="step-location">📍 <strong>Où agir :</strong> Le régulateur de pression est une pièce cylindrique ronde (ressemblant à un gros boulon ou une bobine) vissée sous l'avant du corps principal, entre le corps et l'adaptateur de bouteille (<span class="term" title="ASA = Adaptateur de Bouteille (Air Source Adapter) : la pièce sur laquelle vous vissez la bouteille de gaz">ASA</span>). Il réduit la pression de votre bouteille (environ 200 bars) à une pression de travail basse (environ 11-12 bars) pour ne pas casser les billes.</div>
+          <div class="step-location"><strong>Où agir :</strong> Le régulateur = pièce cylindrique ronde vissée sous le corps, entre le corps et l'<span class="term" title="ASA = Air Source Adapter, adaptateur de bouteille">ASA</span>. Il réduit la pression (~200 bars bouteille) à ~11–12 bars de travail.</div>
           <ol class="step-list">
-            <li>
-              <strong>Procurez-vous la clé à sangle spéciale Dye (fournie avec le lanceur) ou une clé à sangle universelle.</strong>
-              <span class="step-detail">Le régulateur est rond — vous ne pouvez pas l'attraper avec une clé plate ordinaire. La clé à sangle (une bande qui s'enroule autour de la pièce ronde) est l'outil prévu. Si vous n'en avez pas, un chiffon antidérapant épais peut fonctionner pour les régulateurs pas trop serrés.</span>
-            </li>
-            <li>
-              <strong>Enroulez la sangle autour du régulateur et tournez dans le sens antihoraire pour dévisser.</strong>
-              <span class="step-detail">Tenez le corps du lanceur de l'autre main pour éviter qu'il ne tourne avec. Le régulateur peut être serré — appliquez une force régulière sans à-coup. Quand il commence à tourner librement, vous pouvez le finir à la main.</span>
-            </li>
-            <li>
-              <strong>Récupérez les 2 joints toriques d'étanchéité autour du régulateur.</strong>
-              <span class="step-detail">Un joint se trouve à l'entrée du régulateur (côté bouteille, en bas) et un à la sortie (côté corps, en haut). Ils peuvent rester sur le régulateur ou rester dans les logements du corps — cherchez-les soigneusement. Ces joints empêchent la fuite de gaz à haute pression.</span>
-            </li>
-            <li>
-              <strong>N'ouvrez pas le régulateur et ne le démontez pas davantage.</strong>
-              <span class="step-detail">Le régulateur est une pièce de précision calibrée en usine (<span class="term" title="PSI = Pound per Square Inch = unité de pression. 165-175 PSI ≈ 11-12 bars de pression de sortie">165–175 PSI de sortie</span>, soit environ 11-12 bars). Le démonter sans équipement spécialisé risque de modifier irrémédiablement la pression de sortie, ce qui affecterait la vitesse des billes et pourrait dépasser les limites légales du terrain.</span>
-            </li>
+            <li><strong>Procurez-vous la clé à sangle Dye ou une clé à sangle universelle.</strong><span class="step-detail">Le régulateur est rond — impossible avec une clé plate ordinaire. Un chiffon antidérapant épais peut fonctionner si peu serré.</span></li>
+            <li><strong>Enroulez la sangle et tournez antihoraire.</strong><span class="step-detail">Tenez le corps de l'autre main. Force régulière sans à-coup. Finissez à la main quand il tourne librement.</span></li>
+            <li><strong>Récupérez les 2 joints toriques d'étanchéité.</strong><span class="step-detail">Un à l'entrée (côté corps) et un à la sortie (côté bouteille). Peuvent rester sur le régulateur ou dans les logements — cherchez soigneusement.</span></li>
+            <li><strong>N'ouvrez pas le régulateur.</strong><span class="step-detail">Pièce de précision calibrée usine (<span class="term" title="165–175 PSI ≈ 11–12 bars de pression de sortie">165–175 PSI</span>). Démonter sans équipement spécialisé modifie la pression de sortie irrémédiablement.</span></li>
           </ol>
-          <div class="step-verify">✅ <strong>Comment savoir que c'est bon :</strong> Le régulateur est sorti en un seul bloc et vous tenez ses 2 joints toriques. L'emplacement sur le corps du lanceur doit montrer 2 orifices propres (entrée et sortie de gaz).</div>
-          <div class="tip-box">💡 La pression de sortie standard est 165–175 PSI (11–12 bars). Ne la modifiez pas sans utiliser un appareil de mesure de vitesse (chronographe) — une pression trop haute dépasse souvent les 300 FPS autorisés sur les terrains.</div>
+          <div class="step-verify"><strong>Vérification :</strong> Régulateur sorti en un seul bloc, 2 joints toriques récupérés. Les 2 orifices (entrée/sortie) visibles sur le corps.</div>
+          <div class="tip-box">Pression sortie standard 165–175 PSI. Ne modifiez pas sans chronographe — une pression trop haute dépasse les 300 FPS réglementaires.</div>
         </div>
         <div class="step-footer">
-          <div class="step-tools"><span class="tool">🔧 Clé sangle</span><span class="tool">🔴 O-rings ×2</span></div>
+          <div class="step-tools"><span class="tool">Clé à sangle</span><span class="tool">O-rings ×2</span></div>
           <div class="step-actions">
-            <button class="note-btn" data-step="6">📝 Note</button>
+            <button class="note-btn" data-step="6">Note</button>
             <button class="complete-btn" data-step="6" aria-label="Valider étape 6">✓ Valider</button>
           </div>
         </div>
@@ -1425,116 +877,73 @@
           <div class="step-check" aria-hidden="true"></div>
         </div>
         <div class="step-visual">
-                    <svg viewBox="0 0 520 235" role="img" aria-label="Dye DAM — Étape 7 : Nettoyage et inspection — checklist des points critiques, pièces sur tapis" style="width:100%;height:auto;display:block;">
+          <svg viewBox="0 0 600 260" role="img" aria-label="Étape 7 — Nettoyage et inspection" style="width:100%;height:100%;display:block;">
             <defs>
-
-              <marker id="s7_g" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#06d6a0"/></marker>
-              <marker id="s7_r" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#e63946"/></marker>
+              <pattern id="s7dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="0.9" fill="#4a9eff" opacity="0.06"/>
+              </pattern>
             </defs>
-            <rect width="520" height="235" fill="#0b0d18"/>
-
-  <!-- INSPECTION STEP — Parts on mat -->
-  <!-- Mat background -->
-  <rect x="8" y="140" width="504" height="88" rx="6" fill="#0d1e12" stroke="#06d6a0" stroke-width="1" stroke-dasharray="5,3"/>
-  <text x="260" y="156" font-family="sans-serif" font-size="7.5" fill="#06d6a0" text-anchor="middle" opacity="0.5">— TAPIS DE TRAVAIL —</text>
-
-  <!-- Canon on mat -->
-  <rect x="14" y="158" width="110" height="8" rx="2.5" fill="#1e2345" stroke="#457b9d" stroke-width="1.5"/>
-  <rect x="14" y="159" width="3" height="6" rx="0.5" fill="#0b0d18"/>
-  <rect x="19" y="159" width="3" height="6" rx="0.5" fill="#0b0d18"/>
-  <rect x="24" y="159" width="3" height="6" rx="0.5" fill="#0b0d18"/>
-  <text x="69" y="176" font-family="sans-serif" font-size="8" fill="#457b9d" text-anchor="middle">Canon 14"</text>
-  <text x="69" y="186" font-family="sans-serif" font-size="7" fill="#2d3461" text-anchor="middle">Nettoyer l'intérieur</text>
-
-  <!-- Bolt on mat -->
-  <rect x="138" y="156" width="60" height="12" rx="3" fill="#244f7c" stroke="#457b9d" stroke-width="1.5"/>
-  <ellipse cx="155" cy="162" rx="2" ry="7" fill="none" stroke="#06d6a0" stroke-width="2"/>
-  <ellipse cx="172" cy="162" rx="2" ry="7" fill="none" stroke="#06d6a0" stroke-width="2"/>
-  <ellipse cx="186" cy="162" rx="2" ry="7" fill="none" stroke="#06d6a0" stroke-width="2"/>
-  <text x="168" y="178" font-family="sans-serif" font-size="8" fill="#457b9d" text-anchor="middle">Percuteur</text>
-  <text x="168" y="188" font-family="sans-serif" font-size="7" fill="#06d6a0" text-anchor="middle">3 joints toriques</text>
-
-  <!-- Regulator on mat -->
-  <circle cx="242" cy="175" r="18" fill="#0d1117" stroke="#457b9d" stroke-width="1.5"/>
-  <circle cx="242" cy="175" r="11" fill="#111827" stroke="#2d6a8f" stroke-width="1"/>
-  <circle cx="242" cy="175" r="5" fill="#1a1f3a"/>
-  <text x="242" y="200" font-family="sans-serif" font-size="8" fill="#457b9d" text-anchor="middle">Régulateur</text>
-  <text x="242" y="210" font-family="sans-serif" font-size="7" fill="#9d7b00" text-anchor="middle">Ne pas ouvrir</text>
-
-  <!-- Solenoid on mat -->
-  <rect x="272" y="159" width="68" height="18" rx="2.5" fill="#0d2018" stroke="#06d6a0" stroke-width="1.5"/>
-  <rect x="278" y="162" width="22" height="12" rx="2" fill="#1a3a5c"/>
-  <rect x="306" y="163" width="10" height="5" rx="1" fill="#e63946" opacity="0.8"/>
-  <rect x="306" y="170" width="10" height="5" rx="1" fill="#ffd166" opacity="0.7"/>
-  <circle cx="330" cy="168" r="6" fill="#1a3a5c" stroke="#457b9d"/>
-  <text x="306" y="188" font-family="sans-serif" font-size="8" fill="#06d6a0" text-anchor="middle">Électrovanne</text>
-  <text x="306" y="197" font-family="sans-serif" font-size="7" fill="#2d5f8a" text-anchor="middle">Connecteur propre ?</text>
-
-  <!-- O-rings kit on mat -->
-  <circle cx="378" cy="170" r="8" fill="none" stroke="#e63946" stroke-width="2.5"/>
-  <circle cx="393" cy="174" r="6" fill="none" stroke="#e63946" stroke-width="2"/>
-  <circle cx="405" cy="168" r="5" fill="none" stroke="#e63946" stroke-width="1.8"/>
-  <text x="393" y="192" font-family="sans-serif" font-size="8" fill="#e63946" text-anchor="middle">Joints toriques</text>
-  <text x="393" y="202" font-family="sans-serif" font-size="7" fill="#c86060" text-anchor="middle">Inspecter / remplacer</text>
-
-  <!-- Lube bottle -->
-  <rect x="432" y="154" width="14" height="28" rx="4" fill="#1a2800" stroke="#06d6a0" stroke-width="1.5"/>
-  <rect x="434" y="150" width="10" height="6" rx="2" fill="#252b50" stroke="#06d6a0" stroke-width="0.8"/>
-  <text x="439" y="163" font-family="monospace" font-size="6" fill="#06d6a0" text-anchor="middle">DYE</text>
-  <text x="439" y="170" font-family="monospace" font-size="5.5" fill="#06d6a0" text-anchor="middle">LUBE</text>
-  <text x="450" y="196" font-family="sans-serif" font-size="7.5" fill="#06d6a0">Dye Slick Lube</text>
-  <text x="450" y="205" font-family="sans-serif" font-size="7" fill="#2d5f8a">Silicone uniquement</text>
-
-  <!-- Inspection checklist on top half -->
-  <text x="260" y="22" font-family="sans-serif" font-size="11" fill="#c8c8c8" text-anchor="middle" font-weight="bold">Points d'inspection critiques</text>
-  
-  <!-- Check 1: O-rings -->
-  <rect x="8" y="30" width="240" height="24" rx="3" fill="#0d2018" stroke="#06d6a0" stroke-width="1"/>
-  <text x="16" y="45" font-family="sans-serif" font-size="9" fill="#06d6a0">✓  Joints toriques — lisse, souple, sans fissure</text>
-  <!-- Check 2: Barrel -->
-  <rect x="8" y="58" width="240" height="24" rx="3" fill="#0d2018" stroke="#06d6a0" stroke-width="1"/>
-  <text x="16" y="73" font-family="sans-serif" font-size="9" fill="#06d6a0">✓  Canon — intérieur propre, sans débris</text>
-  <!-- Check 3: Body channel -->
-  <rect x="8" y="86" width="240" height="24" rx="3" fill="#0d2018" stroke="#06d6a0" stroke-width="1"/>
-  <text x="16" y="101" font-family="sans-serif" font-size="9" fill="#06d6a0">✓  Tunnel interne — surface lisse et propre</text>
-  <!-- Check 4: No WD-40 -->
-  <rect x="260" y="30" width="252" height="24" rx="3" fill="#2a0808" stroke="#e63946" stroke-width="1"/>
-  <text x="268" y="45" font-family="sans-serif" font-size="9" fill="#e63946">✗  JAMAIS WD-40, huile moteur, graisse pétrolière</text>
-  <!-- Check 5: Electronics -->
-  <rect x="260" y="58" width="252" height="24" rx="3" fill="#0d2018" stroke="#06d6a0" stroke-width="1"/>
-  <text x="268" y="73" font-family="sans-serif" font-size="9" fill="#06d6a0">✓  Électronique — connecteur sans corrosion</text>
-  <!-- Check 6: Lube apply -->
-  <rect x="260" y="86" width="252" height="24" rx="3" fill="#0d2018" stroke="#ffd166" stroke-width="1"/>
-  <text x="268" y="101" font-family="sans-serif" font-size="9" fill="#ffd166">✓  Graisser joints : fine couche Dye Slick Lube</text>
+            <rect width="600" height="260" fill="#07090f"/>
+            <rect width="600" height="260" fill="url(#s7dots)"/>
+            <text x="300" y="200" font-family="Arial Black,sans-serif" font-size="160" font-weight="900" fill="#2dd4bf" opacity="0.03" text-anchor="middle">07</text>
+            <!-- Left column: checklist items -->
+            <text x="20" y="24" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf" font-weight="700" letter-spacing="0.08em">INSPECTION</text>
+            <!-- Item 1: OK -->
+            <rect x="12" y="32" width="250" height="26" rx="4" fill="rgba(45,212,191,0.08)" stroke="rgba(45,212,191,0.25)" stroke-width="1"/>
+            <text x="22" y="49" font-family="system-ui,sans-serif" font-size="11" fill="#2dd4bf">✓  Joints toriques — lisses, souples, sans fissure</text>
+            <!-- Item 2: OK -->
+            <rect x="12" y="62" width="250" height="26" rx="4" fill="rgba(45,212,191,0.08)" stroke="rgba(45,212,191,0.25)" stroke-width="1"/>
+            <text x="22" y="79" font-family="system-ui,sans-serif" font-size="11" fill="#2dd4bf">✓  Canon — intérieur propre, sans débris</text>
+            <!-- Item 3: OK -->
+            <rect x="12" y="92" width="250" height="26" rx="4" fill="rgba(45,212,191,0.08)" stroke="rgba(45,212,191,0.25)" stroke-width="1"/>
+            <text x="22" y="109" font-family="system-ui,sans-serif" font-size="11" fill="#2dd4bf">✓  Tunnel interne — surface lisse et propre</text>
+            <!-- Item 4: NEVER -->
+            <rect x="12" y="122" width="250" height="26" rx="4" fill="rgba(230,57,70,0.08)" stroke="rgba(230,57,70,0.3)" stroke-width="1"/>
+            <text x="22" y="139" font-family="system-ui,sans-serif" font-size="11" fill="#e63946">✗  JAMAIS WD-40 / huile moteur / pétrolier</text>
+            <!-- Item 5: OK -->
+            <rect x="12" y="152" width="250" height="26" rx="4" fill="rgba(45,212,191,0.08)" stroke="rgba(45,212,191,0.25)" stroke-width="1"/>
+            <text x="22" y="169" font-family="system-ui,sans-serif" font-size="11" fill="#2dd4bf">✓  Électronique — connecteur sans corrosion</text>
+            <!-- Item 6: lube -->
+            <rect x="12" y="182" width="250" height="26" rx="4" fill="rgba(245,158,11,0.08)" stroke="rgba(245,158,11,0.25)" stroke-width="1"/>
+            <text x="22" y="199" font-family="system-ui,sans-serif" font-size="11" fill="#f59e0b">✓  Graisser joints : fine couche Dye Slick Lube</text>
+            <!-- Right column: lube tube + o-ring -->
+            <text x="310" y="24" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf" font-weight="700" letter-spacing="0.08em">LUBRIFICATION</text>
+            <!-- Lube tube illustration -->
+            <rect x="310" y="34" width="34" height="80" rx="8" fill="#1e2538" stroke="#2dd4bf" stroke-width="2"/>
+            <rect x="316" y="30" width="22" height="10" rx="3" fill="#252d40" stroke="#2dd4bf" stroke-width="1"/>
+            <text x="327" y="62" font-family="monospace" font-size="8" fill="#2dd4bf" text-anchor="middle" writing-mode="tb">DYE</text>
+            <text x="327" y="95" font-family="monospace" font-size="7" fill="#7a8299" text-anchor="middle">SLICK</text>
+            <text x="310" y="130" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf">Dye Slick Lube</text>
+            <text x="310" y="143" font-family="system-ui,sans-serif" font-size="9" fill="#404860">Silicone 100% uniquement</text>
+            <!-- O-ring cross-section close-up -->
+            <text x="410" y="24" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf" font-weight="700">O-RING GROS PLAN</text>
+            <circle cx="470" cy="105" r="46" fill="none" stroke="#e63946" stroke-width="9"/>
+            <circle cx="470" cy="105" r="30" fill="#07090f"/>
+            <text x="470" y="110" font-family="system-ui,sans-serif" font-size="9" fill="#7a8299" text-anchor="middle">Caoutchouc</text>
+            <text x="470" y="122" font-family="system-ui,sans-serif" font-size="9" fill="#7a8299" text-anchor="middle">NBR</text>
+            <!-- O-ring labels -->
+            <text x="470" y="166" font-family="system-ui,sans-serif" font-size="10" fill="#e63946" text-anchor="middle">Inspecter : lisse et souple</text>
+            <text x="470" y="180" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">Remplacer si: fissuré, dur, déformé</text>
+            <!-- NEVER warning bottom -->
+            <rect x="12" y="222" width="570" height="30" rx="5" fill="rgba(230,57,70,0.06)" stroke="rgba(230,57,70,0.2)" stroke-width="1"/>
+            <text x="300" y="241" font-family="system-ui,sans-serif" font-size="10" fill="#e63946" text-anchor="middle" font-weight="600">⚠  JAMAIS : WD-40 • Huile moteur • Graisse pétrolière • Huile végétale → gonflent et dissolvent les joints NBR</text>
           </svg>
         </div>
         <div class="step-body">
-          <div class="step-location">📍 <strong>Où agir :</strong> C'est l'étape la plus importante pour la longévité du lanceur. Vous allez nettoyer et inspecter toutes les pièces démontées posées sur votre tapis : le corps principal, le canon, le percuteur, le régulateur et l'électrovanne. Les zones critiques sont les rainures des joints toriques, les canaux d'air internes et les surfaces glissantes du percuteur.</div>
+          <div class="step-location"><strong>Où agir :</strong> Toutes les pièces posées sur le tapis : corps, canon, percuteur, régulateur, électrovanne. Zones critiques : rainures des joints, canaux d'air internes, surfaces glissantes du percuteur.</div>
           <ol class="step-list">
-            <li>
-              <strong>Nettoyez chaque pièce avec un chiffon en microfibre légèrement humide ou un dégraissant doux.</strong>
-              <span class="step-detail">Essuyez toutes les surfaces extérieures. Pour le canon, passez un écouvillon propre (ou un chiffon fin roulé sur un cure-dent) dans le tube pour enlever les résidus de billes éclatées et la peinture. N'utilisez <strong>jamais de solvants forts</strong> (acétone, WD-40, white spirit) — ils détruisent les joints en caoutchouc et font gonfler les pièces.</span>
-            </li>
-            <li>
-              <strong>Inspectez chaque joint torique à la loupe ou sous une bonne lumière.</strong>
-              <span class="step-detail">Un joint torique en bon état est lisse, souple, et garde sa forme ronde. Remplacez-le immédiatement s'il présente : des fissures ou craquelures visibles, des déformations (il n'est plus parfaitement rond), une surface dure et peu souple (vieillissement), ou des entailles. Les joints défectueux sont la cause n°1 des fuites de gaz.</span>
-            </li>
-            <li>
-              <strong>Inspectez le canal interne du corps du lanceur avec une petite lampe de poche.</strong>
-              <span class="step-detail">Pointez la lampe dans le tunnel où coulisse le percuteur. La surface doit être lisse, légèrement brillante et exempte de débris (morceaux de billes, peinture séchée, sable). Si vous voyez des dépôts, utilisez un écouvillon sec pour nettoyer.</span>
-            </li>
-            <li>
-              <strong>Appliquez une fine couche de lubrifiant spécial paintball (Dye Slick Lube ou équivalent) sur les joints toriques et les surfaces glissantes.</strong>
-              <span class="step-detail">Le Dye Slick Lube est une graisse silicone transparente. Mettez-en une toute petite quantité (une noisette de la taille d'un petit pois) dans le creux de votre doigt, et enduisez chaque joint torique et le corps du percuteur. Trop de lubrifiant attire la poussière et peut obstruer les canaux d'air — moins c'est mieux.</span>
-            </li>
+            <li><strong>Nettoyez chaque pièce avec un chiffon microfibre légèrement humide.</strong><span class="step-detail">Pour le canon, écouvillon propre dans le tube. Jamais de solvants forts — ils détruisent les joints.</span></li>
+            <li><strong>Inspectez chaque joint torique à la loupe ou sous bonne lumière.</strong><span class="step-detail">Bon état = lisse, souple, parfaitement rond. Remplacez si : fissures, déformation, surface dure, entailles. Les joints défectueux = cause n°1 des fuites.</span></li>
+            <li><strong>Inspectez le canal interne avec une lampe de poche.</strong><span class="step-detail">Surface doit être lisse, légèrement brillante, sans débris. Écouvillon sec si nécessaire.</span></li>
+            <li><strong>Appliquez une fine couche de Dye Slick Lube sur les joints et surfaces glissantes.</strong><span class="step-detail">Une noisette de la taille d'un petit pois sur le doigt. Enduisez chaque joint et le corps du percuteur. Trop de lubrifiant attire la poussière — moins c'est mieux.</span></li>
           </ol>
-          <div class="step-verify">✅ <strong>Comment savoir que c'est bon :</strong> Toutes les pièces sont propres et sèches (pas de résidus de peinture visibles). Tous les joints toriques ont été inspectés et les endommagés ont été remplacés. Chaque joint est légèrement brillant de lubrifiant. Le canal interne du corps est propre et exempt de débris.</div>
-          <div class="warn-box">⚠️ <strong>Jamais ces produits :</strong> WD-40 (détruit les joints en 24h), huile moteur, graisse pétrolière, huile végétale — tous gonflent ou dissolvent les joints en caoutchouc NBR du lanceur. Utilisez uniquement un lubrifiant silicone à base de silicone pure (Dye Slick Lube, Sly Lube, ou lubrifiant silicone générique).</div>
+          <div class="step-verify"><strong>Vérification :</strong> Toutes pièces propres et sèches. Joints inspectés, endommagés remplacés. Chaque joint légèrement brillant de lubrifiant.</div>
+          <div class="warn-box"><strong>Jamais :</strong> WD-40, huile moteur, graisse pétrolière, huile végétale — tous gonflent ou dissolvent les joints NBR. Uniquement lubrifiant silicone pur.</div>
         </div>
         <div class="step-footer">
-          <div class="step-tools"><span class="tool">🧴 Dégraissant</span><span class="tool">🧹 Microfibre</span><span class="tool">🟢 Lube</span></div>
+          <div class="step-tools"><span class="tool">Dégraissant</span><span class="tool">Microfibre</span><span class="tool">Dye Lube</span></div>
           <div class="step-actions">
-            <button class="note-btn" data-step="7">📝 Note</button>
+            <button class="note-btn" data-step="7">Note</button>
             <button class="complete-btn" data-step="7" aria-label="Valider étape 7">✓ Valider</button>
           </div>
         </div>
@@ -1554,175 +963,71 @@
           <div class="step-check" aria-hidden="true"></div>
         </div>
         <div class="step-visual">
-                    <svg viewBox="0 0 520 235" role="img" aria-label="Dye DAM — Étape 8 : Remontage complet — ordre ①②③④⑤ avec couples de serrage et test final" style="width:100%;height:auto;display:block;">
+          <svg viewBox="0 0 600 260" role="img" aria-label="Étape 8 — Remontage complet" style="width:100%;height:100%;display:block;">
             <defs>
-
-              <marker id="s8_a" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#06d6a0"/></marker>
-              <marker id="s8_y" markerWidth="8" markerHeight="7" refX="4" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#ffd166"/></marker>
+              <pattern id="s8dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="0.9" fill="#4a9eff" opacity="0.06"/>
+              </pattern>
             </defs>
-            <rect width="520" height="235" fill="#0b0d18"/>
-  <!-- BARREL -->
-  <rect x="6" y="112" width="7" height="15" rx="2" fill="#ffd166" stroke="#ffaa00" stroke-width="2.0"/>
-  <rect x="11" y="115" width="156" height="9" rx="2.5" fill="#ffd166" stroke="#ffaa00" stroke-width="2.0"/>
-  <rect x="15" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="21" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="27" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="33" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="39" y="117" width="2" height="5" rx="0.5" fill="#0b0d18"/>
-  <rect x="163" y="110" width="11" height="19" rx="1.5" fill="#252b50" stroke="#ffaa00" stroke-width="1"/>
-  <!-- BODY -->
-  <path d="M172 98 L306 98 L306 150 L172 150 Z" fill="#244f7c" stroke="#457b9d" stroke-width="2.0"/>
-  <path d="M168 98 L174 150 L172 150 L165 98 Z" fill="#252b50" stroke="#457b9d" stroke-width="0.8"/>
-  <rect x="304" y="98" width="5" height="52" rx="1" fill="#252b50" stroke="#457b9d" stroke-width="0.8"/>
-  <rect x="174" y="92" width="132" height="6" rx="1" fill="#2d3561" stroke="#457b9d" stroke-width="0.8"/>
-  <rect x="177" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="185" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="193" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="201" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="209" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="217" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="225" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="233" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="241" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="249" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="257" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="265" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="273" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="281" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="289" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="297" y="89" width="4" height="3" rx="0.5" fill="#252b50"/>
-  <rect x="193" y="118" width="24" height="12" rx="1" fill="#0d1020" stroke="#252b50" stroke-width="0.8"/>
-  <rect x="282" y="93" width="8" height="5" rx="1" fill="#141828" stroke="#3d4585" stroke-width="0.7"/>
-  <!-- SOLENOID -->
-  <rect x="188" y="98" width="80" height="8" rx="1.5" fill="#111825" stroke="#2d3461" stroke-width="0.8"/>
-  <rect x="264" y="95" width="10" height="10" rx="1" fill="#0d2018" stroke="#2d3461" stroke-width="0.8"/>
-  <!-- FEED NECK -->
-  <rect x="224" y="64" width="48" height="34" rx="3" fill="#1d3a5c" stroke="#457b9d" stroke-width="2.0"/>
-  <rect x="222" y="64" width="52" height="6" rx="2" fill="#252b50" stroke="#457b9d" stroke-width="1"/>
-  <rect x="222" y="90" width="52" height="4" rx="2" fill="#1a2040" stroke="#457b9d" stroke-width="0.8"/>
-  <ellipse cx="248" cy="64" rx="21" ry="5.5" fill="#0d1020" stroke="#457b9d" stroke-width="1"/>
-  <!-- HOPPER -->
-  <ellipse cx="248" cy="50" rx="32" ry="18" fill="#0d1a2a" stroke="#2d3461" stroke-width="1.0"/>
-  <ellipse cx="248" cy="40" rx="22" ry="12" fill="#0a1828" stroke="#2d3461" stroke-width="0.8"/>
-  <!-- LOWER RECEIVER -->
-  <path d="M174 150 L174 182 L278 182 L278 150 Z" fill="#1d3a5c" stroke="#457b9d" stroke-width="2.0"/>
-  <path d="M200 182 Q208 200 238 200 Q266 200 266 182" fill="none" stroke="#252b50" stroke-width="2.2"/>
-  <polygon points="232,155 237,155 237,179 232,179" fill="#c8c8c8" opacity="0.7"/>
-  <rect x="208" y="158" width="5" height="8" rx="1" fill="#e63946" opacity="0.7"/>
-  <!-- MAGAZINE -->
-  <rect x="185" y="182" width="52" height="42" rx="3" fill="#244f7c" stroke="#457b9d" stroke-width="2.0"/>
-  <line x1="189" y1="185" x2="189" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="193" y1="185" x2="193" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="197" y1="185" x2="197" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="201" y1="185" x2="201" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="205" y1="185" x2="205" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="209" y1="185" x2="209" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="213" y1="185" x2="213" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="217" y1="185" x2="217" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="221" y1="185" x2="221" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <line x1="225" y1="185" x2="225" y2="222" stroke="#252b50" stroke-width="0.7"/>
-  <rect x="183" y="222" width="56" height="5" rx="2" fill="#252b50" stroke="#457b9d" stroke-width="0.8"/>
-  <!-- GRIP -->
-  <path d="M278 150 L278 212 C278 216 282 220 287 220 L308 220 C313 220 316 216 316 212 L316 150 Z" fill="#0d3a2e" stroke="#06d6a0" stroke-width="2.0"/>
-  <line x1="280" y1="162" x2="315" y2="162" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="168" x2="315" y2="168" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="174" x2="315" y2="174" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="180" x2="315" y2="180" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="186" x2="315" y2="186" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="192" x2="315" y2="192" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="198" x2="315" y2="198" stroke="#1e2345" stroke-width="0.8"/>
-  <line x1="280" y1="204" x2="315" y2="204" stroke="#1e2345" stroke-width="0.8"/>
-  <rect x="306" y="152" width="10" height="24" rx="2" fill="#0d1020" stroke="#457b9d" stroke-width="0.8"/>
-  <circle cx="311" cy="157" r="2.2" fill="#06d6a0" opacity="0.85"/>
-  <circle cx="311" cy="163" r="2" fill="#ffd166" opacity="0.65"/>
-  <rect x="308" y="168" width="6" height="3" rx="1" fill="#252b50"/>
-  <rect x="308" y="173" width="6" height="3" rx="1" fill="#252b50"/>
-  <!-- ASA -->
-  <ellipse cx="297" cy="220" rx="16" ry="6" fill="#1a2040" stroke="#457b9d" stroke-width="1.2"/>
-  <!-- REGULATOR -->
-  <rect x="316" y="160" width="5" height="50" rx="1.5" fill="#1a1f3a" stroke="#3d4585" stroke-width="0.8"/>
-  <circle cx="345" cy="193" r="26" fill="#1a1200" stroke="#ffd166" stroke-width="2.5"/>
-  <circle cx="345" cy="193" r="18" fill="#111827" stroke="#ffd166" stroke-width="1.2"/>
-  <circle cx="345" cy="193" r="10" fill="#1a1f3a" stroke="#ffd166" stroke-width="1"/>
-  <circle cx="345" cy="193" r="4.5" fill="#252b50"/>
-  <line x1="367.0" y1="193.0" x2="362.0" y2="193.0" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="356.0" y1="212.1" x2="353.5" y2="207.7" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="334.0" y1="212.1" x2="336.5" y2="207.7" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="323.0" y1="193.0" x2="328.0" y2="193.0" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="334.0" y1="173.9" x2="336.5" y2="178.3" stroke="#ffd166" stroke-width="1.5"/>
-  <line x1="356.0" y1="173.9" x2="353.5" y2="178.3" stroke="#ffd166" stroke-width="1.5"/>
-  <!-- STEP 8 — REASSEMBLY ORDER -->
-  <!-- ① Regulator -->
-  <circle cx="345" cy="180" r="16" fill="#244f00" fill-opacity="0.8" stroke="#06d6a0" stroke-width="2.5"/>
-  <text x="345" y="185" font-family="sans-serif" font-size="14" fill="#06d6a0" text-anchor="middle" font-weight="bold">①</text>
-  <rect x="376" y="173" width="136" height="22" rx="3" fill="#06d6a0" fill-opacity="0.1" stroke="#06d6a0" stroke-width="1"/>
-  <text x="444" y="185" font-family="sans-serif" font-size="8.5" fill="#06d6a0" text-anchor="middle" font-weight="bold">Régulateur (sens horaire)</text>
-  <text x="444" y="195" font-family="sans-serif" font-size="7.5" fill="#2d8a60" text-anchor="middle">Joints lubrifiés, main + ¼ tour</text>
-
-  <!-- ② Solenoid (on top of body) -->
-  <circle cx="228" cy="80" r="14" fill="#244f00" fill-opacity="0.8" stroke="#06d6a0" stroke-width="2.5"/>
-  <text x="228" y="85" font-family="sans-serif" font-size="14" fill="#06d6a0" text-anchor="middle" font-weight="bold">②</text>
-  <rect x="8" y="55" width="176" height="22" rx="3" fill="#06d6a0" fill-opacity="0.1" stroke="#06d6a0" stroke-width="1"/>
-  <text x="96" y="66" font-family="sans-serif" font-size="8.5" fill="#06d6a0" text-anchor="middle" font-weight="bold">Électrovanne (4× M2 en croix)</text>
-  <text x="96" y="76" font-family="sans-serif" font-size="7.5" fill="#2d8a60" text-anchor="middle">Couple ≈ 0,9 N·m (très léger)</text>
-
-  <!-- ③ Grip (lower) -->
-  <circle cx="297" cy="185" r="14" fill="#244f00" fill-opacity="0.8" stroke="#06d6a0" stroke-width="2.5"/>
-  <text x="297" y="190" font-family="sans-serif" font-size="14" fill="#06d6a0" text-anchor="middle" font-weight="bold">③</text>
-  <rect x="8" y="190" width="180" height="22" rx="3" fill="#ffd166" fill-opacity="0.1" stroke="#ffd166" stroke-width="1"/>
-  <text x="98" y="201" font-family="sans-serif" font-size="8.5" fill="#ffd166" text-anchor="middle" font-weight="bold">Poignée (brancher connecteur 1er)</text>
-  <text x="98" y="211" font-family="sans-serif" font-size="7.5" fill="#9d7b00" text-anchor="middle">2× vis 5/32" ≈ 2,3 N·m</text>
-
-  <!-- ④ Bolt + back cap -->
-  <circle cx="245" cy="124" r="14" fill="#244f00" fill-opacity="0.8" stroke="#06d6a0" stroke-width="2.5"/>
-  <text x="245" y="129" font-family="sans-serif" font-size="14" fill="#06d6a0" text-anchor="middle" font-weight="bold">④</text>
-  <rect x="376" y="215" width="136" height="20" rx="3" fill="#ffd166" fill-opacity="0.1" stroke="#ffd166" stroke-width="1"/>
-  <text x="444" y="225" font-family="sans-serif" font-size="8.5" fill="#ffd166" text-anchor="middle" font-weight="bold">Percuteur + capuchon arrière</text>
-  <text x="444" y="233" font-family="sans-serif" font-size="7.5" fill="#9d7b00" text-anchor="middle">Joints graissés, vis 3mm</text>
-
-  <!-- ⑤ Canon -->
-  <circle cx="88" cy="124" r="14" fill="#244f00" fill-opacity="0.8" stroke="#06d6a0" stroke-width="2.5"/>
-  <text x="88" y="129" font-family="sans-serif" font-size="14" fill="#06d6a0" text-anchor="middle" font-weight="bold">⑤</text>
-  <rect x="8" y="131" width="154" height="20" rx="3" fill="#06d6a0" fill-opacity="0.1" stroke="#06d6a0" stroke-width="1"/>
-  <text x="85" y="141" font-family="sans-serif" font-size="8.5" fill="#06d6a0" text-anchor="middle" font-weight="bold">Canon en dernier</text>
-  <text x="85" y="151" font-family="sans-serif" font-size="7.5" fill="#2d8a60" text-anchor="middle">Joint torique lubrifié, ¼ tour horaire</text>
-
-  <!-- Final test reminder -->
-  <rect x="110" y="215" width="250" height="18" rx="3" fill="#e63946" fill-opacity="0.12" stroke="#e63946" stroke-width="1.5"/>
-  <text x="235" y="227" font-family="sans-serif" font-size="8.5" fill="#e63946" text-anchor="middle" font-weight="bold">⚠ Test final : ouvrir bouteille à ½ — écouter les fuites</text>
+            <rect width="600" height="260" fill="#07090f"/>
+            <rect width="600" height="260" fill="url(#s8dots)"/>
+            <text x="300" y="200" font-family="Arial Black,sans-serif" font-size="160" font-weight="900" fill="#4a9eff" opacity="0.03" text-anchor="middle">08</text>
+            <!-- Timeline line -->
+            <line x1="50" y1="110" x2="550" y2="110" stroke="#252d40" stroke-width="2"/>
+            <!-- Arrow right -->
+            <polygon points="550,104 562,110 550,116" fill="#4a9eff" opacity=".5"/>
+            <!-- Node positions -->
+            <!-- Step 1: Regulator -->
+            <circle cx="90" cy="110" r="22" fill="#1e2538" stroke="#2dd4bf" stroke-width="2.5"/>
+            <text x="90" y="116" font-family="system-ui,sans-serif" font-size="16" fill="#2dd4bf" text-anchor="middle" font-weight="700">①</text>
+            <text x="90" y="146" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf" text-anchor="middle" font-weight="600">Régulateur</text>
+            <text x="90" y="160" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">Sens horaire</text>
+            <text x="90" y="172" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">Main + ¼ tour</text>
+            <!-- Step 2: Solenoid -->
+            <circle cx="215" cy="110" r="22" fill="#1e2538" stroke="#2dd4bf" stroke-width="2.5"/>
+            <text x="215" y="116" font-family="system-ui,sans-serif" font-size="16" fill="#2dd4bf" text-anchor="middle" font-weight="700">②</text>
+            <text x="215" y="146" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf" text-anchor="middle" font-weight="600">Solénoïde</text>
+            <text x="215" y="160" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">4× M2 en croix</text>
+            <text x="215" y="172" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">≈ 0,9 N·m</text>
+            <!-- Step 3: Grip -->
+            <circle cx="340" cy="110" r="22" fill="#1e2538" stroke="#f59e0b" stroke-width="2.5"/>
+            <text x="340" y="116" font-family="system-ui,sans-serif" font-size="16" fill="#f59e0b" text-anchor="middle" font-weight="700">③</text>
+            <text x="340" y="146" font-family="system-ui,sans-serif" font-size="10" fill="#f59e0b" text-anchor="middle" font-weight="600">Grip Frame</text>
+            <text x="340" y="160" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">Brancher 1er</text>
+            <text x="340" y="172" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">2× 5/32" — 2,3N·m</text>
+            <!-- Step 4: Bolt + back cap -->
+            <circle cx="465" cy="110" r="22" fill="#1e2538" stroke="#f59e0b" stroke-width="2.5"/>
+            <text x="465" y="116" font-family="system-ui,sans-serif" font-size="16" fill="#f59e0b" text-anchor="middle" font-weight="700">④</text>
+            <text x="465" y="146" font-family="system-ui,sans-serif" font-size="10" fill="#f59e0b" text-anchor="middle" font-weight="600">Percuteur</text>
+            <text x="465" y="160" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">+ capuchon</text>
+            <text x="465" y="172" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">3mm — 1,7N·m</text>
+            <!-- Above nodes: step 5 (canon) - shown above line -->
+            <line x1="90" y1="88" x2="90" y2="62" stroke="#4a9eff" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <rect x="28" y="32" width="124" height="32" rx="5" fill="rgba(74,158,255,0.08)" stroke="rgba(74,158,255,0.25)" stroke-width="1"/>
+            <text x="90" y="46" font-family="system-ui,sans-serif" font-size="10" fill="#4a9eff" text-anchor="middle" font-weight="600">⑤ Canon en dernier</text>
+            <text x="90" y="58" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">Joint lubrifié, ¼ tour horaire</text>
+            <!-- Test final badge -->
+            <rect x="148" y="196" width="304" height="40" rx="8" fill="rgba(45,212,191,0.08)" stroke="rgba(45,212,191,0.3)" stroke-width="1.5"/>
+            <text x="300" y="211" font-family="system-ui,sans-serif" font-size="11" fill="#2dd4bf" text-anchor="middle" font-weight="700">TEST FINAL OBLIGATOIRE</text>
+            <text x="300" y="227" font-family="system-ui,sans-serif" font-size="10" fill="#7a8299" text-anchor="middle">Ouvrir bouteille à ½ tour · Écouter fuites 30 sec · Silence = OK</text>
           </svg>
         </div>
         <div class="step-body">
-          <div class="step-location">📍 <strong>Ordre de remontage :</strong> Le remontage se fait dans l'ordre inverse du démontage. L'ordre est important — ne montez pas la poignée avant l'électrovanne, ni le canon avant que le percuteur soit en place. Suivez exactement les étapes ci-dessous.</div>
+          <div class="step-location"><strong>Ordre de remontage :</strong> L'ordre est crucial — suivez exactement : ① Régulateur → ② Solénoïde → ③ Grip + connecteur → ④ Percuteur + capuchon → ⑤ Canon.</div>
           <ol class="step-list">
-            <li>
-              <strong>① Remontez d'abord le régulateur de pression sous le corps.</strong>
-              <span class="step-detail">Assurez-vous que ses 2 joints toriques sont bien en place et légèrement lubrifiés. Vissez à la main dans le sens horaire jusqu'à ce que vous sentiez une résistance, puis serrez avec la clé à sangle d'un quart de tour supplémentaire. Ne serrez pas à fond — le régulateur doit être snug (bien serré) mais pas bloqué.</span>
-            </li>
-            <li>
-              <strong>② Replacez l'électrovanne sur le dessus du corps.</strong>
-              <span class="step-detail">Alignez les 4 trous de vis de l'électrovanne avec les 4 trous filetés du corps. Insérez les 4 micro-vis M2 à la main d'abord, sans les serrer, pour vérifier que l'électrovanne est bien alignée. Puis serrez-les en croix (haut-gauche, bas-droite, haut-droite, bas-gauche) avec la clé hexagonale 1,5mm. Le couple de serrage recommandé est faible — environ <span class="term" title="8 in-lb ≈ 0,9 N·m : un serrage léger, juste assez pour que la vis ne bouge plus mais sans forcer">8 in-lb (environ 0,9 N·m)</span> — ne serrez pas trop fort, vous risquez de casser les petites vis.</span>
-            </li>
-            <li>
-              <strong>③ Reposez la poignée et rebranchez l'électrovanne.</strong>
-              <span class="step-detail">Commencez par brancher le connecteur de l'électrovanne en vous aidant de votre photo prise lors du démontage. Le connecteur ne peut s'insérer que dans un sens — ne forcez pas si ça résiste. Une fois branché, remontez la poignée contre le corps et vissez les 2 vis latérales en alternant, avec la clé hexagonale 5/32". Couple recommandé : environ <span class="term" title="20 in-lb ≈ 2,3 N·m : serrage modéré, comme serrer fermement une vis de meubles en kit">20 in-lb (environ 2,3 N·m)</span>.</span>
-            </li>
-            <li>
-              <strong>④ Réintroduisez le percuteur dans le tunnel arrière du corps.</strong>
-              <span class="step-detail">Remettez d'abord les 3 joints toriques sur le percuteur dans les positions exactes de votre photo. Lubrifiez légèrement le corps du percuteur. Insérez-le doucement dans le tunnel par l'arrière, en ligne droite, jusqu'à ce qu'il soit complètement rentré. Reposez le capuchon arrière et vissez ses 2 vis avec la clé 3mm. Couple recommandé : <span class="term" title="15 in-lb ≈ 1,7 N·m : serrage moyen, ferme mais sans forcer">15 in-lb (environ 1,7 N·m)</span>.</span>
-            </li>
-            <li>
-              <strong>⑤ Remettez le canon en dernier.</strong>
-              <span class="step-detail">Replacez le joint torique à la base du canon dans sa rainure (s'il était sorti), lubrifiez-le légèrement. Insérez le canon dans l'orifice avant du corps, alignez et tournez d'un quart de tour dans le sens horaire jusqu'au verrou. Le canon est bien en place quand il ne bouge plus et qu'il est aligné avec l'axe du lanceur.</span>
-            </li>
+            <li><strong>① Remontez le régulateur sous le corps.</strong><span class="step-detail">Joints lubrifiés en place. Vissez à la main (sens horaire) jusqu'à résistance, puis ¼ tour à la clé. Ne serrez pas à fond.</span></li>
+            <li><strong>② Replacez l'électrovanne sur le corps.</strong><span class="step-detail">Alignez les 4 trous de vis, insérez les M2 à la main d'abord. Serrage en croix avec clé 1,5mm. Couple faible ≈ <span class="term" title="8 in-lb ≈ 0,9 N·m : très léger, ne pas forcer">0,9 N·m</span>.</span></li>
+            <li><strong>③ Reposez la poignée et rebranchez l'électrovanne.</strong><span class="step-detail">Branchez d'abord le connecteur (avec la photo de référence). Puis les 2 vis latérales 5/32" en alternant. Couple ≈ <span class="term" title="20 in-lb ≈ 2,3 N·m">2,3 N·m</span>.</span></li>
+            <li><strong>④ Réintroduisez le percuteur et le capuchon arrière.</strong><span class="step-detail">Joints remis en position exacte (photo), légèrement lubrifiés. Percuteur en ligne droite dans le tunnel. Capuchon + 2 vis 3mm ≈ <span class="term" title="15 in-lb ≈ 1,7 N·m">1,7 N·m</span>.</span></li>
+            <li><strong>⑤ Remettez le canon en dernier.</strong><span class="step-detail">Joint torique lubrifié dans sa rainure. Insérez et tournez ¼ tour horaire jusqu'au verrou.</span></li>
           </ol>
-          <div class="step-verify">✅ <strong>Test final obligatoire — Ne sautez pas cette étape :</strong> Vissez la bouteille de gaz. Ouvrez-la progressivement (un demi-tour seulement) et écoutez attentivement pendant 30 secondes. Aucun sifflement = pas de fuite. Tournez encore un demi-tour et ré-écoutez. Si vous entendez un sifflement, localisez la fuite (régulateur ? Canon ? Poignée ?) et dévissez immédiatement la bouteille pour corriger. Seulement quand tout est silencieux, ouvrez la bouteille complètement et testez le tir.</div>
-          <div class="tip-box">💡 <strong>Commencez toujours le test de pression à basse pression</strong> en n'ouvrant la bouteille qu'à moitié. Si une pièce n'est pas bien remontée, cela vous laisse le temps d'entendre la fuite et de couper le gaz avant que la pression ne monte trop haut.</div>
+          <div class="step-verify"><strong>Test final obligatoire :</strong> Vissez la bouteille. Ouvrez à ½ tour seulement — écoutez 30 secondes. Aucun sifflement = pas de fuite. Seulement quand tout est silencieux, ouvrez complètement et testez.</div>
+          <div class="tip-box"><strong>Toujours commencer à basse pression.</strong> Ouvrir la bouteille qu'à moitié — une fuite vous laisse le temps de couper le gaz avant que la pression monte.</div>
         </div>
         <div class="step-footer">
-          <div class="step-tools"><span class="tool">🔩 Allen 5/32" + 3mm</span><span class="tool">📏 Dynamométrique</span></div>
+          <div class="step-tools"><span class="tool">Allen 5/32" + 3mm + 1,5mm</span><span class="tool">Dynamométrique</span></div>
           <div class="step-actions">
-            <button class="note-btn" data-step="8">📝 Note</button>
+            <button class="note-btn" data-step="8">Note</button>
             <button class="complete-btn" data-step="8" aria-label="Valider étape 8">✓ Valider</button>
           </div>
         </div>
@@ -1734,20 +1039,13 @@
     </div><!-- /steps-grid -->
   </section>
 
-  <!-- ===========================
-       SECTION : TERRAIN
-       =========================== -->
+  <!-- SECTION: TERRAIN -->
   <section id="section-terrain" class="guide-section" aria-labelledby="terrain-title">
     <div class="terrain-layout">
-
-      <!-- LEFT: Checklist avant-partie -->
       <div class="terrain-left">
         <h1 id="terrain-title" class="page-title">Checklist <em>Avant-Partie</em></h1>
-
         <div class="checklist-panel" role="form" aria-label="Checklist avant-partie">
-          <div class="checklist-items" id="checklist-items">
-            <!-- Generated by JS -->
-          </div>
+          <div class="checklist-items" id="checklist-items"></div>
           <div class="checklist-score-wrap">
             <div class="checklist-score" id="checklist-score">
               <span class="cs-num" id="cs-num">0/10</span>
@@ -1755,22 +1053,17 @@
             </div>
           </div>
           <div class="checklist-actions">
-            <button class="btn-secondary" id="checklist-reset">↺ Reset</button>
-            <button class="btn-primary" id="checklist-save">💾 Sauvegarder</button>
+            <button class="btn-secondary" id="checklist-reset">&#8635; Reset</button>
+            <button class="btn-primary" id="checklist-save">Sauvegarder</button>
           </div>
         </div>
-
         <div class="checklist-history" id="checklist-history">
           <h3 class="history-title">Historique des checklists</h3>
           <div id="checklist-history-list"></div>
         </div>
       </div>
-
-      <!-- RIGHT: Mode Terrain -->
       <div class="terrain-right">
         <h2 class="terrain-right-title">Mode <em>Terrain</em></h2>
-
-        <!-- Giant ball counter -->
         <div class="terrain-counter-card">
           <div class="terrain-label">Billes tirées</div>
           <div class="terrain-giant-count" id="terrain-ball-count">0</div>
@@ -1781,33 +1074,24 @@
             <button class="terrain-add-btn" data-add="500">+500</button>
           </div>
         </div>
-
-        <!-- Game timer -->
         <div class="terrain-timer-card">
           <div class="terrain-label">Chrono de partie</div>
           <div class="terrain-timer-display" id="game-timer-display">00:00:00</div>
           <div class="terrain-timer-controls">
-            <button class="terrain-ctrl-btn" id="game-timer-start">▶ Start</button>
-            <button class="terrain-ctrl-btn" id="game-timer-pause">⏸ Pause</button>
-            <button class="terrain-ctrl-btn" id="game-timer-reset">↺ Reset</button>
+            <button class="terrain-ctrl-btn" id="game-timer-start">&#9654; Start</button>
+            <button class="terrain-ctrl-btn" id="game-timer-pause">&#9646;&#9646; Pause</button>
+            <button class="terrain-ctrl-btn" id="game-timer-reset">&#8635; Reset</button>
           </div>
         </div>
-
-        <!-- Quick diagnostic -->
         <div class="terrain-diag-card">
           <div class="terrain-label">Diagnostic rapide</div>
-          <div class="terrain-diag-btns" id="terrain-diag-btns">
-            <!-- Generated by JS -->
-          </div>
+          <div class="terrain-diag-btns" id="terrain-diag-btns"></div>
         </div>
       </div>
-
     </div>
   </section>
 
-  <!-- ===========================
-       SECTION : SCHEMA
-       =========================== -->
+  <!-- SECTION: SCHEMA -->
   <section id="section-schema" class="guide-section" aria-labelledby="schema-title">
     <div class="schema-header">
       <h1 id="schema-title" class="page-title">Schéma <em>Explosé</em></h1>
@@ -1816,32 +1100,25 @@
         <button class="schema-toggle-btn" id="schema-view-list" aria-pressed="false">Liste pièces</button>
       </div>
     </div>
-
     <div id="schema-diagram-view">
-      <div class="schema-svg-wrap" id="schema-svg-wrap" aria-label="Schéma explosé Dye DAM, cliquez sur un composant">
-        <!-- SVG generated by JS -->
-      </div>
+      <div class="schema-svg-wrap" id="schema-svg-wrap" aria-label="Schéma explosé Dye DAM"></div>
       <p class="schema-hint">Cliquez sur un numéro pour afficher les détails du composant.</p>
     </div>
-
     <div id="schema-list-view" hidden>
       <div class="search-bar-wrap">
         <label for="parts-search" class="sr-only">Rechercher une pièce</label>
-        <input type="search" id="parts-search" class="search-bar" placeholder="🔍 Rechercher une pièce…" aria-label="Rechercher dans la nomenclature"/>
+        <input type="search" id="parts-search" class="search-bar" placeholder="Rechercher une pièce…" aria-label="Rechercher dans la nomenclature"/>
       </div>
       <div class="parts-grid" id="parts-grid" role="list" aria-label="Pièces du Dye DAM"></div>
     </div>
   </section>
 
-  <!-- ===========================
-       SECTION : DIAGNOSTIC
-       =========================== -->
+  <!-- SECTION: DIAGNOSTIC -->
   <section id="section-diagnostic" class="guide-section" aria-labelledby="diag-title">
     <div class="diag-header">
       <h1 id="diag-title">Diagnostic<br><em>Interactif</em></h1>
       <p>Sélectionnez le symptôme — je vous guide vers la solution exacte.</p>
     </div>
-
     <div class="diag-container">
       <nav class="diag-breadcrumb" id="diag-breadcrumb" aria-label="Fil d'ariane diagnostic">
         <span class="bc-item bc-item--root" data-node="root">Accueil</span>
@@ -1851,13 +1128,9 @@
     </div>
   </section>
 
-  <!-- ===========================
-       SECTION : STATS
-       =========================== -->
+  <!-- SECTION: STATS -->
   <section id="section-stats" class="guide-section" aria-labelledby="stats-title">
     <h1 id="stats-title" class="page-title">Statistiques <em>&amp; Config</em></h1>
-
-    <!-- Stat cards -->
     <div class="stats-cards" role="list" aria-label="Statistiques globales">
       <div class="stat-card" role="listitem">
         <div class="stat-card-icon">🎯</div>
@@ -1881,18 +1154,14 @@
       </div>
     </div>
 
-    <!-- Configuration profiles -->
     <div class="stats-section">
       <div class="stats-section-header">
         <h2 class="stats-section-title">Profils de Configuration</h2>
         <button class="btn-add-fps" id="btn-add-profile" aria-label="Ajouter un profil">+ Profil</button>
       </div>
-      <div class="profiles-grid" id="profiles-grid">
-        <!-- Generated by JS -->
-      </div>
+      <div class="profiles-grid" id="profiles-grid"></div>
     </div>
 
-    <!-- Installed parts tracking -->
     <div class="stats-section">
       <div class="stats-section-header">
         <h2 class="stats-section-title">Suivi des Pièces Installées</h2>
@@ -1902,25 +1171,16 @@
         <table class="installed-parts-table" id="installed-parts-table" aria-label="Pièces installées">
           <thead>
             <tr>
-              <th>Pièce</th>
-              <th>Date install</th>
-              <th>Billes depuis</th>
-              <th>Intervalle rec.</th>
-              <th>Statut</th>
-              <th>Action</th>
+              <th>Pièce</th><th>Date install</th><th>Billes depuis</th><th>Intervalle rec.</th><th>Statut</th><th>Action</th>
             </tr>
           </thead>
-          <tbody id="installed-parts-body">
-            <!-- Generated by JS -->
-          </tbody>
+          <tbody id="installed-parts-body"></tbody>
         </table>
       </div>
     </div>
 
-    <!-- Technical references -->
     <div class="stats-section">
       <h2 class="stats-section-title">Références Techniques</h2>
-
       <div class="accordion" id="accordion-orings">
         <button class="accordion-btn" aria-expanded="false" aria-controls="acc-body-orings">
           <span>Table des O-rings</span>
@@ -1942,7 +1202,6 @@
           </table>
         </div>
       </div>
-
       <div class="accordion" id="accordion-torques">
         <button class="accordion-btn" aria-expanded="false" aria-controls="acc-body-torques">
           <span>Couples de serrage</span>
@@ -1964,18 +1223,15 @@
     </div>
   </section>
 
-  <!-- ===========================
-       SECTION : CARNET
-       =========================== -->
+  <!-- SECTION: CARNET -->
   <section id="section-carnet" class="guide-section" aria-labelledby="carnet-title">
     <h1 id="carnet-title" class="page-title">Carnet <em>d'Entretien</em></h1>
 
-    <!-- FPS Tracker -->
     <div class="fps-panel">
       <div class="fps-header">
         <h2>Suivi Chronographe</h2>
         <div style="display:flex;gap:.5rem;align-items:center;">
-          <button class="btn-add-fps" id="btn-export-pdf" aria-label="Exporter en PDF">📄 Exporter PDF</button>
+          <button class="btn-add-fps" id="btn-export-pdf" aria-label="Exporter en PDF">Exporter PDF</button>
           <button class="btn-add-fps" id="btn-add-fps" aria-label="Ajouter une mesure FPS">+ Mesure</button>
         </div>
       </div>
@@ -1985,7 +1241,6 @@
       <div class="fps-stats" id="fps-stats"></div>
     </div>
 
-    <!-- Add FPS modal inline -->
     <div class="fps-form" id="fps-form" hidden>
       <h3>Nouvelle mesure FPS</h3>
       <div class="form-row">
@@ -2003,13 +1258,11 @@
       </div>
     </div>
 
-    <!-- Maintenance log -->
     <div class="log-panel">
       <div class="log-header">
         <h2>Journal d'entretien</h2>
         <button class="btn-add-log" id="btn-add-log" aria-label="Ajouter une entrée">+ Entrée</button>
       </div>
-
       <div class="log-form" id="log-form" hidden>
         <h3>Nouvelle entrée</h3>
         <div class="form-grid">
@@ -2041,24 +1294,23 @@
           <button class="btn-primary" id="log-save">Enregistrer</button>
         </div>
       </div>
-
       <div class="log-list" id="log-list" role="list" aria-label="Journal d'entretien" aria-live="polite"></div>
     </div>
   </section>
 
 </main>
 
-<!-- ===== FLOATING TERRAIN BUTTON ===== -->
+<!-- FLOATING TERRAIN BUTTON -->
 <button class="float-terrain-btn" id="float-terrain-btn" aria-label="Ouvrir le mode terrain">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
   <span>Terrain</span>
 </button>
 
-<!-- ===== FOOTER ===== -->
+<!-- FOOTER -->
 <footer class="site-footer print-footer" role="contentinfo">
   <div class="footer-inner">
     <p>Dye DAM · Guide d'entretien non officiel · Usage éducatif</p>
-    <p class="footer-note">⚠️ Respectez les règles de sécurité — limite légale 300 FPS / bille .68 calibre.</p>
+    <p class="footer-note">⚠ Respectez les règles de sécurité — limite légale 300 FPS / bille .68 calibre.</p>
   </div>
 </footer>
 
