@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dye DAM — Dashboard Entretien v4</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Aller au contenu principal</a>
+<div id="sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+<!-- ===== HEADER ===== -->
+<header class="site-header" role="banner">
+  <div class="header-inner">
+    <div class="header-logo">
+      <svg class="logo-icon" viewBox="0 0 28 28" aria-hidden="true" fill="none">
+        <rect x="2" y="10" width="18" height="8" rx="2" fill="#4a9eff" opacity=".9"/>
+        <rect x="18" y="11.5" width="8" height="5" rx="1.5" fill="#2f6ec4"/>
+        <rect x="6" y="5" width="3.5" height="5" rx="1" fill="#2dd4bf" opacity=".8"/>
+        <rect x="7" y="18" width="5" height="6" rx="1" fill="#1e2538"/>
+        <circle cx="3.5" cy="14" r="1.8" fill="#f59e0b" opacity=".9"/>
+        <circle cx="24" cy="14" r="3" fill="#07090f" stroke="#4a9eff" stroke-width="1.2"/>
+        <circle cx="24" cy="14" r="1.2" fill="#4a9eff"/>
+      </svg>
+      <div>
+        <span class="logo-title">Dye DAM</span>
+        <span class="logo-sub">Dual Feed Assault Marker</span>
+      </div>
+    </div>
+
+    <nav class="header-nav" role="navigation" aria-label="Sections du dashboard">
+      <button class="nav-btn active" data-section="demontage" aria-pressed="true">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>
+        Guide
+      </button>
+      <button class="nav-btn" data-section="terrain" aria-pressed="false">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+        Terrain
+      </button>
+      <button class="nav-btn" data-section="schema" aria-pressed="false">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        Schéma
+      </button>
+      <button class="nav-btn" data-section="diagnostic" aria-pressed="false">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+        Diagnostic
+        <span class="nav-badge" id="diag-badge" hidden>!</span>
+      </button>
+      <button class="nav-btn" data-section="stats" aria-pressed="false">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+        Stats
+      </button>
+      <button class="nav-btn" data-section="carnet" aria-pressed="false">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/></svg>
+        Carnet
+      </button>
+    </nav>
+
+    <div class="header-right">
+      <div class="profile-badge" id="profile-badge" hidden>
+        <span class="profile-badge-dot"></span>
+        <span id="profile-badge-name">Profil</span>
+      </div>
+      <div class="ball-widget" id="ball-widget" aria-label="Compteur de billes">
+        <div class="bw-track">
+          <span class="bw-label">Billes</span>
+          <button class="bw-edit" id="bw-edit-btn" aria-label="Modifier le compteur">✏</button>
+        </div>
+        <div class="bw-count" id="bw-count" aria-live="polite">0</div>
+        <div class="bw-bar" role="progressbar" aria-label="Progression vers prochain entretien" aria-valuemin="0" aria-valuemax="5000" aria-valuenow="0" id="bw-progress">
+          <div class="bw-fill" id="bw-fill"></div>
+        </div>
+        <div class="bw-next" id="bw-next">→ entretien dans 5 000</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== BALL COUNTER MODAL ===== -->
+<div class="modal-overlay" id="ball-modal" hidden role="dialog" aria-modal="true" aria-labelledby="ball-modal-title">
+  <div class="modal">
+    <h2 id="ball-modal-title">Compteur de billes</h2>
+    <div class="ball-btns">
+      <button class="ball-add-btn" data-add="100">+100</button>
+      <button class="ball-add-btn" data-add="500">+500</button>
+      <button class="ball-add-btn ball-add-btn--accent" data-add="1000">+1 000</button>
+    </div>
+    <div class="modal-input-row">
+      <label for="ball-custom">Valeur exacte</label>
+      <input type="number" id="ball-custom" min="0" placeholder="ex: 12500" aria-describedby="ball-custom-hint"/>
+      <span id="ball-custom-hint" class="input-hint">Saisissez le total cumulé</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="ball-reset-btn">Remettre à zéro</button>
+      <button class="btn-primary" id="ball-save-btn">Enregistrer</button>
+    </div>
+    <button class="modal-close" aria-label="Fermer">✕</button>
+  </div>
+</div>
+
+<!-- ===== PROFILE MODAL ===== -->
+<div class="modal-overlay" id="profile-modal" hidden role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
+  <div class="modal modal--wide">
+    <h2 id="profile-modal-title">Profil de configuration</h2>
+    <div class="form-grid">
+      <div class="form-row">
+        <label for="pm-name">Nom du profil</label>
+        <input type="text" id="pm-name" placeholder="Ex: Speedball Dim"/>
+      </div>
+      <div class="form-row">
+        <label for="pm-type">Type</label>
+        <select id="pm-type">
+          <option value="speedball">Speedball</option>
+          <option value="woodsball">Woodsball</option>
+          <option value="training">Entraînement</option>
+          <option value="custom">Personnalisé</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="pm-fps">FPS cible</label>
+        <input type="number" id="pm-fps" min="200" max="350" placeholder="285"/>
+      </div>
+      <div class="form-row">
+        <label for="pm-psi">PSI régulateur</label>
+        <input type="number" id="pm-psi" min="100" max="300" placeholder="170"/>
+      </div>
+      <div class="form-row">
+        <label for="pm-mode">Mode de tir</label>
+        <select id="pm-mode">
+          <option value="Semi">Semi-auto</option>
+          <option value="Ramp">Ramp</option>
+          <option value="Full-Auto">Full-Auto</option>
+          <option value="Burst">Burst</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="pm-feed">Alimentation</label>
+        <input type="text" id="pm-feed" placeholder="Chargeur, MAG+Chargeur…"/>
+      </div>
+      <div class="form-row form-row--full">
+        <label for="pm-notes">Notes</label>
+        <textarea id="pm-notes" rows="2" placeholder="Notes additionnelles…"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="pm-cancel">Annuler</button>
+      <button class="btn-primary" id="pm-save">Enregistrer</button>
+    </div>
+    <input type="hidden" id="pm-edit-id"/>
+    <button class="modal-close" aria-label="Fermer">✕</button>
+  </div>
+</div>
+
+<!-- ===== INSTALLED PART MODAL ===== -->
+<div class="modal-overlay" id="part-install-modal" hidden role="dialog" aria-modal="true" aria-labelledby="pim-title">
+  <div class="modal">
+    <h2 id="pim-title">Ajouter pièce installée</h2>
+    <div class="form-grid">
+      <div class="form-row form-row--full">
+        <label for="pim-part">Pièce</label>
+        <select id="pim-part">
+          <option value="bolt-orings">Bolt O-rings (×3)</option>
+          <option value="battery-cr2">Batterie CR2</option>
+          <option value="barrel-oring">O-ring Canon</option>
+          <option value="reg-orings">O-ring Régulateur</option>
+          <option value="full-kit">Kit complet O-rings</option>
+          <option value="custom">Autre…</option>
+        </select>
+      </div>
+      <div class="form-row form-row--full" id="pim-custom-row" hidden>
+        <label for="pim-custom-name">Nom de la pièce</label>
+        <input type="text" id="pim-custom-name" placeholder="Ex: Solénoïde"/>
+      </div>
+      <div class="form-row">
+        <label for="pim-date">Date d'installation</label>
+        <input type="date" id="pim-date"/>
+      </div>
+      <div class="form-row">
+        <label for="pim-balls">Billes au compteur</label>
+        <input type="number" id="pim-balls" placeholder="Auto"/>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="pim-cancel">Annuler</button>
+      <button class="btn-primary" id="pim-save">Enregistrer</button>
+    </div>
+    <button class="modal-close" aria-label="Fermer">✕</button>
+  </div>
+</div>
+
+<!-- ===== SCHEMA PART PANEL ===== -->
+<div class="modal-overlay" id="schema-panel-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="schema-panel-title">
+  <div class="modal modal--schema">
+    <h2 id="schema-panel-title">Composant</h2>
+    <div id="schema-panel-body"></div>
+    <button class="modal-close" aria-label="Fermer">✕</button>
+  </div>
+</div>
+
+<!-- ===== TERRAIN OVERLAY ===== -->
+<div class="modal-overlay terrain-overlay" id="terrain-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="terrain-overlay-title">
+  <div class="terrain-overlay-inner">
+    <button class="modal-close terrain-overlay-close" aria-label="Fermer mode terrain">✕</button>
+    <h2 id="terrain-overlay-title" class="terrain-overlay-title">Mode Terrain</h2>
+    <div class="terrain-overlay-counter">
+      <div class="terrain-giant-count" id="overlay-ball-count">0</div>
+      <div class="terrain-overlay-adds">
+        <button class="terrain-add-btn" data-add="50">+50</button>
+        <button class="terrain-add-btn" data-add="100">+100</button>
+        <button class="terrain-add-btn" data-add="200">+200</button>
+      </div>
+    </div>
+    <div class="terrain-overlay-timer">
+      <div class="terrain-timer-display" id="overlay-timer-display">00:00:00</div>
+      <div class="terrain-timer-controls">
+        <button class="terrain-ctrl-btn" id="overlay-timer-start">&#9654; Start</button>
+        <button class="terrain-ctrl-btn" id="overlay-timer-pause">&#9646;&#9646; Pause</button>
+        <button class="terrain-ctrl-btn" id="overlay-timer-reset">&#8635; Reset</button>
+      </div>
+    </div>
+    <div class="terrain-overlay-actions">
+      <button class="terrain-overlay-big-btn" id="overlay-checklist-btn">Checklist</button>
+      <button class="terrain-overlay-big-btn" id="overlay-diag-btn">Diagnostic</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ALERT BANNER ===== -->
+<div class="alert-banner" id="alert-banner" hidden role="alert" aria-live="assertive">
+  <span class="alert-icon" aria-hidden="true">⚠</span>
+  <span id="alert-text"></span>
+  <button class="alert-dismiss" id="alert-dismiss" aria-label="Fermer l'alerte">✕</button>
+</div>
+
+<!-- ===== TOOLBAR ===== -->
+<div class="toolbar" id="toolbar" role="toolbar" aria-label="Navigation des étapes">
+  <div class="toolbar-inner">
+    <div class="progress-wrap">
+      <span class="progress-label">
+        Étape <strong id="current-step">1</strong> / <strong id="total-steps">8</strong>
+        <span class="progress-done" id="progress-done"></span>
+      </span>
+      <div class="progress-track">
+        <div class="progress-bar" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="8" id="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="step-dots" id="step-dots" aria-hidden="true"></div>
+      </div>
+    </div>
+    <div class="step-timer-wrap">
+      <span class="timer-label">Durée</span>
+      <span class="step-timer" id="step-timer" aria-live="off">00:00</span>
+    </div>
+    <div class="toolbar-controls">
+      <button class="ctrl-btn" id="btn-prev" aria-label="Étape précédente" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="ctrl-btn" id="btn-next" aria-label="Étape suivante">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <button class="ctrl-btn ctrl-play" id="btn-play" aria-label="Lecture automatique" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="currentColor" id="play-icon"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </button>
+    </div>
+    <p class="kb-hint" aria-hidden="true">← → naviguer · Espace lecture · 1–8 saut direct</p>
+  </div>
+</div>
+
+<!-- ===== MAIN ===== -->
+<main id="main-content" class="main">
+
+  <!-- SECTION: GUIDE -->
+  <section id="section-demontage" class="guide-section active" aria-labelledby="guide-title">
+    <div class="section-hero">
+      <div class="section-hero-text">
+        <h1 id="guide-title">Guide Démontage<br><em>Dye DAM</em></h1>
+        <p>8 étapes illustrées · Ordre exact · Couples de serrage</p>
+        <div class="hero-stats" role="list">
+          <div role="listitem"><span class="stat-n">8</span><span class="stat-l">Étapes</span></div>
+          <div role="listitem"><span class="stat-n">~45</span><span class="stat-l">Min</span></div>
+          <div role="listitem"><span class="stat-n" id="stat-done">0</span><span class="stat-l">Validées</span></div>
+        </div>
+      </div>
+      <div class="section-hero-vis" aria-label="Vue Dye DAM">
+        <svg viewBox="0 0 500 200" role="img" aria-label="Schéma latéral Dye DAM">
+          <defs>
+            <linearGradient id="hg1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#1e2538"/><stop offset="100%" stop-color="#252d40"/></linearGradient>
+            <filter id="hglow"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <!-- Dot grid -->
+          <pattern id="hdots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+            <circle cx="1" cy="1" r="0.8" fill="#4a9eff" opacity="0.08"/>
+          </pattern>
+          <rect width="500" height="200" fill="url(#hdots)"/>
+          <!-- Barrel -->
+          <rect x="10" y="80" width="160" height="12" rx="3" fill="url(#hg1)" stroke="#252d40" stroke-width="1"/>
+          <rect x="10" y="82" width="160" height="3" rx="1" fill="#2f3a52" opacity=".5"/>
+          <!-- Body -->
+          <rect x="168" y="58" width="148" height="74" rx="6" fill="url(#hg1)" stroke="#252d40" stroke-width="1.2"/>
+          <rect x="168" y="58" width="148" height="8" rx="3" fill="#2f3a52" opacity=".5"/>
+          <!-- Feed neck -->
+          <rect x="222" y="34" width="42" height="24" rx="2" fill="#1e2538" stroke="#2f3a52" stroke-width="1"/>
+          <!-- Grip -->
+          <path d="M226 132 L226 172 Q226 180 233 180 L258 180 Q265 180 265 172 L265 132 Z" fill="#1e2538" stroke="#252d40" stroke-width="1"/>
+          <!-- Trigger guard -->
+          <path d="M236 132 Q236 155 243 160 Q253 160 260 155 Q265 152 265 132" fill="none" stroke="#252d40" stroke-width="1.5"/>
+          <!-- Regulator circle -->
+          <circle cx="340" cy="158" r="22" fill="#1e2538" stroke="#f59e0b" stroke-width="1.5"/>
+          <circle cx="340" cy="158" r="14" fill="#111624" stroke="#f59e0b" stroke-width="1"/>
+          <circle cx="340" cy="158" r="6" fill="#252d40"/>
+          <!-- Solenoid -->
+          <rect x="180" y="58" width="70" height="6" rx="1" fill="#111624" stroke="#2f3a52" stroke-width=".8"/>
+          <!-- DYE text -->
+          <text x="210" y="105" font-family="Arial Black,sans-serif" font-size="16" font-weight="900" fill="#e63946" opacity=".9" letter-spacing="1">DYE</text>
+          <text x="210" y="118" font-family="Arial,sans-serif" font-size="7" fill="#4a9eff" letter-spacing="4">D·A·M</text>
+          <!-- Status dot -->
+          <circle cx="294" cy="68" r="3.5" fill="#2dd4bf" filter="url(#hglow)"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="steps-grid" id="steps-container" role="list" aria-label="Étapes de démontage">
+
+      <!-- ÉTAPE 1 -->
+      <article class="step-card" data-step="1" role="listitem" tabindex="0" aria-label="Étape 1">
+        <div class="step-header">
+          <span class="step-num" aria-hidden="true">01</span>
+          <div class="step-meta">
+            <h2 class="step-title">Sécurité &amp; Préparation</h2>
+            <span class="step-est">⏱ ~2 min</span>
+          </div>
+          <div class="step-check" aria-hidden="true"></div>
+        </div>
+        <div class="step-visual">
+          <svg viewBox="0 0 600 260" role="img" aria-label="Étape 1 — Mise en sécurité" style="width:100%;height:100%;display:block;">
+            <defs>
+              <pattern id="s1dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="0.9" fill="#4a9eff" opacity="0.06"/>
+              </pattern>
+            </defs>
+            <rect width="600" height="260" fill="#07090f"/>
+            <rect width="600" height="260" fill="url(#s1dots)"/>
+            <!-- Watermark -->
+            <text x="300" y="190" font-family="Arial Black,sans-serif" font-size="160" font-weight="900" fill="#4a9eff" opacity="0.03" text-anchor="middle">01</text>
+            <!-- Panel dividers -->
+            <line x1="200" y1="30" x2="200" y2="230" stroke="#252d40" stroke-width="1"/>
+            <line x1="400" y1="30" x2="400" y2="230" stroke="#252d40" stroke-width="1"/>
+            <!-- Panel 1: Remove loader -->
+            <text x="100" y="55" font-family="system-ui,sans-serif" font-size="10" fill="#f59e0b" text-anchor="middle" font-weight="700" letter-spacing="0.08em">① RETIRER</text>
+            <!-- Loader dome -->
+            <ellipse cx="100" cy="130" rx="52" ry="36" fill="#111624" stroke="#4a9eff" stroke-width="2"/>
+            <ellipse cx="100" cy="118" rx="38" ry="24" fill="#0c0f1a" stroke="#2f3a52" stroke-width="1"/>
+            <!-- Feed neck -->
+            <rect x="82" y="150" width="36" height="20" rx="2" fill="#1e2538" stroke="#2f3a52" stroke-width="1"/>
+            <!-- Up arrow -->
+            <line x1="100" y1="90" x2="100" y2="68" stroke="#4a9eff" stroke-width="2" stroke-dasharray="4,3"/>
+            <polygon points="100,60 94,72 106,72" fill="#4a9eff"/>
+            <text x="100" y="205" font-family="system-ui,sans-serif" font-size="11" fill="#4a9eff" text-anchor="middle">Chargeur</text>
+            <text x="100" y="220" font-family="system-ui,sans-serif" font-size="10" fill="#404860" text-anchor="middle">Tirez vers le haut</text>
+            <!-- Panel 2: Gas bottle -->
+            <text x="300" y="55" font-family="system-ui,sans-serif" font-size="10" fill="#f59e0b" text-anchor="middle" font-weight="700" letter-spacing="0.08em">② DÉVISSER</text>
+            <!-- Cylinder body -->
+            <rect x="258" y="80" width="44" height="110" rx="10" fill="#1e2538" stroke="#f59e0b" stroke-width="2"/>
+            <rect x="264" y="86" width="32" height="98" rx="7" fill="#111624" stroke="#252d40" stroke-width="1"/>
+            <!-- Regulator ring -->
+            <ellipse cx="280" cy="80" rx="22" ry="8" fill="#252d40" stroke="#f59e0b" stroke-width="1.5"/>
+            <!-- Pressure lines -->
+            <line x1="268" y1="110" x2="292" y2="110" stroke="#f59e0b" stroke-width="1" opacity=".4"/>
+            <line x1="268" y1="120" x2="292" y2="120" stroke="#f59e0b" stroke-width="1" opacity=".4"/>
+            <line x1="268" y1="130" x2="292" y2="130" stroke="#f59e0b" stroke-width="1" opacity=".4"/>
+            <!-- Rotation arc -->
+            <path d="M 302 85 A 30 30 0 0 0 260 95" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+            <polygon points="256,98 258,88 265,94" fill="#f59e0b"/>
+            <text x="300" y="205" font-family="system-ui,sans-serif" font-size="11" fill="#f59e0b" text-anchor="middle">Bouteille HPA</text>
+            <text x="300" y="220" font-family="system-ui,sans-serif" font-size="10" fill="#404860" text-anchor="middle">Sens antihoraire</text>
+            <!-- Panel 3: Trigger purge -->
+            <text x="500" y="55" font-family="system-ui,sans-serif" font-size="10" fill="#f59e0b" text-anchor="middle" font-weight="700" letter-spacing="0.08em">③ PURGER 5×</text>
+            <!-- Trigger shape -->
+            <path d="M475 90 L510 90 L516 140 L506 165 L498 165 L498 140 L488 140 L488 165 L480 165 L475 140 Z" fill="#1e2538" stroke="#2dd4bf" stroke-width="2"/>
+            <!-- Guard -->
+            <path d="M478 165 Q490 180 502 165" fill="none" stroke="#2dd4bf" stroke-width="1.5"/>
+            <!-- Sound waves from purge -->
+            <path d="M 520 125 Q 530 115 530 130 Q 530 145 520 135" fill="none" stroke="#2dd4bf" stroke-width="1.5" opacity=".8"/>
+            <path d="M 524 120 Q 540 108 540 130 Q 540 152 524 140" fill="none" stroke="#2dd4bf" stroke-width="1.2" opacity=".5"/>
+            <path d="M 528 115 Q 552 100 552 130 Q 552 160 528 145" fill="none" stroke="#2dd4bf" stroke-width="1" opacity=".3"/>
+            <text x="500" y="205" font-family="system-ui,sans-serif" font-size="11" fill="#2dd4bf" text-anchor="middle">Gâchette</text>
+            <text x="500" y="220" font-family="system-ui,sans-serif" font-size="10" fill="#404860" text-anchor="middle">Appuyez 5× — purge gaz</text>
+            <!-- Warning bar bottom -->
+            <rect x="20" y="238" width="560" height="16" rx="4" fill="rgba(230,57,70,0.08)" stroke="rgba(230,57,70,0.2)" stroke-width="1"/>
+            <text x="300" y="250" font-family="system-ui,sans-serif" font-size="10" fill="#e63946" text-anchor="middle" font-weight="600">⚠  Ne jamais démonter sous pression — vérifier le silence de la gâchette</text>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-location"><strong>Où agir :</strong> Partez de l'arrière du lanceur. La grosse pièce cylindrique vissée en bas = la bouteille de gaz. La coupole transparente sur le dessus = le chargeur. Sous l'avant du lanceur = le MAG.</div>
+          <ol class="step-list">
+            <li><strong>Retirez le chargeur de billes.</strong><span class="step-detail">Chargeur électrique : tirez vers le haut. MAG rectangulaire : bouton de déverrouillage sur le côté puis tirez vers le bas.</span></li>
+            <li><strong>Dévissez la bouteille HPA ou CO₂.</strong><span class="step-detail">La grande pièce ronde en bas à l'arrière. Tournez en sens antihoraire jusqu'à décrochage. Posez sur le tapis.</span></li>
+            <li><strong>Purgez le gaz résiduel.</strong><span class="step-detail">Pointez vers le bas, loin de tout. Appuyez la gâchette 4–5 fois jusqu'à ne plus entendre aucun "pschitt".</span></li>
+            <li><strong>Installez sur le tapis, canon à gauche.</strong><span class="step-detail">Préparez un petit pot pour les vis — vous en perdrez une sans ça.</span></li>
+          </ol>
+          <div class="step-verify"><strong>Vérification :</strong> Appuyez encore une fois sur la gâchette — silence total. Pas de souffle d'air = dépressurisé.</div>
+          <div class="tip-box"><strong>Conseil :</strong> Un tapis magnétique (~10€ en modélisme) retient automatiquement les petites vis.</div>
+          <div class="warn-box"><strong>Sécurité absolue :</strong> Ne passez jamais à l'étape suivante si le lanceur est encore sous pression.</div>
+        </div>
+        <div class="step-footer">
+          <div class="step-tools"><span class="tool">Tapis magnétique</span><span class="tool">Pot à vis</span></div>
+          <div class="step-actions">
+            <button class="note-btn" data-step="1" aria-label="Ajouter une note à l'étape 1">Note</button>
+            <button class="complete-btn" data-step="1" aria-label="Valider étape 1">✓ Valider</button>
+          </div>
+        </div>
+        <div class="step-note-area" id="note-area-1" hidden>
+          <textarea class="step-note" id="note-1" placeholder="Note personnelle pour cette étape…" aria-label="Note étape 1"></textarea>
+        </div>
+      </article>
+
+      <!-- ÉTAPE 2 -->
+      <article class="step-card" data-step="2" role="listitem" tabindex="0" aria-label="Étape 2">
+        <div class="step-header">
+          <span class="step-num" aria-hidden="true">02</span>
+          <div class="step-meta">
+            <h2 class="step-title">Retrait du Canon</h2>
+            <span class="step-est">⏱ ~3 min</span>
+          </div>
+          <div class="step-check" aria-hidden="true"></div>
+        </div>
+        <div class="step-visual">
+          <svg viewBox="0 0 600 260" role="img" aria-label="Étape 2 — Retrait du canon" style="width:100%;height:100%;display:block;">
+            <defs>
+              <pattern id="s2dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="0.9" fill="#4a9eff" opacity="0.06"/>
+              </pattern>
+              <marker id="s2arr" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto">
+                <polygon points="0 0,8 3.5,0 7" fill="#4a9eff"/>
+              </marker>
+              <marker id="s2arrr" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto">
+                <polygon points="0 0,8 3.5,0 7" fill="#e63946"/>
+              </marker>
+            </defs>
+            <rect width="600" height="260" fill="#07090f"/>
+            <rect width="600" height="260" fill="url(#s2dots)"/>
+            <text x="300" y="200" font-family="Arial Black,sans-serif" font-size="160" font-weight="900" fill="#4a9eff" opacity="0.03" text-anchor="middle">02</text>
+            <!-- Body block (right, fixed) -->
+            <rect x="300" y="90" width="140" height="80" rx="6" fill="#1e2538" stroke="#252d40" stroke-width="1.5"/>
+            <text x="370" y="136" font-family="system-ui,sans-serif" font-size="11" fill="#7a8299" text-anchor="middle">Corps</text>
+            <text x="370" y="151" font-family="system-ui,sans-serif" font-size="10" fill="#404860" text-anchor="middle">fixe</text>
+            <!-- Gap highlight -->
+            <rect x="282" y="88" width="20" height="84" rx="2" fill="none" stroke="#4a9eff" stroke-width="1.5" stroke-dasharray="5,3"/>
+            <text x="292" y="82" font-family="system-ui,sans-serif" font-size="9" fill="#4a9eff" text-anchor="middle">Gap</text>
+            <!-- Barrel (left, being removed) -->
+            <rect x="60" y="108" width="226" height="44" rx="4" fill="#4a9eff" opacity="0.15" stroke="#4a9eff" stroke-width="2"/>
+            <!-- Barrel vents -->
+            <line x1="80" y1="112" x2="80" y2="148" stroke="#07090f" stroke-width="2"/>
+            <line x1="96" y1="112" x2="96" y2="148" stroke="#07090f" stroke-width="2"/>
+            <line x1="112" y1="112" x2="112" y2="148" stroke="#07090f" stroke-width="2"/>
+            <line x1="128" y1="112" x2="128" y2="148" stroke="#07090f" stroke-width="2"/>
+            <!-- End cap -->
+            <rect x="44" y="105" width="18" height="50" rx="3" fill="#4a9eff" opacity="0.3" stroke="#4a9eff" stroke-width="1.5"/>
+            <!-- Barrel label -->
+            <rect x="60" y="160" width="230" height="28" rx="5" fill="rgba(74,158,255,0.08)" stroke="rgba(74,158,255,0.2)" stroke-width="1"/>
+            <text x="175" y="172" font-family="system-ui,sans-serif" font-size="11" fill="#4a9eff" text-anchor="middle" font-weight="600">Canon Dye Ultralite 14"</text>
+            <text x="175" y="184" font-family="system-ui,sans-serif" font-size="10" fill="#404860" text-anchor="middle">Filetage Autococker ⅞"</text>
+            <!-- Pull arrow -->
+            <line x1="250" y1="130" x2="60" y2="130" stroke="#4a9eff" stroke-width="2.5" stroke-dasharray="6,3" marker-end="url(#s2arr)"/>
+            <text x="155" y="106" font-family="system-ui,sans-serif" font-size="11" fill="#4a9eff" text-anchor="middle" font-weight="600">Tirez vers l'avant</text>
+            <!-- Rotation arc at barrel base -->
+            <path d="M 290 102 A 20 20 0 0 0 268 108" fill="none" stroke="#4a9eff" stroke-width="2.5" stroke-linecap="round"/>
+            <polygon points="264,112 266,100 274,107" fill="#4a9eff"/>
+            <text x="248" y="95" font-family="system-ui,sans-serif" font-size="10" fill="#4a9eff" text-anchor="middle">¼ tour</text>
+            <text x="248" y="107" font-family="system-ui,sans-serif" font-size="10" fill="#404860" text-anchor="middle">antihoraire</text>
+            <!-- O-ring callout -->
+            <circle cx="295" cy="130" r="10" fill="none" stroke="#e63946" stroke-width="2.5"/>
+            <line x1="305" y1="122" x2="360" y2="85" stroke="#e63946" stroke-width="1.5" marker-end="url(#s2arrr)"/>
+            <rect x="362" y="60" width="160" height="48" rx="6" fill="rgba(230,57,70,0.08)" stroke="rgba(230,57,70,0.25)" stroke-width="1"/>
+            <text x="442" y="76" font-family="system-ui,sans-serif" font-size="11" fill="#e63946" text-anchor="middle" font-weight="700">Joint torique #006</text>
+            <text x="442" y="91" font-family="system-ui,sans-serif" font-size="10" fill="#e63946" text-anchor="middle">⚠ À ne PAS perdre !</text>
+            <text x="442" y="103" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">Bague noire ~5mm ø</text>
+            <!-- O-ring close-up inset -->
+            <rect x="420" y="160" width="140" height="80" rx="6" fill="#0c0f1a" stroke="#e63946" stroke-width="1.5"/>
+            <text x="490" y="178" font-family="system-ui,sans-serif" font-size="9" fill="#e63946" text-anchor="middle">Gros plan O-ring</text>
+            <circle cx="490" cy="210" r="24" fill="none" stroke="#e63946" stroke-width="4.5"/>
+            <circle cx="490" cy="210" r="10" fill="#07090f"/>
+            <text x="490" y="248" font-family="system-ui,sans-serif" font-size="9" fill="#7a8299" text-anchor="middle">Caoutchouc NBR</text>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-location"><strong>Où agir :</strong> Le canon = le long tube à l'avant (~35 cm). Il se visse à l'avant du corps. Le joint torique se trouve à la base du canon, à la jonction avec le corps.</div>
+          <ol class="step-list">
+            <li><strong>Tournez le canon d'un quart de tour antihoraire.</strong><span class="step-detail">90° exactement. Le filetage <span class="term" title="Filetage Autococker ⅞-14 UNS : standard paintball">Autococker ⅞"</span> se déverrouille vite. Vous sentirez un léger déclic.</span></li>
+            <li><strong>Tirez le canon droit vers l'avant.</strong><span class="step-detail">En ligne droite, sans tordre. Si ça résiste, vérifiez le quart de tour complet.</span></li>
+            <li><strong>Récupérez immédiatement le <span class="term" title="Joint torique = O-ring, bague ronde en caoutchouc assurant l'étanchéité">joint torique</span>.</strong><span class="step-detail">Ce petit anneau noir (~5 mm ø, 1 mm épaisseur) peut rester sur le tapis ou dans l'orifice. Placez-le dans un sachet — si perdu, le canon fuira.</span></li>
+          </ol>
+          <div class="step-verify"><strong>Vérification :</strong> Canon sorti proprement, joint torique récupéré. Regardez dans l'orifice avec une lampe — le joint ne doit pas rester coincé.</div>
+          <div class="tip-box">Si le canon résiste après le quart de tour, vérifiez l'alignement. Le filetage Autococker est délicat si on tire en biais.</div>
+        </div>
+        <div class="step-footer">
+          <div class="step-tools"><span class="tool">Mains nues</span><span class="tool">O-ring #006</span></div>
+          <div class="step-actions">
+            <button class="note-btn" data-step="2" aria-label="Note étape 2">Note</button>
+            <button class="complete-btn" data-step="2" aria-label="Valider étape 2">✓ Valider</button>
+          </div>
+        </div>
+        <div class="step-note-area" id="note-area-2" hidden>
+          <textarea class="step-note" id="note-2" placeholder="Note personnelle…" aria-label="Note étape 2"></textarea>
+        </div>
+      </article>
+
+      <!-- ÉTAPE 3 -->
+      <article class="step-card" data-step="3" role="listitem" tabindex="0" aria-label="Étape 3">
+        <div class="step-header">
+          <span class="step-num" aria-hidden="true">03</span>
+          <div class="step-meta">
+            <h2 class="step-title">Système Bolt OOPS</h2>
+            <span class="step-est">⏱ ~5 min</span>
+          </div>
+          <div class="step-check" aria-hidden="true"></div>
+        </div>
+        <div class="step-visual">
+          <svg viewBox="0 0 600 260" role="img" aria-label="Étape 3 — Capuchon arrière et percuteur" style="width:100%;height:100%;display:block;">
+            <defs>
+              <pattern id="s3dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="0.9" fill="#4a9eff" opacity="0.06"/>
+              </pattern>
+              <marker id="s3arb" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto">
+                <polygon points="0 0,8 3.5,0 7" fill="#4a9eff"/>
+              </marker>
+              <marker id="s3ary" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto">
+                <polygon points="0 0,8 3.5,0 7" fill="#f59e0b"/>
+              </marker>
+            </defs>
+            <rect width="600" height="260" fill="#07090f"/>
+            <rect width="600" height="260" fill="url(#s3dots)"/>
+            <text x="300" y="200" font-family="Arial Black,sans-serif" font-size="160" font-weight="900" fill="#f59e0b" opacity="0.03" text-anchor="middle">03</text>
+            <!-- Body block -->
+            <rect x="160" y="90" width="230" height="80" rx="6" fill="#1e2538" stroke="#252d40" stroke-width="1.5"/>
+            <!-- Tunnel inside body -->
+            <rect x="164" y="111" width="222" height="38" rx="2" fill="#07090f" stroke="#252d40" stroke-width="1" stroke-dasharray="4,3"/>
+            <text x="275" y="134" font-family="system-ui,sans-serif" font-size="10" fill="#404860" text-anchor="middle">Tunnel interne</text>
+            <!-- Back cap (right face) -->
+            <rect x="388" y="88" width="28" height="84" rx="4" fill="#f59e0b" opacity="0.2" stroke="#f59e0b" stroke-width="2.5"/>
+            <!-- Screws on back cap -->
+            <circle cx="402" cy="108" r="7" fill="#07090f" stroke="#f59e0b" stroke-width="2"/>
+            <line x1="398" y1="108" x2="406" y2="108" stroke="#f59e0b" stroke-width="1.5"/>
+            <line x1="402" y1="104" x2="402" y2="112" stroke="#f59e0b" stroke-width="1.5"/>
+            <circle cx="402" cy="152" r="7" fill="#07090f" stroke="#f59e0b" stroke-width="2"/>
+            <line x1="398" y1="152" x2="406" y2="152" stroke="#f59e0b" stroke-width="1.5"/>
+            <line x1="402" y1="148" x2="402" y2="156" stroke="#f59e0b" stroke-width="1.5"/>
+            <!-- Back cap label -->
+            <line x1="418" y1="130" x2="466" y2="110" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#s3ary)"/>
+            <rect x="468" y="88" width="118" height="44" rx="5" fill="rgba(245,158,11,0.08)" stroke="rgba(245,158,11,0.25)" stroke-width="1"/>
+            <text x="527" y="104" font-family="system-ui,sans-serif" font-size="11" fill="#f59e0b" text-anchor="middle" font-weight="700">Capuchon arrière</text>
+            <text x="527" y="118" font-family="system-ui,sans-serif" font-size="10" fill="#7a8299" text-anchor="middle">2× vis Allen 3mm</text>
+            <text x="527" y="130" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">antihoraire</text>
+            <!-- Bolt extracted (left of body) -->
+            <rect x="28" y="111" width="134" height="38" rx="5" fill="#1e2538" stroke="#4a9eff" stroke-width="2"/>
+            <!-- 3 O-rings on bolt -->
+            <ellipse cx="60" cy="130" rx="3" ry="20" fill="none" stroke="#2dd4bf" stroke-width="3"/>
+            <ellipse cx="100" cy="130" rx="3" ry="20" fill="none" stroke="#2dd4bf" stroke-width="3"/>
+            <ellipse cx="140" cy="130" rx="3" ry="20" fill="none" stroke="#2dd4bf" stroke-width="3"/>
+            <!-- Extraction arrow -->
+            <line x1="158" y1="130" x2="36" y2="130" stroke="#4a9eff" stroke-width="2.5" stroke-dasharray="5,3" marker-end="url(#s3arb)"/>
+            <!-- Bolt label -->
+            <rect x="28" y="158" width="134" height="38" rx="5" fill="rgba(74,158,255,0.06)" stroke="rgba(74,158,255,0.2)" stroke-width="1"/>
+            <text x="95" y="172" font-family="system-ui,sans-serif" font-size="11" fill="#4a9eff" text-anchor="middle" font-weight="600">Percuteur OOPS</text>
+            <text x="95" y="186" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf" text-anchor="middle">3× joints toriques</text>
+            <!-- O-ring callout -->
+            <line x1="100" y1="110" x2="100" y2="86" stroke="#2dd4bf" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <rect x="30" y="60" width="140" height="22" rx="4" fill="rgba(45,212,191,0.08)" stroke="rgba(45,212,191,0.2)" stroke-width="1"/>
+            <text x="100" y="75" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf" text-anchor="middle">Photographiez avant retrait !</text>
+            <!-- Allen key icon -->
+            <rect x="468" y="148" width="36" height="8" rx="3" fill="#252d40" stroke="#7a8299" stroke-width="1"/>
+            <rect x="462" y="140" width="8" height="24" rx="3" fill="#252d40" stroke="#7a8299" stroke-width="1"/>
+            <text x="516" y="162" font-family="system-ui,sans-serif" font-size="10" fill="#7a8299">Clé Allen 3mm</text>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-location"><strong>Où agir :</strong> Le <span class="term" title="Bolt = percuteur, le piston interne qui propulse la bille">bolt</span> est dans le tunnel horizontal du corps. Accès par le <span class="term" title="Back cap = bouchon vissé à l'arrière du corps">capuchon arrière</span> — la pièce plate sur la face arrière du corps, juste au-dessus de la poignée.</div>
+          <ol class="step-list">
+            <li><strong>Repérez les 2 petites vis hexagonales 3mm sur le capuchon arrière.</strong><span class="step-detail">Ces vis font 3mm de diamètre — clé Allen 3mm obligatoire. Ne confondez pas avec les vis du grip sur les côtés.</span></li>
+            <li><strong>Dévissez les 2 vis en alternant (demi-tour chacune).</strong><span class="step-detail">Alternez pour ne pas contraindre la pièce. Posez les vis dans le pot. Glissez le capuchon vers l'arrière.</span></li>
+            <li><strong>Tirez le bolt handle vers l'arrière pour extraire le percuteur.</strong><span class="step-detail">Le percuteur sort d'un seul bloc (<span class="term" title="OOPS = One Piece Spool : percuteur et système interne indémontables">système OOPS</span>). Tirez lentement en ligne droite.</span></li>
+            <li><strong>Récupérez les 3 joints toriques et notez leur position.</strong><span class="step-detail">Photographiez avant de retirer quoi que ce soit. Chaque joint a un diamètre précis — les confondre cause des fuites.</span></li>
+          </ol>
+          <div class="step-verify"><strong>Vérification :</strong> Capuchon + 2 vis + percuteur + 3 joints toriques identifiés. Le tunnel arrière doit être vide et propre.</div>
+          <div class="tip-box"><strong>Photo indispensable :</strong> Prenez une photo des 3 joints sur le percuteur avant retrait — positions exactes.</div>
+        </div>
+        <div class="step-footer">
+          <div class="step-tools"><span class="tool">Allen 3mm</span><span class="tool">O-rings ×3</span></div>
+          <div class="step-actions">
+            <button class="note-btn" data-step="3">Note</button>
+            <button class="complete-btn" data-step="3" aria-label="Valider étape 3">✓ Valider</button>
+          </div>
+        </div>
+        <div class="step-note-area" id="note-area-3" hidden>
+          <textarea class="step-note" id="note-3" placeholder="Note personnelle…" aria-label="Note étape 3"></textarea>
+        </div>
+      </article>
+
+      <!-- ÉTAPE 4 -->
+      <article class="step-card" data-step="4" role="listitem" tabindex="0" aria-label="Étape 4">
+        <div class="step-header">
+          <span class="step-num" aria-hidden="true">04</span>
+          <div class="step-meta">
+            <h2 class="step-title">Séparation Grip / Corps</h2>
+            <span class="step-est">⏱ ~5 min</span>
+          </div>
+          <div class="step-check" aria-hidden="true"></div>
+        </div>
+        <div class="step-visual">
+          <svg viewBox="0 0 600 260" role="img" aria-label="Étape 4 — Séparation grip/corps" style="width:100%;height:100%;display:block;">
+            <defs>
+              <pattern id="s4dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="0.9" fill="#4a9eff" opacity="0.06"/>
+              </pattern>
+              <marker id="s4arrd" markerWidth="8" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
+                <polygon points="8 0,0 3.5,8 7" fill="#2dd4bf"/>
+              </marker>
+            </defs>
+            <rect width="600" height="260" fill="#07090f"/>
+            <rect width="600" height="260" fill="url(#s4dots)"/>
+            <text x="300" y="200" font-family="Arial Black,sans-serif" font-size="160" font-weight="900" fill="#2dd4bf" opacity="0.03" text-anchor="middle">04</text>
+            <!-- Upper body block -->
+            <rect x="140" y="60" width="240" height="70" rx="6" fill="#1e2538" stroke="#252d40" stroke-width="1.5"/>
+            <text x="260" y="100" font-family="system-ui,sans-serif" font-size="12" fill="#7a8299" text-anchor="middle" font-weight="600">Corps principal</text>
+            <!-- Solenoid on top -->
+            <rect x="170" y="52" width="100" height="10" rx="2" fill="#111624" stroke="#2f3a52" stroke-width="1"/>
+            <!-- Separation dashed line -->
+            <line x1="100" y1="130" x2="440" y2="130" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8,4"/>
+            <text x="460" y="134" font-family="system-ui,sans-serif" font-size="10" fill="#f59e0b" font-weight="600">Ligne de séparation</text>
+            <!-- Left screw -->
+            <circle cx="168" cy="130" r="9" fill="#1e2538" stroke="#f59e0b" stroke-width="2.5"/>
+            <line x1="163" y1="130" x2="173" y2="130" stroke="#f59e0b" stroke-width="2"/>
+            <line x1="168" y1="125" x2="168" y2="135" stroke="#f59e0b" stroke-width="2"/>
+            <!-- Right screw -->
+            <circle cx="352" cy="130" r="9" fill="#1e2538" stroke="#f59e0b" stroke-width="2.5"/>
+            <line x1="347" y1="130" x2="357" y2="130" stroke="#f59e0b" stroke-width="2"/>
+            <line x1="352" y1="125" x2="352" y2="135" stroke="#f59e0b" stroke-width="2"/>
+            <!-- Screw label -->
+            <text x="260" y="116" font-family="system-ui,sans-serif" font-size="10" fill="#f59e0b" text-anchor="middle">2× vis Allen 5/32" — une par côté</text>
+            <!-- Grip block (below, being separated) -->
+            <rect x="180" y="148" width="160" height="80" rx="6" fill="#2dd4bf" opacity="0.08" stroke="#2dd4bf" stroke-width="2"/>
+            <!-- Grip texture lines -->
+            <line x1="185" y1="158" x2="335" y2="158" stroke="#2dd4bf" stroke-width="0.5" opacity=".2"/>
+            <line x1="185" y1="166" x2="335" y2="166" stroke="#2dd4bf" stroke-width="0.5" opacity=".2"/>
+            <line x1="185" y1="174" x2="335" y2="174" stroke="#2dd4bf" stroke-width="0.5" opacity=".2"/>
+            <line x1="185" y1="182" x2="335" y2="182" stroke="#2dd4bf" stroke-width="0.5" opacity=".2"/>
+            <line x1="185" y1="190" x2="335" y2="190" stroke="#2dd4bf" stroke-width="0.5" opacity=".2"/>
+            <text x="260" y="196" font-family="system-ui,sans-serif" font-size="12" fill="#2dd4bf" text-anchor="middle" font-weight="600">Grip Frame</text>
+            <!-- Down arrow -->
+            <line x1="260" y1="232" x2="260" y2="250" stroke="#2dd4bf" stroke-width="2.5" marker-end="url(#s4arrd)"/>
+            <text x="260" y="248" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf" text-anchor="middle">Tirez vers le bas</text>
+            <!-- Connector cable (red warning) -->
+            <path d="M 210 52 Q 210 40 240 40 Q 265 40 265 55" fill="none" stroke="#e63946" stroke-width="2.5" stroke-dasharray="5,3"/>
+            <circle cx="265" cy="60" r="5" fill="#e63946" opacity="0.8"/>
+            <!-- Warning callout -->
+            <rect x="20" y="28" width="180" height="38" rx="5" fill="rgba(230,57,70,0.08)" stroke="rgba(230,57,70,0.3)" stroke-width="1"/>
+            <text x="110" y="43" font-family="system-ui,sans-serif" font-size="11" fill="#e63946" text-anchor="middle" font-weight="700">⚠ Débrancher D'ABORD</text>
+            <text x="110" y="57" font-family="system-ui,sans-serif" font-size="10" fill="#e63946" text-anchor="middle">le connecteur solénoïde</text>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-location"><strong>Où agir :</strong> La <span class="term" title="Grip frame = partie tenue en main, contenant gâchette et électronique">poignée</span> est fixée sous le corps par 2 vis latérales. L'<span class="term" title="Solénoïde = électrovanne qui ouvre/ferme le gaz à chaque tir">électrovanne</span> sur le dessus de la poignée est reliée au corps par un câble délicat.</div>
+          <ol class="step-list">
+            <li><strong>Photographiez le câblage de l'électrovanne.</strong><span class="step-detail">Photo nette depuis le dessus et le côté. Référence indispensable au remontage — un mauvais branchement peut griller l'électronique.</span></li>
+            <li><strong>Débranchez délicatement le connecteur de l'électrovanne.</strong><span class="step-detail">Pincez le corps plastique du connecteur. <strong>Jamais sur le fil lui-même</strong> — arrachement = réparation 40-60€.</span></li>
+            <li><strong>Dévissez les 2 vis latérales Allen 5/32".</strong><span class="step-detail">Une de chaque côté, à la jonction corps/poignée. Alternez (demi-tour à gauche, demi-tour à droite).</span></li>
+            <li><strong>Tirez la poignée vers le bas.</strong><span class="step-detail">Légère pression des deux côtés si elle colle. Posez côté électronique vers le haut.</span></li>
+          </ol>
+          <div class="step-verify"><strong>Vérification :</strong> Poignée séparée et posée à part. Connecteur intact (pas de fil arraché). Vérifiez sur la photo que vous vous souvenez du sens de branchement.</div>
+          <div class="warn-box">Le câble de l'électrovanne est la pièce la plus fragile du lanceur. Toujours saisir le connecteur plastique, jamais le fil.</div>
+        </div>
+        <div class="step-footer">
+          <div class="step-tools"><span class="tool">Allen 5/32"</span><span class="tool">Photo câblage</span></div>
+          <div class="step-actions">
+            <button class="note-btn" data-step="4">Note</button>
+            <button class="complete-btn" data-step="4" aria-label="Valider étape 4">✓ Valider</button>
+          </div>
+        </div>
+        <div class="step-note-area" id="note-area-4" hidden>
+          <textarea class="step-note" id="note-4" placeholder="Note personnelle…" aria-label="Note étape 4"></textarea>
+        </div>
+      </article>
+
+      <!-- ÉTAPE 5 -->
+      <article class="step-card" data-step="5" role="listitem" tabindex="0" aria-label="Étape 5">
+        <div class="step-header">
+          <span class="step-num" aria-hidden="true">05</span>
+          <div class="step-meta">
+            <h2 class="step-title">Retrait du Solénoïde</h2>
+            <span class="step-est">⏱ ~5 min</span>
+          </div>
+          <div class="step-check" aria-hidden="true"></div>
+        </div>
+        <div class="step-visual">
+          <svg viewBox="0 0 600 260" role="img" aria-label="Étape 5 — Retrait solénoïde" style="width:100%;height:100%;display:block;">
+            <defs>
+              <pattern id="s5dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="0.9" fill="#4a9eff" opacity="0.06"/>
+              </pattern>
+              <marker id="s5arru" markerWidth="8" markerHeight="7" refX="3.5" refY="0" orient="auto">
+                <polygon points="0 7,3.5 0,7 7" fill="#2dd4bf"/>
+              </marker>
+              <marker id="s5arro" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto">
+                <polygon points="0 0,8 3.5,0 7" fill="#f59e0b"/>
+              </marker>
+            </defs>
+            <rect width="600" height="260" fill="#07090f"/>
+            <rect width="600" height="260" fill="url(#s5dots)"/>
+            <text x="300" y="200" font-family="Arial Black,sans-serif" font-size="160" font-weight="900" fill="#2dd4bf" opacity="0.03" text-anchor="middle">05</text>
+            <!-- Body (top view implied, showing solenoid seat) -->
+            <rect x="120" y="130" width="280" height="80" rx="6" fill="#1e2538" stroke="#252d40" stroke-width="1.5"/>
+            <text x="260" y="178" font-family="system-ui,sans-serif" font-size="11" fill="#7a8299" text-anchor="middle">Corps principal</text>
+            <!-- 4 screw holes on body -->
+            <circle cx="164" cy="132" r="7" fill="#07090f" stroke="#f59e0b" stroke-width="2.5"/>
+            <line x1="160" y1="132" x2="168" y2="132" stroke="#f59e0b" stroke-width="1.5"/>
+            <line x1="164" y1="128" x2="164" y2="136" stroke="#f59e0b" stroke-width="1.5"/>
+            <circle cx="210" cy="132" r="7" fill="#07090f" stroke="#f59e0b" stroke-width="2.5"/>
+            <line x1="206" y1="132" x2="214" y2="132" stroke="#f59e0b" stroke-width="1.5"/>
+            <line x1="210" y1="128" x2="210" y2="136" stroke="#f59e0b" stroke-width="1.5"/>
+            <circle cx="310" cy="132" r="7" fill="#07090f" stroke="#f59e0b" stroke-width="2.5"/>
+            <line x1="306" y1="132" x2="314" y2="132" stroke="#f59e0b" stroke-width="1.5"/>
+            <line x1="310" y1="128" x2="310" y2="136" stroke="#f59e0b" stroke-width="1.5"/>
+            <circle cx="356" cy="132" r="7" fill="#07090f" stroke="#f59e0b" stroke-width="2.5"/>
+            <line x1="352" y1="132" x2="360" y2="132" stroke="#f59e0b" stroke-width="1.5"/>
+            <line x1="356" y1="128" x2="356" y2="136" stroke="#f59e0b" stroke-width="1.5"/>
+            <!-- Screw order label -->
+            <text x="125" y="148" font-family="system-ui,sans-serif" font-size="9" fill="#f59e0b">①</text>
+            <text x="207" y="148" font-family="system-ui,sans-serif" font-size="9" fill="#f59e0b">③</text>
+            <text x="305" y="148" font-family="system-ui,sans-serif" font-size="9" fill="#f59e0b">④</text>
+            <text x="352" y="148" font-family="system-ui,sans-serif" font-size="9" fill="#f59e0b">②</text>
+            <!-- Solenoid lifted above -->
+            <rect x="120" y="50" width="280" height="52" rx="5" fill="#2dd4bf" opacity="0.1" stroke="#2dd4bf" stroke-width="2.5"/>
+            <!-- Solenoid internal detail -->
+            <rect x="130" y="58" width="60" height="36" rx="3" fill="#111624" stroke="#2f3a52" stroke-width="1"/>
+            <rect x="200" y="60" width="25" height="14" rx="2" fill="#e63946" opacity="0.7"/>
+            <rect x="200" y="78" width="25" height="14" rx="2" fill="#f59e0b" opacity="0.7"/>
+            <circle cx="260" cy="76" r="12" fill="#111624" stroke="#4a9eff" stroke-width="1.5"/>
+            <circle cx="260" cy="76" r="5" fill="#4a9eff" opacity=".4"/>
+            <text x="310" y="72" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf">Solénoïde</text>
+            <text x="310" y="84" font-family="system-ui,sans-serif" font-size="9" fill="#404860">Électrovanne 3 voies</text>
+            <!-- Lift arrows -->
+            <line x1="175" y1="126" x2="175" y2="108" stroke="#2dd4bf" stroke-width="2" stroke-dasharray="4,3"/>
+            <polygon points="175,100 169,112 181,112" fill="#2dd4bf"/>
+            <line x1="345" y1="126" x2="345" y2="108" stroke="#2dd4bf" stroke-width="2" stroke-dasharray="4,3"/>
+            <polygon points="345,100 339,112 351,112" fill="#2dd4bf"/>
+            <!-- Screw label callout -->
+            <line x1="370" y1="132" x2="430" y2="120" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#s5arro)"/>
+            <rect x="432" y="100" width="148" height="50" rx="5" fill="rgba(245,158,11,0.08)" stroke="rgba(245,158,11,0.25)" stroke-width="1"/>
+            <text x="506" y="116" font-family="system-ui,sans-serif" font-size="11" fill="#f59e0b" text-anchor="middle" font-weight="700">4× vis M2 — clé 1,5mm</text>
+            <text x="506" y="130" font-family="system-ui,sans-serif" font-size="10" fill="#7a8299" text-anchor="middle">Ordre croisé ① ② ③ ④</text>
+            <text x="506" y="143" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">Les plus petites vis du lanceur</text>
+            <!-- Cross order box -->
+            <rect x="432" y="170" width="148" height="66" rx="5" fill="rgba(45,212,191,0.06)" stroke="rgba(45,212,191,0.2)" stroke-width="1"/>
+            <text x="506" y="185" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf" text-anchor="middle" font-weight="600">Ordre de dévissage :</text>
+            <text x="506" y="200" font-family="system-ui,sans-serif" font-size="9" fill="#2dd4bf" text-anchor="middle">① haut-gauche → ② bas-droit</text>
+            <text x="506" y="214" font-family="system-ui,sans-serif" font-size="9" fill="#2dd4bf" text-anchor="middle">③ haut-droit → ④ bas-gauche</text>
+            <text x="506" y="228" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">2-3 tours par vis avant suivante</text>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-location"><strong>Où agir :</strong> L'<span class="term" title="Solénoïde = électrovanne 3 voies commandant le gaz à chaque tir">électrovanne</span> = petite pièce noire rectangulaire vissée sur le dessus du corps, vers l'avant-centre. Reconnaissable par le câble électrique. Retenue par 4 micro-vis M2 — les plus petites du lanceur.</div>
+          <ol class="step-list">
+            <li><strong>Repérez les 4 micro-vis M2 aux 4 coins de l'électrovanne.</strong><span class="step-detail">Diamètre 2mm — clé hexagonale 1,5mm obligatoire (fine comme un cure-dent épais). Si une vis est sous une étiquette, décollezle bord délicatement.</span></li>
+            <li><strong>Dévissez en croix : ① haut-gauche, ② bas-droit, ③ haut-droit, ④ bas-gauche.</strong><span class="step-detail">2-3 tours par vis avant de passer à la suivante — évite de tordre la platine. Posez ces 4 vis dans un compartiment séparé du pot.</span></li>
+            <li><strong>Soulevez l'électrovanne à plat, sans la pencher.</strong><span class="step-detail">Des petits joints en dessous peuvent coller légèrement. Ne penchez pas — les micro-canaux d'air internes sont fragiles. Déposez sur le tapis, <span class="term" title="PCB = circuit imprimé électronique">PCB</span> vers le haut.</span></li>
+          </ol>
+          <div class="step-verify"><strong>Vérification :</strong> Électrovanne à plat sur le tapis, 4 vis en sécurité. Les 4 trous de vis et les mini-canaux d'air sont visibles sur le corps.</div>
+          <div class="tip-box">Certains collent les 4 vis M2 sur un bout de scotch numéroté pendant le nettoyage — bonne pratique.</div>
+        </div>
+        <div class="step-footer">
+          <div class="step-tools"><span class="tool">Allen 1,5mm</span><span class="tool">Anti-statique</span></div>
+          <div class="step-actions">
+            <button class="note-btn" data-step="5">Note</button>
+            <button class="complete-btn" data-step="5" aria-label="Valider étape 5">✓ Valider</button>
+          </div>
+        </div>
+        <div class="step-note-area" id="note-area-5" hidden>
+          <textarea class="step-note" id="note-5" placeholder="Note personnelle…" aria-label="Note étape 5"></textarea>
+        </div>
+      </article>
+
+      <!-- ÉTAPE 6 -->
+      <article class="step-card" data-step="6" role="listitem" tabindex="0" aria-label="Étape 6">
+        <div class="step-header">
+          <span class="step-num" aria-hidden="true">06</span>
+          <div class="step-meta">
+            <h2 class="step-title">Retrait du Régulateur</h2>
+            <span class="step-est">⏱ ~5 min</span>
+          </div>
+          <div class="step-check" aria-hidden="true"></div>
+        </div>
+        <div class="step-visual">
+          <svg viewBox="0 0 600 260" role="img" aria-label="Étape 6 — Régulateur de pression" style="width:100%;height:100%;display:block;">
+            <defs>
+              <pattern id="s6dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="0.9" fill="#4a9eff" opacity="0.06"/>
+              </pattern>
+              <marker id="s6arrr" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto">
+                <polygon points="0 0,8 3.5,0 7" fill="#e63946"/>
+              </marker>
+            </defs>
+            <rect width="600" height="260" fill="#07090f"/>
+            <rect width="600" height="260" fill="url(#s6dots)"/>
+            <text x="220" y="200" font-family="Arial Black,sans-serif" font-size="160" font-weight="900" fill="#f59e0b" opacity="0.03" text-anchor="middle">06</text>
+            <!-- Regulator main cross-section (center) -->
+            <circle cx="220" cy="130" r="88" fill="#1e2538" stroke="#f59e0b" stroke-width="3"/>
+            <circle cx="220" cy="130" r="66" fill="#111624" stroke="#f59e0b" stroke-width="1.5"/>
+            <circle cx="220" cy="130" r="44" fill="#0c0f1a" stroke="#f59e0b" stroke-width="1"/>
+            <circle cx="220" cy="130" r="22" fill="#1e2538" stroke="#f59e0b" stroke-width="1"/>
+            <circle cx="220" cy="130" r="9" fill="#252d40"/>
+            <!-- PSI label in center -->
+            <text x="220" y="125" font-family="monospace" font-size="14" fill="#f59e0b" text-anchor="middle" font-weight="700">165</text>
+            <text x="220" y="141" font-family="monospace" font-size="10" fill="#7a8299" text-anchor="middle">PSI</text>
+            <!-- Anticlockwise rotation arc -->
+            <path d="M 305 90 A 90 90 0 0 0 150 68" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+            <polygon points="146,64 142,76 154,72" fill="#f59e0b"/>
+            <text x="340" y="76" font-family="system-ui,sans-serif" font-size="12" fill="#f59e0b" font-weight="700">↺ Clé à sangle</text>
+            <text x="340" y="90" font-family="system-ui,sans-serif" font-size="10" fill="#7a8299">Sens antihoraire</text>
+            <!-- O-ring #010 at top -->
+            <ellipse cx="220" cy="42" rx="26" ry="10" fill="none" stroke="#e63946" stroke-width="3"/>
+            <line x1="246" y1="38" x2="300" y2="22" stroke="#e63946" stroke-width="1.5" marker-end="url(#s6arrr)"/>
+            <rect x="302" y="8" width="148" height="36" rx="5" fill="rgba(230,57,70,0.08)" stroke="rgba(230,57,70,0.25)" stroke-width="1"/>
+            <text x="376" y="23" font-family="system-ui,sans-serif" font-size="11" fill="#e63946" text-anchor="middle" font-weight="700">Joint torique #010</text>
+            <text x="376" y="37" font-family="system-ui,sans-serif" font-size="10" fill="#7a8299" text-anchor="middle">Côté corps du lanceur</text>
+            <!-- O-ring #012 at bottom -->
+            <ellipse cx="220" cy="218" rx="26" ry="10" fill="none" stroke="#e63946" stroke-width="3"/>
+            <line x1="246" y1="222" x2="300" y2="238" stroke="#e63946" stroke-width="1.5" marker-end="url(#s6arrr)"/>
+            <rect x="302" y="224" width="148" height="36" rx="5" fill="rgba(230,57,70,0.08)" stroke="rgba(230,57,70,0.25)" stroke-width="1"/>
+            <text x="376" y="239" font-family="system-ui,sans-serif" font-size="11" fill="#e63946" text-anchor="middle" font-weight="700">Joint torique #012</text>
+            <text x="376" y="253" font-family="system-ui,sans-serif" font-size="10" fill="#7a8299" text-anchor="middle">Côté bouteille (ASA)</text>
+            <!-- Warning box right -->
+            <rect x="452" y="110" width="130" height="56" rx="5" fill="rgba(230,57,70,0.06)" stroke="rgba(230,57,70,0.2)" stroke-width="1"/>
+            <text x="517" y="126" font-family="system-ui,sans-serif" font-size="10" fill="#e63946" text-anchor="middle" font-weight="700">⚠ ATTENTION</text>
+            <text x="517" y="140" font-family="system-ui,sans-serif" font-size="9" fill="#e63946" text-anchor="middle">Ne pas ouvrir</text>
+            <text x="517" y="153" font-family="system-ui,sans-serif" font-size="9" fill="#e63946" text-anchor="middle">l'intérieur !</text>
+            <text x="517" y="163" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">Calibré usine</text>
+            <!-- Reg label left -->
+            <rect x="12" y="104" width="108" height="54" rx="5" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.2)" stroke-width="1"/>
+            <text x="66" y="119" font-family="system-ui,sans-serif" font-size="10" fill="#f59e0b" text-anchor="middle" font-weight="700">Régulateur</text>
+            <text x="66" y="132" font-family="system-ui,sans-serif" font-size="9" fill="#7a8299" text-anchor="middle">Sortie : 165–175</text>
+            <text x="66" y="145" font-family="system-ui,sans-serif" font-size="9" fill="#7a8299" text-anchor="middle">PSI ≈ 11–12 bars</text>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-location"><strong>Où agir :</strong> Le régulateur = pièce cylindrique ronde vissée sous le corps, entre le corps et l'<span class="term" title="ASA = Air Source Adapter, adaptateur de bouteille">ASA</span>. Il réduit la pression (~200 bars bouteille) à ~11–12 bars de travail.</div>
+          <ol class="step-list">
+            <li><strong>Procurez-vous la clé à sangle Dye ou une clé à sangle universelle.</strong><span class="step-detail">Le régulateur est rond — impossible avec une clé plate ordinaire. Un chiffon antidérapant épais peut fonctionner si peu serré.</span></li>
+            <li><strong>Enroulez la sangle et tournez antihoraire.</strong><span class="step-detail">Tenez le corps de l'autre main. Force régulière sans à-coup. Finissez à la main quand il tourne librement.</span></li>
+            <li><strong>Récupérez les 2 joints toriques d'étanchéité.</strong><span class="step-detail">Un à l'entrée (côté corps) et un à la sortie (côté bouteille). Peuvent rester sur le régulateur ou dans les logements — cherchez soigneusement.</span></li>
+            <li><strong>N'ouvrez pas le régulateur.</strong><span class="step-detail">Pièce de précision calibrée usine (<span class="term" title="165–175 PSI ≈ 11–12 bars de pression de sortie">165–175 PSI</span>). Démonter sans équipement spécialisé modifie la pression de sortie irrémédiablement.</span></li>
+          </ol>
+          <div class="step-verify"><strong>Vérification :</strong> Régulateur sorti en un seul bloc, 2 joints toriques récupérés. Les 2 orifices (entrée/sortie) visibles sur le corps.</div>
+          <div class="tip-box">Pression sortie standard 165–175 PSI. Ne modifiez pas sans chronographe — une pression trop haute dépasse les 300 FPS réglementaires.</div>
+        </div>
+        <div class="step-footer">
+          <div class="step-tools"><span class="tool">Clé à sangle</span><span class="tool">O-rings ×2</span></div>
+          <div class="step-actions">
+            <button class="note-btn" data-step="6">Note</button>
+            <button class="complete-btn" data-step="6" aria-label="Valider étape 6">✓ Valider</button>
+          </div>
+        </div>
+        <div class="step-note-area" id="note-area-6" hidden>
+          <textarea class="step-note" id="note-6" placeholder="Note personnelle…" aria-label="Note étape 6"></textarea>
+        </div>
+      </article>
+
+      <!-- ÉTAPE 7 -->
+      <article class="step-card" data-step="7" role="listitem" tabindex="0" aria-label="Étape 7">
+        <div class="step-header">
+          <span class="step-num" aria-hidden="true">07</span>
+          <div class="step-meta">
+            <h2 class="step-title">Nettoyage &amp; Inspection</h2>
+            <span class="step-est">⏱ ~10 min</span>
+          </div>
+          <div class="step-check" aria-hidden="true"></div>
+        </div>
+        <div class="step-visual">
+          <svg viewBox="0 0 600 260" role="img" aria-label="Étape 7 — Nettoyage et inspection" style="width:100%;height:100%;display:block;">
+            <defs>
+              <pattern id="s7dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="0.9" fill="#4a9eff" opacity="0.06"/>
+              </pattern>
+            </defs>
+            <rect width="600" height="260" fill="#07090f"/>
+            <rect width="600" height="260" fill="url(#s7dots)"/>
+            <text x="300" y="200" font-family="Arial Black,sans-serif" font-size="160" font-weight="900" fill="#2dd4bf" opacity="0.03" text-anchor="middle">07</text>
+            <!-- Left column: checklist items -->
+            <text x="20" y="24" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf" font-weight="700" letter-spacing="0.08em">INSPECTION</text>
+            <!-- Item 1: OK -->
+            <rect x="12" y="32" width="250" height="26" rx="4" fill="rgba(45,212,191,0.08)" stroke="rgba(45,212,191,0.25)" stroke-width="1"/>
+            <text x="22" y="49" font-family="system-ui,sans-serif" font-size="11" fill="#2dd4bf">✓  Joints toriques — lisses, souples, sans fissure</text>
+            <!-- Item 2: OK -->
+            <rect x="12" y="62" width="250" height="26" rx="4" fill="rgba(45,212,191,0.08)" stroke="rgba(45,212,191,0.25)" stroke-width="1"/>
+            <text x="22" y="79" font-family="system-ui,sans-serif" font-size="11" fill="#2dd4bf">✓  Canon — intérieur propre, sans débris</text>
+            <!-- Item 3: OK -->
+            <rect x="12" y="92" width="250" height="26" rx="4" fill="rgba(45,212,191,0.08)" stroke="rgba(45,212,191,0.25)" stroke-width="1"/>
+            <text x="22" y="109" font-family="system-ui,sans-serif" font-size="11" fill="#2dd4bf">✓  Tunnel interne — surface lisse et propre</text>
+            <!-- Item 4: NEVER -->
+            <rect x="12" y="122" width="250" height="26" rx="4" fill="rgba(230,57,70,0.08)" stroke="rgba(230,57,70,0.3)" stroke-width="1"/>
+            <text x="22" y="139" font-family="system-ui,sans-serif" font-size="11" fill="#e63946">✗  JAMAIS WD-40 / huile moteur / pétrolier</text>
+            <!-- Item 5: OK -->
+            <rect x="12" y="152" width="250" height="26" rx="4" fill="rgba(45,212,191,0.08)" stroke="rgba(45,212,191,0.25)" stroke-width="1"/>
+            <text x="22" y="169" font-family="system-ui,sans-serif" font-size="11" fill="#2dd4bf">✓  Électronique — connecteur sans corrosion</text>
+            <!-- Item 6: lube -->
+            <rect x="12" y="182" width="250" height="26" rx="4" fill="rgba(245,158,11,0.08)" stroke="rgba(245,158,11,0.25)" stroke-width="1"/>
+            <text x="22" y="199" font-family="system-ui,sans-serif" font-size="11" fill="#f59e0b">✓  Graisser joints : fine couche Dye Slick Lube</text>
+            <!-- Right column: lube tube + o-ring -->
+            <text x="310" y="24" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf" font-weight="700" letter-spacing="0.08em">LUBRIFICATION</text>
+            <!-- Lube tube illustration -->
+            <rect x="310" y="34" width="34" height="80" rx="8" fill="#1e2538" stroke="#2dd4bf" stroke-width="2"/>
+            <rect x="316" y="30" width="22" height="10" rx="3" fill="#252d40" stroke="#2dd4bf" stroke-width="1"/>
+            <text x="327" y="62" font-family="monospace" font-size="8" fill="#2dd4bf" text-anchor="middle" writing-mode="tb">DYE</text>
+            <text x="327" y="95" font-family="monospace" font-size="7" fill="#7a8299" text-anchor="middle">SLICK</text>
+            <text x="310" y="130" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf">Dye Slick Lube</text>
+            <text x="310" y="143" font-family="system-ui,sans-serif" font-size="9" fill="#404860">Silicone 100% uniquement</text>
+            <!-- O-ring cross-section close-up -->
+            <text x="410" y="24" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf" font-weight="700">O-RING GROS PLAN</text>
+            <circle cx="470" cy="105" r="46" fill="none" stroke="#e63946" stroke-width="9"/>
+            <circle cx="470" cy="105" r="30" fill="#07090f"/>
+            <text x="470" y="110" font-family="system-ui,sans-serif" font-size="9" fill="#7a8299" text-anchor="middle">Caoutchouc</text>
+            <text x="470" y="122" font-family="system-ui,sans-serif" font-size="9" fill="#7a8299" text-anchor="middle">NBR</text>
+            <!-- O-ring labels -->
+            <text x="470" y="166" font-family="system-ui,sans-serif" font-size="10" fill="#e63946" text-anchor="middle">Inspecter : lisse et souple</text>
+            <text x="470" y="180" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">Remplacer si: fissuré, dur, déformé</text>
+            <!-- NEVER warning bottom -->
+            <rect x="12" y="222" width="570" height="30" rx="5" fill="rgba(230,57,70,0.06)" stroke="rgba(230,57,70,0.2)" stroke-width="1"/>
+            <text x="300" y="241" font-family="system-ui,sans-serif" font-size="10" fill="#e63946" text-anchor="middle" font-weight="600">⚠  JAMAIS : WD-40 • Huile moteur • Graisse pétrolière • Huile végétale → gonflent et dissolvent les joints NBR</text>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-location"><strong>Où agir :</strong> Toutes les pièces posées sur le tapis : corps, canon, percuteur, régulateur, électrovanne. Zones critiques : rainures des joints, canaux d'air internes, surfaces glissantes du percuteur.</div>
+          <ol class="step-list">
+            <li><strong>Nettoyez chaque pièce avec un chiffon microfibre légèrement humide.</strong><span class="step-detail">Pour le canon, écouvillon propre dans le tube. Jamais de solvants forts — ils détruisent les joints.</span></li>
+            <li><strong>Inspectez chaque joint torique à la loupe ou sous bonne lumière.</strong><span class="step-detail">Bon état = lisse, souple, parfaitement rond. Remplacez si : fissures, déformation, surface dure, entailles. Les joints défectueux = cause n°1 des fuites.</span></li>
+            <li><strong>Inspectez le canal interne avec une lampe de poche.</strong><span class="step-detail">Surface doit être lisse, légèrement brillante, sans débris. Écouvillon sec si nécessaire.</span></li>
+            <li><strong>Appliquez une fine couche de Dye Slick Lube sur les joints et surfaces glissantes.</strong><span class="step-detail">Une noisette de la taille d'un petit pois sur le doigt. Enduisez chaque joint et le corps du percuteur. Trop de lubrifiant attire la poussière — moins c'est mieux.</span></li>
+          </ol>
+          <div class="step-verify"><strong>Vérification :</strong> Toutes pièces propres et sèches. Joints inspectés, endommagés remplacés. Chaque joint légèrement brillant de lubrifiant.</div>
+          <div class="warn-box"><strong>Jamais :</strong> WD-40, huile moteur, graisse pétrolière, huile végétale — tous gonflent ou dissolvent les joints NBR. Uniquement lubrifiant silicone pur.</div>
+        </div>
+        <div class="step-footer">
+          <div class="step-tools"><span class="tool">Dégraissant</span><span class="tool">Microfibre</span><span class="tool">Dye Lube</span></div>
+          <div class="step-actions">
+            <button class="note-btn" data-step="7">Note</button>
+            <button class="complete-btn" data-step="7" aria-label="Valider étape 7">✓ Valider</button>
+          </div>
+        </div>
+        <div class="step-note-area" id="note-area-7" hidden>
+          <textarea class="step-note" id="note-7" placeholder="Note personnelle…" aria-label="Note étape 7"></textarea>
+        </div>
+      </article>
+
+      <!-- ÉTAPE 8 -->
+      <article class="step-card" data-step="8" role="listitem" tabindex="0" aria-label="Étape 8">
+        <div class="step-header">
+          <span class="step-num" aria-hidden="true">08</span>
+          <div class="step-meta">
+            <h2 class="step-title">Remontage Complet</h2>
+            <span class="step-est">⏱ ~10 min</span>
+          </div>
+          <div class="step-check" aria-hidden="true"></div>
+        </div>
+        <div class="step-visual">
+          <svg viewBox="0 0 600 260" role="img" aria-label="Étape 8 — Remontage complet" style="width:100%;height:100%;display:block;">
+            <defs>
+              <pattern id="s8dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="0.9" fill="#4a9eff" opacity="0.06"/>
+              </pattern>
+            </defs>
+            <rect width="600" height="260" fill="#07090f"/>
+            <rect width="600" height="260" fill="url(#s8dots)"/>
+            <text x="300" y="200" font-family="Arial Black,sans-serif" font-size="160" font-weight="900" fill="#4a9eff" opacity="0.03" text-anchor="middle">08</text>
+            <!-- Timeline line -->
+            <line x1="50" y1="110" x2="550" y2="110" stroke="#252d40" stroke-width="2"/>
+            <!-- Arrow right -->
+            <polygon points="550,104 562,110 550,116" fill="#4a9eff" opacity=".5"/>
+            <!-- Node positions -->
+            <!-- Step 1: Regulator -->
+            <circle cx="90" cy="110" r="22" fill="#1e2538" stroke="#2dd4bf" stroke-width="2.5"/>
+            <text x="90" y="116" font-family="system-ui,sans-serif" font-size="16" fill="#2dd4bf" text-anchor="middle" font-weight="700">①</text>
+            <text x="90" y="146" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf" text-anchor="middle" font-weight="600">Régulateur</text>
+            <text x="90" y="160" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">Sens horaire</text>
+            <text x="90" y="172" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">Main + ¼ tour</text>
+            <!-- Step 2: Solenoid -->
+            <circle cx="215" cy="110" r="22" fill="#1e2538" stroke="#2dd4bf" stroke-width="2.5"/>
+            <text x="215" y="116" font-family="system-ui,sans-serif" font-size="16" fill="#2dd4bf" text-anchor="middle" font-weight="700">②</text>
+            <text x="215" y="146" font-family="system-ui,sans-serif" font-size="10" fill="#2dd4bf" text-anchor="middle" font-weight="600">Solénoïde</text>
+            <text x="215" y="160" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">4× M2 en croix</text>
+            <text x="215" y="172" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">≈ 0,9 N·m</text>
+            <!-- Step 3: Grip -->
+            <circle cx="340" cy="110" r="22" fill="#1e2538" stroke="#f59e0b" stroke-width="2.5"/>
+            <text x="340" y="116" font-family="system-ui,sans-serif" font-size="16" fill="#f59e0b" text-anchor="middle" font-weight="700">③</text>
+            <text x="340" y="146" font-family="system-ui,sans-serif" font-size="10" fill="#f59e0b" text-anchor="middle" font-weight="600">Grip Frame</text>
+            <text x="340" y="160" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">Brancher 1er</text>
+            <text x="340" y="172" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">2× 5/32" — 2,3N·m</text>
+            <!-- Step 4: Bolt + back cap -->
+            <circle cx="465" cy="110" r="22" fill="#1e2538" stroke="#f59e0b" stroke-width="2.5"/>
+            <text x="465" y="116" font-family="system-ui,sans-serif" font-size="16" fill="#f59e0b" text-anchor="middle" font-weight="700">④</text>
+            <text x="465" y="146" font-family="system-ui,sans-serif" font-size="10" fill="#f59e0b" text-anchor="middle" font-weight="600">Percuteur</text>
+            <text x="465" y="160" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">+ capuchon</text>
+            <text x="465" y="172" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">3mm — 1,7N·m</text>
+            <!-- Above nodes: step 5 (canon) - shown above line -->
+            <line x1="90" y1="88" x2="90" y2="62" stroke="#4a9eff" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <rect x="28" y="32" width="124" height="32" rx="5" fill="rgba(74,158,255,0.08)" stroke="rgba(74,158,255,0.25)" stroke-width="1"/>
+            <text x="90" y="46" font-family="system-ui,sans-serif" font-size="10" fill="#4a9eff" text-anchor="middle" font-weight="600">⑤ Canon en dernier</text>
+            <text x="90" y="58" font-family="system-ui,sans-serif" font-size="9" fill="#404860" text-anchor="middle">Joint lubrifié, ¼ tour horaire</text>
+            <!-- Test final badge -->
+            <rect x="148" y="196" width="304" height="40" rx="8" fill="rgba(45,212,191,0.08)" stroke="rgba(45,212,191,0.3)" stroke-width="1.5"/>
+            <text x="300" y="211" font-family="system-ui,sans-serif" font-size="11" fill="#2dd4bf" text-anchor="middle" font-weight="700">TEST FINAL OBLIGATOIRE</text>
+            <text x="300" y="227" font-family="system-ui,sans-serif" font-size="10" fill="#7a8299" text-anchor="middle">Ouvrir bouteille à ½ tour · Écouter fuites 30 sec · Silence = OK</text>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-location"><strong>Ordre de remontage :</strong> L'ordre est crucial — suivez exactement : ① Régulateur → ② Solénoïde → ③ Grip + connecteur → ④ Percuteur + capuchon → ⑤ Canon.</div>
+          <ol class="step-list">
+            <li><strong>① Remontez le régulateur sous le corps.</strong><span class="step-detail">Joints lubrifiés en place. Vissez à la main (sens horaire) jusqu'à résistance, puis ¼ tour à la clé. Ne serrez pas à fond.</span></li>
+            <li><strong>② Replacez l'électrovanne sur le corps.</strong><span class="step-detail">Alignez les 4 trous de vis, insérez les M2 à la main d'abord. Serrage en croix avec clé 1,5mm. Couple faible ≈ <span class="term" title="8 in-lb ≈ 0,9 N·m : très léger, ne pas forcer">0,9 N·m</span>.</span></li>
+            <li><strong>③ Reposez la poignée et rebranchez l'électrovanne.</strong><span class="step-detail">Branchez d'abord le connecteur (avec la photo de référence). Puis les 2 vis latérales 5/32" en alternant. Couple ≈ <span class="term" title="20 in-lb ≈ 2,3 N·m">2,3 N·m</span>.</span></li>
+            <li><strong>④ Réintroduisez le percuteur et le capuchon arrière.</strong><span class="step-detail">Joints remis en position exacte (photo), légèrement lubrifiés. Percuteur en ligne droite dans le tunnel. Capuchon + 2 vis 3mm ≈ <span class="term" title="15 in-lb ≈ 1,7 N·m">1,7 N·m</span>.</span></li>
+            <li><strong>⑤ Remettez le canon en dernier.</strong><span class="step-detail">Joint torique lubrifié dans sa rainure. Insérez et tournez ¼ tour horaire jusqu'au verrou.</span></li>
+          </ol>
+          <div class="step-verify"><strong>Test final obligatoire :</strong> Vissez la bouteille. Ouvrez à ½ tour seulement — écoutez 30 secondes. Aucun sifflement = pas de fuite. Seulement quand tout est silencieux, ouvrez complètement et testez.</div>
+          <div class="tip-box"><strong>Toujours commencer à basse pression.</strong> Ouvrir la bouteille qu'à moitié — une fuite vous laisse le temps de couper le gaz avant que la pression monte.</div>
+        </div>
+        <div class="step-footer">
+          <div class="step-tools"><span class="tool">Allen 5/32" + 3mm + 1,5mm</span><span class="tool">Dynamométrique</span></div>
+          <div class="step-actions">
+            <button class="note-btn" data-step="8">Note</button>
+            <button class="complete-btn" data-step="8" aria-label="Valider étape 8">✓ Valider</button>
+          </div>
+        </div>
+        <div class="step-note-area" id="note-area-8" hidden>
+          <textarea class="step-note" id="note-8" placeholder="Note personnelle…" aria-label="Note étape 8"></textarea>
+        </div>
+      </article>
+
+    </div><!-- /steps-grid -->
+  </section>
+
+  <!-- SECTION: TERRAIN -->
+  <section id="section-terrain" class="guide-section" aria-labelledby="terrain-title">
+    <div class="terrain-layout">
+      <div class="terrain-left">
+        <h1 id="terrain-title" class="page-title">Checklist <em>Avant-Partie</em></h1>
+        <div class="checklist-panel" role="form" aria-label="Checklist avant-partie">
+          <div class="checklist-items" id="checklist-items"></div>
+          <div class="checklist-score-wrap">
+            <div class="checklist-score" id="checklist-score">
+              <span class="cs-num" id="cs-num">0/10</span>
+              <span class="cs-verdict" id="cs-verdict">—</span>
+            </div>
+          </div>
+          <div class="checklist-actions">
+            <button class="btn-secondary" id="checklist-reset">&#8635; Reset</button>
+            <button class="btn-primary" id="checklist-save">Sauvegarder</button>
+          </div>
+        </div>
+        <div class="checklist-history" id="checklist-history">
+          <h3 class="history-title">Historique des checklists</h3>
+          <div id="checklist-history-list"></div>
+        </div>
+      </div>
+      <div class="terrain-right">
+        <h2 class="terrain-right-title">Mode <em>Terrain</em></h2>
+        <div class="terrain-counter-card">
+          <div class="terrain-label">Billes tirées</div>
+          <div class="terrain-giant-count" id="terrain-ball-count">0</div>
+          <div class="terrain-adds">
+            <button class="terrain-add-btn" data-add="50">+50</button>
+            <button class="terrain-add-btn" data-add="100">+100</button>
+            <button class="terrain-add-btn" data-add="200">+200</button>
+            <button class="terrain-add-btn" data-add="500">+500</button>
+          </div>
+        </div>
+        <div class="terrain-timer-card">
+          <div class="terrain-label">Chrono de partie</div>
+          <div class="terrain-timer-display" id="game-timer-display">00:00:00</div>
+          <div class="terrain-timer-controls">
+            <button class="terrain-ctrl-btn" id="game-timer-start">&#9654; Start</button>
+            <button class="terrain-ctrl-btn" id="game-timer-pause">&#9646;&#9646; Pause</button>
+            <button class="terrain-ctrl-btn" id="game-timer-reset">&#8635; Reset</button>
+          </div>
+        </div>
+        <div class="terrain-diag-card">
+          <div class="terrain-label">Diagnostic rapide</div>
+          <div class="terrain-diag-btns" id="terrain-diag-btns"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION: SCHEMA -->
+  <section id="section-schema" class="guide-section" aria-labelledby="schema-title">
+    <div class="schema-header">
+      <h1 id="schema-title" class="page-title">Schéma <em>Explosé</em></h1>
+      <div class="schema-toggle" role="group" aria-label="Vue">
+        <button class="schema-toggle-btn active" id="schema-view-diagram" aria-pressed="true">Vue explosée</button>
+        <button class="schema-toggle-btn" id="schema-view-list" aria-pressed="false">Liste pièces</button>
+      </div>
+    </div>
+    <div id="schema-diagram-view">
+      <div class="schema-svg-wrap" id="schema-svg-wrap" aria-label="Schéma explosé Dye DAM"></div>
+      <p class="schema-hint">Cliquez sur un numéro pour afficher les détails du composant.</p>
+    </div>
+    <div id="schema-list-view" hidden>
+      <div class="search-bar-wrap">
+        <label for="parts-search" class="sr-only">Rechercher une pièce</label>
+        <input type="search" id="parts-search" class="search-bar" placeholder="Rechercher une pièce…" aria-label="Rechercher dans la nomenclature"/>
+      </div>
+      <div class="parts-grid" id="parts-grid" role="list" aria-label="Pièces du Dye DAM"></div>
+    </div>
+  </section>
+
+  <!-- SECTION: DIAGNOSTIC -->
+  <section id="section-diagnostic" class="guide-section" aria-labelledby="diag-title">
+    <div class="diag-header">
+      <h1 id="diag-title">Diagnostic<br><em>Interactif</em></h1>
+      <p>Sélectionnez le symptôme — je vous guide vers la solution exacte.</p>
+    </div>
+    <div class="diag-container">
+      <nav class="diag-breadcrumb" id="diag-breadcrumb" aria-label="Fil d'ariane diagnostic">
+        <span class="bc-item bc-item--root" data-node="root">Accueil</span>
+      </nav>
+      <div class="diag-panel" id="diag-panel" role="region" aria-live="polite" aria-label="Arbre de diagnostic"></div>
+      <div class="diag-result" id="diag-result" hidden role="region" aria-label="Résultat du diagnostic"></div>
+    </div>
+  </section>
+
+  <!-- SECTION: STATS -->
+  <section id="section-stats" class="guide-section" aria-labelledby="stats-title">
+    <h1 id="stats-title" class="page-title">Statistiques <em>&amp; Config</em></h1>
+    <div class="stats-cards" role="list" aria-label="Statistiques globales">
+      <div class="stat-card" role="listitem">
+        <div class="stat-card-icon">🎯</div>
+        <div class="stat-card-val" id="sc-balls">0</div>
+        <div class="stat-card-label">Billes tirées</div>
+      </div>
+      <div class="stat-card" role="listitem">
+        <div class="stat-card-icon">🔧</div>
+        <div class="stat-card-val" id="sc-entretiens">0</div>
+        <div class="stat-card-label">Entretiens</div>
+      </div>
+      <div class="stat-card" role="listitem">
+        <div class="stat-card-icon">📊</div>
+        <div class="stat-card-val" id="sc-fps-avg">—</div>
+        <div class="stat-card-label">FPS moyen</div>
+      </div>
+      <div class="stat-card" role="listitem">
+        <div class="stat-card-icon">📅</div>
+        <div class="stat-card-val" id="sc-days">—</div>
+        <div class="stat-card-label">J. depuis entretien</div>
+      </div>
+    </div>
+
+    <div class="stats-section">
+      <div class="stats-section-header">
+        <h2 class="stats-section-title">Profils de Configuration</h2>
+        <button class="btn-add-fps" id="btn-add-profile" aria-label="Ajouter un profil">+ Profil</button>
+      </div>
+      <div class="profiles-grid" id="profiles-grid"></div>
+    </div>
+
+    <div class="stats-section">
+      <div class="stats-section-header">
+        <h2 class="stats-section-title">Suivi des Pièces Installées</h2>
+        <button class="btn-add-fps" id="btn-add-installed-part" aria-label="Ajouter une pièce">+ Pièce</button>
+      </div>
+      <div class="installed-parts-wrap">
+        <table class="installed-parts-table" id="installed-parts-table" aria-label="Pièces installées">
+          <thead>
+            <tr>
+              <th>Pièce</th><th>Date install</th><th>Billes depuis</th><th>Intervalle rec.</th><th>Statut</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="installed-parts-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="stats-section">
+      <h2 class="stats-section-title">Références Techniques</h2>
+      <div class="accordion" id="accordion-orings">
+        <button class="accordion-btn" aria-expanded="false" aria-controls="acc-body-orings">
+          <span>Table des O-rings</span>
+          <svg class="accordion-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+        <div class="accordion-body" id="acc-body-orings" hidden>
+          <table class="ref-table" aria-label="O-rings Dye DAM">
+            <thead><tr><th>Position</th><th>Taille</th><th>Qté</th></tr></thead>
+            <tbody>
+              <tr><td>O-ring Canon</td><td>#006</td><td>1</td></tr>
+              <tr><td>Bolt avant</td><td>#008</td><td>1</td></tr>
+              <tr><td>Bolt milieu</td><td>#009</td><td>1</td></tr>
+              <tr><td>Bolt arrière</td><td>#011</td><td>1</td></tr>
+              <tr><td>Régulateur entrée</td><td>#010</td><td>1</td></tr>
+              <tr><td>Régulateur sortie</td><td>#012</td><td>1</td></tr>
+              <tr><td>ASA</td><td>#014</td><td>1</td></tr>
+              <tr><td>Solénoïde</td><td>#006</td><td>2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="accordion" id="accordion-torques">
+        <button class="accordion-btn" aria-expanded="false" aria-controls="acc-body-torques">
+          <span>Couples de serrage</span>
+          <svg class="accordion-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+        <div class="accordion-body" id="acc-body-torques" hidden>
+          <table class="ref-table" aria-label="Couples de serrage Dye DAM">
+            <thead><tr><th>Pièce</th><th>Taille clé</th><th>Couple</th></tr></thead>
+            <tbody>
+              <tr><td>Back cap</td><td>Allen 3mm</td><td>15 in-lb</td></tr>
+              <tr><td>Grip frame</td><td>Allen 5/32"</td><td>20 in-lb</td></tr>
+              <tr><td>Solénoïde</td><td>Allen 1.5mm</td><td>8 in-lb</td></tr>
+              <tr><td>Rail Picatinny</td><td>Allen 3/32"</td><td>10 in-lb</td></tr>
+              <tr><td>Régulateur</td><td>Clé sangle</td><td>Main + 1/4t</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION: CARNET -->
+  <section id="section-carnet" class="guide-section" aria-labelledby="carnet-title">
+    <h1 id="carnet-title" class="page-title">Carnet <em>d'Entretien</em></h1>
+
+    <div class="fps-panel">
+      <div class="fps-header">
+        <h2>Suivi Chronographe</h2>
+        <div style="display:flex;gap:.5rem;align-items:center;">
+          <button class="btn-add-fps" id="btn-export-pdf" aria-label="Exporter en PDF">Exporter PDF</button>
+          <button class="btn-add-fps" id="btn-add-fps" aria-label="Ajouter une mesure FPS">+ Mesure</button>
+        </div>
+      </div>
+      <div class="fps-chart-wrap">
+        <svg id="fps-chart" viewBox="0 0 600 120" preserveAspectRatio="none" aria-label="Historique FPS" role="img"></svg>
+      </div>
+      <div class="fps-stats" id="fps-stats"></div>
+    </div>
+
+    <div class="fps-form" id="fps-form" hidden>
+      <h3>Nouvelle mesure FPS</h3>
+      <div class="form-row">
+        <label for="fps-value">Vélocité (FPS)</label>
+        <input type="number" id="fps-value" min="100" max="400" placeholder="280" aria-describedby="fps-hint"/>
+        <span id="fps-hint" class="input-hint">Limite réglementaire : 300 FPS</span>
+      </div>
+      <div class="form-row">
+        <label for="fps-temp">Température (°C)</label>
+        <input type="number" id="fps-temp" min="-10" max="45" placeholder="20"/>
+      </div>
+      <div class="form-actions">
+        <button class="btn-secondary" id="fps-cancel">Annuler</button>
+        <button class="btn-primary" id="fps-save">Enregistrer</button>
+      </div>
+    </div>
+
+    <div class="log-panel">
+      <div class="log-header">
+        <h2>Journal d'entretien</h2>
+        <button class="btn-add-log" id="btn-add-log" aria-label="Ajouter une entrée">+ Entrée</button>
+      </div>
+      <div class="log-form" id="log-form" hidden>
+        <h3>Nouvelle entrée</h3>
+        <div class="form-grid">
+          <div class="form-row">
+            <label for="log-type">Type d'entretien</label>
+            <select id="log-type">
+              <option value="after-game">Après partie</option>
+              <option value="standard">Standard (5k billes)</option>
+              <option value="complete">Complet (50k billes)</option>
+              <option value="reparation">Réparation</option>
+              <option value="reglage">Réglage</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="log-fps">FPS relevé</label>
+            <input type="number" id="log-fps" min="100" max="400" placeholder="287"/>
+          </div>
+          <div class="form-row form-row--full">
+            <label for="log-notes">Notes</label>
+            <textarea id="log-notes" rows="3" placeholder="Pièces remplacées, observations…"></textarea>
+          </div>
+          <div class="form-row">
+            <label for="log-balls">Billes au compteur</label>
+            <input type="number" id="log-balls" placeholder="Auto" readonly/>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-secondary" id="log-cancel">Annuler</button>
+          <button class="btn-primary" id="log-save">Enregistrer</button>
+        </div>
+      </div>
+      <div class="log-list" id="log-list" role="list" aria-label="Journal d'entretien" aria-live="polite"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- FLOATING TERRAIN BUTTON -->
+<button class="float-terrain-btn" id="float-terrain-btn" aria-label="Ouvrir le mode terrain">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+  <span>Terrain</span>
+</button>
+
+<!-- FOOTER -->
+<footer class="site-footer print-footer" role="contentinfo">
+  <div class="footer-inner">
+    <p>Dye DAM · Guide d'entretien non officiel · Usage éducatif</p>
+    <p class="footer-note">⚠ Respectez les règles de sécurité — limite légale 300 FPS / bille .68 calibre.</p>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
