@@ -3,6 +3,9 @@
 # Requirements
 # ============================================================
 
+# --- Solana (MemeCrawler) ---
+solders>=0.21.0
+
 # --- Polymarket ---
 py-clob-client>=0.20.0
 web3>=6.0.0
