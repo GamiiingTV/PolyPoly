@@ -11,6 +11,12 @@ MEMOIRE = RACINE / "memoire"
 
 
 @dataclass
+class ConfigJeu:
+    personnage: str = "dalibor"
+    univers: str = "boheme_1403"
+
+
+@dataclass
 class ConfigClaude:
     modele: str = "claude-opus-5-5"
     effort: str = "low"
@@ -23,7 +29,8 @@ class ConfigAudio:
     sortie: str = ""
     ecouter_micro: bool = True
     micro: str = ""
-    silence_fin_ms: int = 550
+    silence_fin_ms: int = 700
+    anticipation_ms: int = 300
     duree_min_ms: int = 400
     sensibilite: float = 3.0
 
@@ -40,11 +47,13 @@ class ConfigVision:
     active: bool = True
     titre_fenetre: str = "Kingdom Come"
     ecran: int = 1
-    largeur_max: int = 1280
-    qualite: int = 70
+    images_par_seconde: float = 2.0
+    largeur_max: int = 1920
+    qualite: int = 80
     joindre_aux_repliques: bool = True
     observateur: bool = True
-    intervalle_s: float = 30.0
+    intervalle_min_s: float = 8.0
+    battement_s: float = 45.0
     modele_observateur: str = "claude-opus-5-5"
 
 
@@ -60,6 +69,7 @@ class ConfigInterface:
 
 @dataclass
 class Config:
+    jeu: ConfigJeu = field(default_factory=ConfigJeu)
     claude: ConfigClaude = field(default_factory=ConfigClaude)
     audio: ConfigAudio = field(default_factory=ConfigAudio)
     transcription: ConfigTranscription = field(default_factory=ConfigTranscription)
@@ -79,7 +89,7 @@ def charger(chemin: Path | None = None) -> Config:
     if chemin.exists():
         with open(chemin, "rb") as f:
             brut = tomllib.load(f)
-        for section in ("claude", "audio", "transcription", "vision", "interface"):
+        for section in ("jeu", "claude", "audio", "transcription", "vision", "interface"):
             _remplir(getattr(cfg, section), brut.get(section, {}))
     cfg.interface.nombre_de_choix = max(3, min(6, cfg.interface.nombre_de_choix))
     return cfg

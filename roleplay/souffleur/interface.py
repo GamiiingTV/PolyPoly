@@ -22,7 +22,8 @@ AIDE = ("Écrire ici :  texte = réplique entendue  ·  moi: texte = ce que Dali
 
 
 class Interface:
-    def __init__(self, largeur: int, opacite: float, nombre: int):
+    def __init__(self, largeur: int, opacite: float, nombre: int, titre: str = "✠ Le Souffleur"):
+        self.titre = titre
         self.racine = tk.Tk()
         self.racine.title("Le Souffleur")
         self.racine.configure(bg=FOND)
@@ -65,7 +66,7 @@ class Interface:
         r = self.racine
         tete = tk.Frame(r, bg=PANNEAU)
         tete.pack(fill="x")
-        titre = tk.Label(tete, text="✠ Le Souffleur", bg=PANNEAU, fg=OR, font=self.f_titre, padx=8, pady=4)
+        titre = tk.Label(tete, text=self.titre, bg=PANNEAU, fg=OR, font=self.f_titre, padx=8, pady=4)
         titre.pack(side="left")
         self.etat = tk.Label(tete, text="● prêt", bg=PANNEAU, fg=GRIS, font=self.f_petit)
         self.etat.pack(side="left", padx=6)
@@ -176,7 +177,7 @@ class Interface:
                     prop, premier, total = donnee
                     self._afficher_proposition(prop, True)
                     delai = f"1er choix {premier:.1f}s · " if premier else ""
-                    self.etat.config(text=f"● {delai}total {total:.1f}s", fg=VERT)
+                    self.etat.config(text=f"● {delai}complet {total:.1f}s", fg=VERT)
                 elif genre == "erreur":
                     self.etat.config(text="● erreur", fg=ROUGE)
                     self._ajouter_fil(f"⚠ {donnee}", "journal")

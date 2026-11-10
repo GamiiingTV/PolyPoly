@@ -1,14 +1,19 @@
-"""Les yeux du Souffleur : captures d'écran du jeu et observation continue de la scène.
+"""Les yeux du Souffleur : l'écran du jeu filmé en continu.
 
-- `Oeil` capture la fenêtre du jeu (ou un écran entier), la réduit et l'encode en JPEG.
-- `Observateur` regarde l'écran à intervalles réguliers, seulement quand l'image a
-  changé, et demande à Claude de décrire la scène (lieu, moment, personnes, tension).
+- `Oeil` filme la fenêtre du jeu (ou un écran entier) plusieurs fois par seconde et
+  garde les ~30 dernières secondes en mémoire vive (jamais sur le disque).
+  Pour une réplique, il fournit l'écran du moment où l'on a commencé à parler et
+  l'écran actuel s'il a changé.
+- `Observateur` fait décrire la scène par Claude dès qu'elle change (au plus toutes
+  les `intervalle_min_s` secondes), tout de suite si elle change brutalement, et au
+  moins toutes les `battement_s` secondes.
 
 L'outil ne fait que regarder : il n'envoie jamais de touche ni de clic au jeu.
 """
 from __future__ import annotations
 
 import base64
+import collections
 import io
 import os
 import threading
@@ -18,6 +23,9 @@ from typing import Callable
 import numpy as np
 
 from .config import ConfigVision
+
+SEUIL_CHANGEMENT = 8.0     # différence moyenne (0-255) pour dire « l'image a changé »
+SEUIL_RUPTURE = 30.0       # changement brutal : nouvelle scène, écran de chargement, combat
 
 
 def _rect_fenetre(titre: str) -> dict | None:
@@ -68,7 +76,7 @@ def masquer_des_captures(fenetre_tk) -> bool:
 
 
 class Image:
-    """Une capture prête à envoyer."""
+    """Une image de l'écran, prête à envoyer."""
 
     def __init__(self, jpeg: bytes, signature: np.ndarray, quand: float):
         self.jpeg = jpeg
@@ -92,28 +100,42 @@ class Oeil:
         from PIL import Image as _PIL  # noqa: F401
         self.cfg = cfg
         self.journal = journal
-        self._instantane: Image | None = None
+        self.periode = 1.0 / max(0.2, min(10.0, cfg.images_par_seconde))
+        self.images: collections.deque[Image] = collections.deque(maxlen=max(4, int(30 / self.periode)))
+        self.actif = threading.Event()
+        self.actif.set()
+        self.sur_rupture: Callable[[], None] | None = None
+        self._debut_parole: float | None = None
         self._verrou = threading.Lock()
         self._fenetre_signalee = None
+        self._zone_cache: tuple[float, dict] | None = None
 
+    # ------------------------------------------------------------ capture
     def _zone(self, sct) -> dict:
+        maintenant = time.monotonic()
+        if self._zone_cache and maintenant - self._zone_cache[0] < 2.0:
+            return self._zone_cache[1]
         zone = _rect_fenetre(self.cfg.titre_fenetre)
         trouvee = zone is not None
         if trouvee != self._fenetre_signalee:
             self._fenetre_signalee = trouvee
             self.journal(f"Vision : fenêtre « {self.cfg.titre_fenetre} » trouvée." if trouvee else
                          f"Vision : fenêtre « {self.cfg.titre_fenetre} » introuvable, je regarde l'écran {self.cfg.ecran}.")
-        if zone:
-            return zone
-        ecrans = sct.monitors
-        return ecrans[self.cfg.ecran] if 0 < self.cfg.ecran < len(ecrans) else ecrans[1 if len(ecrans) > 1 else 0]
+        if not zone:
+            ecrans = sct.monitors
+            zone = ecrans[self.cfg.ecran] if 0 < self.cfg.ecran < len(ecrans) else ecrans[1 if len(ecrans) > 1 else 0]
+        self._zone_cache = (maintenant, zone)
+        return zone
 
-    def capturer(self) -> Image | None:
+    def capturer(self, sct=None) -> Image | None:
         import mss
         from PIL import Image as PIL
         try:
-            fabrique = getattr(mss, "MSS", None) or mss.mss
-            with fabrique() as sct:   # une instance par appel : mss n'aime pas les fils multiples
+            if sct is None:
+                fabrique = getattr(mss, "MSS", None) or mss.mss
+                with fabrique() as s:
+                    brut = s.grab(self._zone(s))
+            else:
                 brut = sct.grab(self._zone(sct))
             img = PIL.frombytes("RGB", brut.size, brut.bgra, "raw", "BGRX")
         except Exception as e:
@@ -125,52 +147,98 @@ class Oeil:
         img.save(tampon, format="JPEG", quality=self.cfg.qualite)
         return Image(tampon.getvalue(), signature, time.monotonic())
 
-    def instantane(self) -> None:
-        """À appeler quand quelqu'un commence à parler : fige ce qu'on voit à cet instant."""
-        img = self.capturer()
-        if img:
-            with self._verrou:
-                self._instantane = img
+    def filmer(self) -> None:
+        """Boucle de capture continue (à lancer dans un fil dédié)."""
+        import mss
+        fabrique = getattr(mss, "MSS", None) or mss.mss
+        with fabrique() as sct:   # une instance par fil : mss n'aime pas être partagé
+            while True:
+                debut = time.monotonic()
+                if self.actif.is_set():
+                    img = self.capturer(sct)
+                    if img:
+                        precedente = self.derniere()
+                        with self._verrou:
+                            self.images.append(img)
+                        if precedente and img.difference(precedente) >= SEUIL_RUPTURE and self.sur_rupture:
+                            self.sur_rupture()
+                time.sleep(max(0.0, self.periode - (time.monotonic() - debut)))
 
-    def pour_replique(self, fraicheur_s: float = 20.0) -> Image | None:
-        """L'image du moment où l'on t'a adressé la parole, sinon une capture immédiate."""
+    def demarrer(self) -> None:
+        threading.Thread(target=self.filmer, daemon=True, name="oeil").start()
+
+    # ------------------------------------------------------------ lecture
+    def derniere(self) -> Image | None:
         with self._verrou:
-            img = self._instantane
-            self._instantane = None
-        if img and time.monotonic() - img.quand <= fraicheur_s:
-            return img
-        return self.capturer()
+            return self.images[-1] if self.images else None
+
+    def a_l_instant(self, quand: float) -> Image | None:
+        with self._verrou:
+            avant = [i for i in self.images if i.quand <= quand + 0.2]
+            return avant[-1] if avant else (self.images[0] if self.images else None)
+
+    def marquer_debut_parole(self) -> None:
+        self._debut_parole = time.monotonic()
+
+    def pour_replique(self) -> list[tuple[str, Image]]:
+        """L'écran du début de la réplique, puis l'écran actuel s'il a changé."""
+        actuelle = self.derniere()
+        if actuelle is None or time.monotonic() - actuelle.quand > 3 * self.periode + 1:
+            actuelle = self.capturer() or actuelle      # flux arrêté : capture immédiate
+        if actuelle is None:
+            return []
+        debut = self._debut_parole
+        if debut is not None and time.monotonic() - debut < 30:
+            initiale = self.a_l_instant(debut)
+            if initiale is not None and initiale is not actuelle and initiale.difference(actuelle) >= SEUIL_CHANGEMENT:
+                ecart = actuelle.quand - initiale.quand
+                return [("l'écran quand on a commencé à parler à {nom}", initiale),
+                        (f"l'écran maintenant, {ecart:.0f} s plus tard", actuelle)]
+        return [("l'écran maintenant", actuelle)]
 
 
 class Observateur(threading.Thread):
-    """Regarde la scène en continu et tient à jour sa description."""
+    """Fait décrire la scène dès qu'elle change, sur le flux continu de l'Oeil."""
 
-    def __init__(self, oeil: Oeil, decrire: Callable[[Image], None], intervalle_s: float,
-                 seuil_changement: float = 10.0):
+    def __init__(self, oeil: Oeil, decrire: Callable[[Image], None], intervalle_min_s: float,
+                 battement_s: float):
         super().__init__(daemon=True, name="observateur")
         self.oeil = oeil
         self.decrire = decrire
-        self.intervalle_s = max(5.0, intervalle_s)
-        self.seuil = seuil_changement
+        self.intervalle_min_s = max(3.0, intervalle_min_s)
+        self.battement_s = max(self.intervalle_min_s, battement_s)
         self.actif = threading.Event()
         self.actif.set()
-        self._derniere: Image | None = None
-        self._reveil = threading.Event()
+        self._decrite: Image | None = None
+        self._quand = 0.0
+        self._urgence = threading.Event()
 
     def maintenant(self) -> None:
-        self._reveil.set()
+        self._urgence.set()
 
     def run(self) -> None:
-        time.sleep(3)
+        time.sleep(2)
         while True:
-            force = self._reveil.is_set()
-            self._reveil.clear()
-            if self.actif.is_set():
-                img = self.oeil.capturer()
-                if img and (force or img.difference(self._derniere) >= self.seuil):
-                    self._derniere = img
-                    try:
-                        self.decrire(img)
-                    except Exception as e:  # ne jamais tuer l'observateur
-                        self.oeil.journal(f"Vision : observation ratée ({e}).")
-            self._reveil.wait(self.intervalle_s)
+            urgent = self._urgence.wait(1.0)
+            if not self.actif.is_set():
+                self._urgence.clear()
+                continue
+            img = self.oeil.derniere()
+            ecoule = time.monotonic() - self._quand
+            if img is None or img is self._decrite:
+                self._urgence.clear()
+                continue
+            change = img.difference(self._decrite) >= SEUIL_CHANGEMENT
+            if (urgent and ecoule >= 2.0) or (change and ecoule >= self.intervalle_min_s) \
+                    or ecoule >= self.battement_s:
+                self._urgence.clear()
+                if urgent:
+                    time.sleep(0.8)                      # laisse la nouvelle scène se poser
+                    img = self.oeil.derniere() or img
+                self._decrite, self._quand = img, time.monotonic()
+                try:
+                    self.decrire(img)
+                except Exception as e:   # ne jamais tuer l'observateur
+                    self.oeil.journal(f"Vision : observation ratée ({e}).")
+            elif urgent:
+                time.sleep(0.25)                         # urgence trop proche de la dernière vue

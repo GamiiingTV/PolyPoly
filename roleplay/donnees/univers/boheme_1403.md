@@ -1,3 +1,7 @@
+---
+cadre: un mod multijoueur de Kingdom Come: Deliverance II, en Bohême, en l'an de grâce 1403
+vocabulaire: le roi Venceslas, Sigismond de Hongrie, Kuttenberg, Kutná Hora, Prague, Rattay, Trosky, Skalitz, Sasau, la Bohême, les Coumans, groschen, Votre Grâce, Monseigneur
+---
 # Guide : la Bohême en 1403
 
 <!-- Mémo historique remis à Claude. Corrige ou complète selon le lore de ton serveur :
@@ -38,3 +42,16 @@
 ## Couleur de langue (français teinté d'époque, à doser)
 - Mots : messire, point (négation), nenni, oui-da, certes, céans (ici), ouïr, occire, derechef, sitôt, icelui, moult (avec parcimonie), vilain (paysan), manant, ribaud, gueux, maraud, félon, pendard, bougre (insulte), larron.
 - Tournures : « Dieu vous garde », « Que Dieu vous ait en sa sainte garde », « Par ma foi », « Sur mon âme », « Je vous en sais gré », « Point ne le ferai », « Ne vous déplaise », « Sauf votre respect », « Grand bien vous fasse », « Par saint Venceslas ! », « Allez avec Dieu », « Au nom du roi ».
+
+## Langue et style des répliques
+- Uniquement en français teinté de vieux parler, mais facile à lire d'un coup d'œil et à dire à voix haute : « Messire », « point », « nenni », « céans », « ouïr », « je gage que », « par ma foi », « Dieu vous garde ». Pas d'ancien français illisible.
+- Aucun mot moderne (voir la liste des anachronismes plus haut).
+
+## Scènes typiques et palette de réponses
+- Marchand : marchander, accepter, mettre en doute la qualité, faire valoir son rang.
+- Menace, embuscade : apaiser, intimider, gagner du temps, appeler à l'aide ou dégainer.
+- Ennemi politique : diplomatie prudente, fierté loyale, ruse, sonder.
+- Clerc : piété, érudition, question habile.
+- Supérieur (baron, émissaire royal) : déférence, conseil avisé, réserve.
+- Inférieur (paysan, valet) : justice, protection, autorité.
+- Taverne : bonhomie, prudence face aux oreilles qui traînent, tournée offerte.

@@ -41,13 +41,16 @@ class Segmenteur:
 
     def __init__(
         self,
-        silence_fin_ms: int = 550,
+        silence_fin_ms: int = 700,
         duree_min_ms: int = 400,
         sensibilite: float = 3.0,
         duree_max_s: float = 25.0,
         preroll_ms: int = 300,
+        anticipation_ms: int = 0,
     ):
         self.trames_silence_fin = max(1, silence_fin_ms // TRAME_MS)
+        anticipation = anticipation_ms // TRAME_MS
+        self.trames_anticipation = anticipation if 0 < anticipation < self.trames_silence_fin else 0
         self.trames_min = max(1, duree_min_ms // TRAME_MS)
         self.trames_max = int(duree_max_s * 1000 / TRAME_MS)
         self.sensibilite = sensibilite
@@ -60,14 +63,18 @@ class Segmenteur:
         self._silence = 0
         self._candidat = 0
         self._voisees = 0
+        self._emis = False            # déjà envoyée par anticipation
+        self._reprise = False         # la personne a reparlé depuis
         self.au_debut = None          # rappel facultatif : quelqu'un commence à parler
 
     def _est_parole(self, rms: float) -> bool:
         return rms > max(self.plancher, self.bruit * self.sensibilite)
 
-    def pousser(self, echantillons: np.ndarray) -> list[np.ndarray]:
-        """Ajoute de l'audio ; renvoie les répliques terminées."""
-        termines: list[np.ndarray] = []
+    def pousser(self, echantillons: np.ndarray) -> list[tuple[str, np.ndarray]]:
+        """Ajoute de l'audio ; renvoie les répliques prêtes, sous la forme (genre, audio) :
+        « fin » pour une nouvelle réplique, « suite » quand la personne a repris après
+        une réplique déjà envoyée par anticipation (l'audio contient alors le tout)."""
+        termines: list[tuple[str, np.ndarray]] = []
         self._tampon = np.concatenate([self._tampon, echantillons.astype(np.float32)])
         while self._tampon.size >= TRAME:
             trame, self._tampon = self._tampon[:TRAME], self._tampon[TRAME:]
@@ -76,7 +83,7 @@ class Segmenteur:
                 termines.append(seg)
         return termines
 
-    def _traiter(self, trame: np.ndarray) -> np.ndarray | None:
+    def _traiter(self, trame: np.ndarray) -> tuple[str, np.ndarray] | None:
         rms = float(np.sqrt(np.mean(trame * trame)) + 1e-9)
         parole = self._est_parole(rms)
 
@@ -90,6 +97,7 @@ class Segmenteur:
                 self._trames = list(self._preroll)
                 self._silence = 0
                 self._voisees = self._candidat
+                self._emis = self._reprise = False
                 if self.au_debut:
                     self.au_debut()
             return None
@@ -97,25 +105,33 @@ class Segmenteur:
         self._trames.append(trame)
         self._silence = 0 if parole else self._silence + 1
         self._voisees += 1 if parole else 0
+        if parole and self._emis:
+            self._reprise = True
+        if (self.trames_anticipation and self._silence == self.trames_anticipation
+                and self._voisees >= self.trames_min and (not self._emis or self._reprise)):
+            genre = "suite" if self._emis else "fin"
+            self._emis, self._reprise = True, False
+            return genre, np.concatenate(self._trames[: len(self._trames) - self._silence // 2])
         trop_long = len(self._trames) >= self.trames_max
         if self._silence >= self.trames_silence_fin or trop_long:
             # On garde un peu du silence final, pour ne pas couper la dernière syllabe.
             trames = self._trames[: len(self._trames) - (0 if trop_long else self._silence // 2)]
-            voisees = self._voisees
+            voisees, emis, reprise = self._voisees, self._emis, self._reprise
             self._en_parole = False
             self._trames = []
             self._candidat = 0
             self._voisees = 0
             self._preroll.clear()
-            if voisees >= self.trames_min:
-                return np.concatenate(trames)
+            if voisees >= self.trames_min and (not emis or reprise):
+                return ("suite" if emis else "fin"), np.concatenate(trames)
         return None
 
-    def vider(self) -> np.ndarray | None:
-        if self._en_parole and self._voisees >= self.trames_min:
+    def vider(self) -> tuple[str, np.ndarray] | None:
+        if self._en_parole and self._voisees >= self.trames_min and (not self._emis or self._reprise):
+            genre = "suite" if self._emis else "fin"
             seg = np.concatenate(self._trames)
             self._trames, self._en_parole = [], False
-            return seg
+            return genre, seg
         return None
 
 
@@ -176,10 +192,10 @@ def _trouver_peripherique(p, pyaudio, source: str, nom: str) -> dict:
 
 
 class Capture(threading.Thread):
-    """Écoute une source et appelle `rappel(source, audio_16k)` à chaque réplique."""
+    """Écoute une source et appelle `rappel(source, genre, audio_16k)` à chaque réplique."""
 
     def __init__(self, source: str, nom_peripherique: str, segmenteur: Segmenteur,
-                 rappel: Callable[[str, np.ndarray], None], journal: Callable[[str], None]):
+                 rappel: Callable[[str, str, np.ndarray], None], journal: Callable[[str], None]):
         super().__init__(daemon=True, name=f"capture-{source}")
         self.source = source
         self.nom_peripherique = nom_peripherique
@@ -211,8 +227,8 @@ class Capture(threading.Thread):
                 signal = np.frombuffer(brut, dtype=np.float32)
                 if canaux > 1:
                     signal = signal.reshape(-1, canaux).mean(axis=1)
-                for seg in self.segmenteur.pousser(reechantillonner(signal, taux)):
-                    self.rappel(self.source, seg)
+                for genre, seg in self.segmenteur.pousser(reechantillonner(signal, taux)):
+                    self.rappel(self.source, genre, seg)
             flux.stop_stream()
             flux.close()
         except Exception as e:

@@ -1,13 +1,14 @@
 """Mémoire du Souffleur : fil de la conversation, registre des personnes et des faits."""
 from __future__ import annotations
 
+import collections
 import json
 import threading
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
 
-from .config import DONNEES, MEMOIRE
+from .config import MEMOIRE
 
 
 @dataclass
@@ -36,6 +37,7 @@ class Personne:
 class Memoire:
     def __init__(self, dossier: Path = MEMOIRE):
         self.dossier = dossier
+        self.scenes: collections.deque[tuple[str, str]] = collections.deque(maxlen=6)
         (dossier / "sessions").mkdir(parents=True, exist_ok=True)
         self.chemin_registre = dossier / "registre.json"
         self.chemin_session = dossier / "sessions" / f"{datetime.now():%Y-%m-%d_%Hh%M}.txt"
@@ -127,7 +129,20 @@ class Memoire:
         with self._verrou:
             return "\n".join(r.ligne() for r in self.fil[index:]), len(self.fil)
 
+    def noter_scene(self, description: str) -> None:
+        with self._verrou:
+            self.scene = description
+            self.scenes.append((datetime.now().strftime("%H:%M:%S"), description))
 
-def lire_donnee(nom: str) -> str:
-    chemin = DONNEES / nom
-    return chemin.read_text(encoding="utf-8") if chemin.exists() else ""
+    def texte_scenes(self) -> str:
+        with self._verrou:
+            return "\n".join(f"[{h}] {d}" for h, d in self.scenes)
+
+    def remplacer_derniere(self, source: str, texte: str) -> Replique | None:
+        """La personne a repris après une pause : on complète sa dernière réplique."""
+        with self._verrou:
+            for r in reversed(self.fil[-6:]):
+                if r.source == source:
+                    r.texte = texte
+                    return r
+        return None

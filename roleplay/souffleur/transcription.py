@@ -7,12 +7,6 @@ from pathlib import Path
 
 import numpy as np
 
-# Noms propres soufflés à Whisper pour qu'il les écrive correctement.
-VOCABULAIRE = (
-    "Messire Dalibor Medved, seigneur de Suchdol. Le roi Venceslas, Sigismond de Hongrie, "
-    "Kuttenberg, Kutná Hora, Prague, Rattay, Trosky, Skalitz, Sasau, la Bohême, les Coumans, "
-    "groschen, Votre Grâce, Monseigneur."
-)
 
 # Phrases que Whisper « invente » sur du silence ou de la musique.
 HALLUCINATIONS = re.compile(
@@ -37,7 +31,9 @@ def _dll_cuda() -> None:
 
 
 class Transcripteur:
-    def __init__(self, modele: str, appareil: str, precision: str, journal):
+    def __init__(self, modele: str, appareil: str, precision: str, journal, vocabulaire: str = ""):
+        # Noms propres soufflés à Whisper pour qu'il les écrive correctement.
+        self.vocabulaire = (vocabulaire.strip().rstrip(".") + ".") if vocabulaire.strip() else None
         _dll_cuda()
         from faster_whisper import WhisperModel  # import tardif : lourd
 
@@ -55,13 +51,15 @@ class Transcripteur:
             beam_size=1,
             vad_filter=True,
             condition_on_previous_text=False,
-            initial_prompt=VOCABULAIRE,
+            initial_prompt=self.vocabulaire,
         )
         morceaux = []
         for s in segments:
             if s.no_speech_prob > 0.6 and s.avg_logprob < -0.8:
                 continue
             texte = s.text.strip()
+            if self.vocabulaire and texte.strip(" .,").lower() in self.vocabulaire.lower():
+                continue          # Whisper qui répète la liste de noms sur du silence
             if texte and not HALLUCINATIONS.search(texte):
                 morceaux.append(texte)
         return " ".join(morceaux).strip()

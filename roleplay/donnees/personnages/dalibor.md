@@ -1,6 +1,11 @@
+---
+nom: Dalibor
+nom_complet: le seigneur Dalibor Medved de Suchdol
+vocabulaire: Messire Dalibor Medved, seigneur de Suchdol
+---
 # Fiche : le seigneur Dalibor Medved de Suchdol
 
-<!-- Fiche lue par le Souffleur à chaque réplique. Complète-la librement :
+<!-- Fiche lue par le Souffleur à chaque réplique. L'en-tête entre les --- donne le nom affiché et les noms propres à bien transcrire. Complète-la librement :
      plus elle est précise, plus les répliques te ressembleront.
      Les lignes « À préciser » ne sont pas inventées par l'outil. -->
 
@@ -19,6 +24,15 @@
 - Cultivé : il a lu, il cite volontiers l'Écriture, les Pères de l'Église ou un adage latin. Il aime le bon droit et la parole donnée.
 - Il parle comme un seigneur de son temps : « Messire », « Dieu vous garde », « par ma foi », « je vous en sais gré ».
 - Prudent : il écoute avant de juger et ne s'engage pas à la légère.
+
+## Manière de parler
+- Poli, cultivé, mesuré. Il reste digne même menacé : sa fermeté passe par la froideur et le rang, jamais par l'insulte.
+- Il vouvoie ses pairs, ses supérieurs et les inconnus. Il peut tutoyer avec bienveillance un serf, un valet ou un enfant.
+- Il glisse volontiers une sentence latine ou un mot de l'Écriture, sans jamais pontifier.
+
+## Scènes propres à Dalibor
+- Avec ses sujets de Suchdol : justice, protection, autorité paternelle.
+- Avec un partisan de Sigismond : diplomatie prudente, fierté loyale, ruse, sonder ses intentions.
 
 ## Objectifs
 1. **Protéger ses terres et ses gens** : Suchdol, son village, ses paysans, ses récoltes, contre les pillards, les mercenaires et les ambitieux.

@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from . import prompts
 from .config import ConfigClaude
 from .memoire import Memoire, Personne, Replique
+from .profil import Profil
 from .vision import Image
 
 BETA_REPLI = "server-side-fallback-2026-07-01"
@@ -69,24 +70,27 @@ def _avec_repli(modele: str) -> bool:
 class Conseiller:
     """Lance une génération à la fois ; une nouvelle demande annule la précédente."""
 
-    def __init__(self, cfg: ConfigClaude, memoire: Memoire, nombre: int,
+    def __init__(self, cfg: ConfigClaude, profil: Profil, memoire: Memoire, nombre: int,
                  evenement: Callable[[str, object], None],
-                 fournir_image: Callable[[], "Image | None"] | None = None):
+                 fournir_images: Callable[[], list[tuple[str, Image]]] | None = None):
         self.cfg = cfg
-        self.fournir_image = fournir_image
+        self.profil = profil
+        self.fournir_images = fournir_images
         self.memoire = memoire
         self.nombre = nombre
         self.evenement = evenement   # (type, donnée) -> interface
         self.client = anthropic.Anthropic(max_retries=1)
-        self.systeme = prompts.systeme_souffleur()
+        self.systeme = [{"type": "text", "text": prompts.systeme_souffleur(profil),
+                         "cache_control": {"type": "ephemeral", "ttl": "1h"}}]
         self._generation = 0
         self._verrou = threading.Lock()
 
-    def demander(self, consigne: str = "") -> None:
+    def demander(self, consigne: str = "", depuis: float | None = None) -> None:
+        """`depuis` : instant où la personne s'est tue, pour mesurer le délai réel."""
         with self._verrou:
             self._generation += 1
             gen = self._generation
-        threading.Thread(target=self._generer, args=(gen, consigne), daemon=True).start()
+        threading.Thread(target=self._generer, args=(gen, consigne, depuis), daemon=True).start()
 
     def annuler(self) -> None:
         with self._verrou:
@@ -95,19 +99,36 @@ class Conseiller:
     def _a_jour(self, gen: int) -> bool:
         return gen == self._generation
 
+    def prechauffer(self) -> None:
+        """Charge les consignes dans le cache de Claude avant la première réplique :
+        la première vraie demande part ainsi aussi vite que les suivantes."""
+        def _chauffer():
+            try:
+                extra = {"speed": "fast"} if self.cfg.rapide and self.cfg.modele == "claude-opus-5-5" else {}
+                self.client.messages.create(
+                    model=self.cfg.modele, max_tokens=0, system=self.systeme,
+                    messages=[{"role": "user", "content": "Prêt."}], **extra)
+            except anthropic.APIError:
+                pass   # sans gravité : la première réplique remplira le cache
+        threading.Thread(target=_chauffer, daemon=True).start()
+
     def _requete(self, consigne: str) -> dict:
-        image = self.fournir_image() if self.fournir_image else None
+        images = self.fournir_images() if self.fournir_images else []
+        contenu: list[dict] = []
+        legendes = []
+        for i, (legende, image) in enumerate(images, 1):
+            legende = f"Image {i} : " + legende.format(nom=self.profil.nom)
+            legendes.append(legende)
+            contenu += [{"type": "text", "text": legende}, image.bloc()]
         demande = prompts.demande_souffleur(
-            self.memoire.texte_registre(), self.memoire.situation,
-            self.memoire.texte_fil(40), self.nombre, consigne,
-            scene=self.memoire.scene, image=image is not None,
+            self.profil, self.memoire.texte_registre(), self.memoire.situation,
+            self.memoire.texte_scenes(), self.memoire.texte_fil(40), self.nombre, consigne, legendes,
         )
-        contenu = ([image.bloc()] if image else []) + [{"type": "text", "text": demande}]
+        contenu.append({"type": "text", "text": demande})
         params = dict(
             model=self.cfg.modele,
             max_tokens=4000,
-            system=[{"type": "text", "text": self.systeme,
-                     "cache_control": {"type": "ephemeral", "ttl": "1h"}}],
+            system=self.systeme,
             messages=[{"role": "user", "content": contenu}],
             output_config={"effort": self.cfg.effort},
         )
@@ -118,8 +139,8 @@ class Conseiller:
             params["fallbacks"] = "default"
         return params
 
-    def _generer(self, gen: int, consigne: str) -> None:
-        debut = time.monotonic()
+    def _generer(self, gen: int, consigne: str, depuis: float | None = None) -> None:
+        debut = depuis or time.monotonic()
         self.evenement("debut", None)
         prop = Proposition()
         tampon = ""
@@ -173,9 +194,10 @@ class MiseAJour(BaseModel):
 
 
 class Chroniqueur:
-    def __init__(self, cfg: ConfigClaude, memoire: Memoire, journal: Callable[[str], None],
-                 tous_les: int = 8):
+    def __init__(self, cfg: ConfigClaude, profil: Profil, memoire: Memoire,
+                 journal: Callable[[str], None], tous_les: int = 8):
         self.cfg = cfg
+        self.systeme = prompts.systeme_chroniqueur(profil)
         self.memoire = memoire
         self.journal = journal
         self.tous_les = tous_les
@@ -202,12 +224,12 @@ class Chroniqueur:
                 return
             contenu = (
                 f"=== MÉMOIRE ACTUELLE ===\n{self.memoire.texte_registre()}\n\n"
-                f"=== NOUVELLES RÉPLIQUES ===\n{nouveau}"
+                f"=== NOUVELLES LIGNES ===\n{nouveau}"
             )
             params = dict(
                 model=self.cfg.modele_chroniqueur,
                 max_tokens=8000,
-                system=prompts.CONSIGNES_CHRONIQUEUR,
+                system=self.systeme,
                 messages=[{"role": "user", "content": contenu}],
                 output_format=MiseAJour,
                 output_config={"effort": "low"},
@@ -235,16 +257,18 @@ class SceneVue(BaseModel):
     moment: str
     personnes: list[str]
     tension: str
-    etat_de_dalibor: str
+    etat_du_personnage: str
     details_utiles: str
     changement_notable: bool
     resume: str
 
 
 class Regard:
-    def __init__(self, modele: str, memoire: Memoire, evenement: Callable[[str, object], None],
-                 journal: Callable[[str], None]):
+    def __init__(self, modele: str, profil: Profil, memoire: Memoire,
+                 evenement: Callable[[str, object], None], journal: Callable[[str], None]):
         self.modele = modele
+        self.profil = profil
+        self.systeme = prompts.systeme_observateur(profil)
         self.memoire = memoire
         self.evenement = evenement
         self.journal = journal
@@ -256,10 +280,13 @@ class Regard:
             reponse = self.client.messages.parse(
                 model=self.modele,
                 max_tokens=4000,
-                system=prompts.CONSIGNES_OBSERVATEUR,
+                system=self.systeme,
                 messages=[{"role": "user", "content": [
                     image.bloc(),
-                    {"type": "text", "text": f"Description précédente : {precedente}\n\nDécris la scène actuelle."},
+                    {"type": "text", "text": (
+                        f"Description précédente : {precedente}\n\n"
+                        f"Derniers échanges entendus (pour reconnaître qui est qui) :\n"
+                        f"{self.memoire.texte_fil(6)}\n\nDécris la scène actuelle.")},
                 ]}],
                 output_format=SceneVue,
                 output_config={"effort": "low"},
@@ -275,11 +302,11 @@ class Regard:
             morceaux.append("présents : " + ", ".join(s.personnes))
         if s.tension:
             morceaux.append(f"tension : {s.tension}")
-        if s.etat_de_dalibor:
-            morceaux.append(f"Dalibor : {s.etat_de_dalibor}")
+        if s.etat_du_personnage:
+            morceaux.append(f"{self.profil.nom} : {s.etat_du_personnage}")
         if s.details_utiles:
             morceaux.append(s.details_utiles)
-        self.memoire.scene = " · ".join(m for m in morceaux if m)
+        self.memoire.noter_scene(" · ".join(m for m in morceaux if m))
         self.evenement("scene", s)
         if s.changement_notable and s.resume:
             r = Replique("vue", "écran", s.resume)

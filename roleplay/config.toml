@@ -3,6 +3,12 @@
 #  Modifie ce fichier avec le Bloc-notes, puis relance l'outil.
 # ============================================================
 
+[jeu]
+# Fiche du personnage (donnees/personnages/<nom>.md) et guide de l'univers
+# (donnees/univers/<nom>.md). Pour un autre joueur : copie _modele.md.
+personnage = "dalibor"
+univers = "boheme_1403"
+
 [claude]
 # Modèle qui rédige les répliques.
 # "claude-opus-5-5" : la meilleure qualité de langue et de rigueur historique.
@@ -24,9 +30,12 @@ sortie = ""
 # Écouter aussi ton micro, pour que l'outil sache ce que Dalibor a répondu.
 ecouter_micro = true
 micro = ""
-# Silence (en millisecondes) qui marque la fin d'une réplique.
-# Plus bas = plus vif, mais risque de couper les gens qui hésitent.
-silence_fin_ms = 550
+# Anticipation : après ce silence (ms), les répliques sont déjà demandées.
+# Si la personne reprend la parole avant `silence_fin_ms`, la phrase est
+# complétée et les répliques refaites. 0 = désactivé.
+anticipation_ms = 300
+# Silence (ms) qui clôt définitivement une réplique.
+silence_fin_ms = 700
 # Une réplique plus courte que ça est ignorée (toux, bruits).
 duree_min_ms = 400
 # Sensibilité : combien de fois plus fort que le bruit de fond il faut parler.
@@ -47,15 +56,20 @@ active = true
 # Il cherche la fenêtre dont le titre contient ce texte ; sinon il regarde l'écran n° `ecran`.
 titre_fenetre = "Kingdom Come"
 ecran = 1
-# Taille de l'image envoyée (en pixels) et qualité JPEG : plus petit = plus vif et moins cher.
-largeur_max = 1280
-qualite = 70
-# Joindre l'image du moment où l'on te parle à chaque demande de répliques.
+# Images filmées par seconde (gardées en mémoire vive, sur ton PC, ~30 s).
+images_par_seconde = 2
+# Taille (pixels, côté le plus long) et qualité JPEG des images envoyées à Claude.
+# 1920 = ce que tu vois, en détail. 1280 = plus vif et moins cher.
+largeur_max = 1920
+qualite = 80
+# Joindre à chaque demande l'écran du début de la réplique et l'écran actuel.
 joindre_aux_repliques = true
 # Observateur : décrit la scène en continu (lieu, heure, personnes, tension).
-# Il ne regarde que si l'image a changé, au plus une fois toutes les `intervalle_s` secondes.
+# Il regarde dès que l'image change (au plus toutes les `intervalle_min_s` s),
+# tout de suite si elle change brutalement, et au moins toutes les `battement_s` s.
 observateur = true
-intervalle_s = 30
+intervalle_min_s = 8
+battement_s = 45
 modele_observateur = "claude-opus-5-5"
 
 [interface]

@@ -26,9 +26,9 @@ def test_segmenteur_decoupe_deux_repliques():
     morceaux = []
     for i in range(0, flux.size, 480):
         morceaux += seg.pousser(flux[i:i + 480])
-    assert len(morceaux) == 2
-    assert 1.0 < morceaux[0].size / TAUX < 1.9
-    assert 0.6 < morceaux[1].size / TAUX < 1.5
+    assert [g for g, _ in morceaux] == ["fin", "fin"]
+    assert 1.0 < morceaux[0][1].size / TAUX < 1.9
+    assert 0.6 < morceaux[1][1].size / TAUX < 1.5
 
 
 def test_segmenteur_ignore_les_bruits_courts():
@@ -71,6 +71,8 @@ CONSEIL: Une aune de bon drap vaut quelques groschen, pas une soixantaine."""
 
 def test_memoire(tmp_path):
     m = Memoire(tmp_path)
+    m.noter_scene("taverne · soir")
+    assert "taverne" in m.texte_scenes()
     m.ajouter(Replique("interlocuteur", "Voix A", "Dieu vous garde, messire."))
     m.ajouter(Replique("moi", "Dalibor", "Et vous de même."))
     m.renommer("Voix A", "Kuno")
@@ -104,3 +106,56 @@ def test_capture_ecran():
     img = Oeil(ConfigVision(largeur_max=640), print).capturer()
     assert img is not None and img.jpeg[:2] == b"\xff\xd8"
     assert img.bloc()["source"]["media_type"] == "image/jpeg"
+
+
+def _decouper(seg, flux):
+    sortie = []
+    for i in range(0, flux.size, 480):
+        sortie += seg.pousser(flux[i:i + 480])
+    return sortie
+
+
+def test_anticipation_simple():
+    # Une phrase suivie d'un long silence : une seule réplique, envoyée dès 300 ms de silence.
+    seg = Segmenteur(silence_fin_ms=700, duree_min_ms=300, anticipation_ms=300)
+    flux = np.concatenate([_bruit(1), _voix(140, 1.0), _bruit(1.5)])
+    sortie = _decouper(seg, flux)
+    assert [g for g, _ in sortie] == ["fin"]
+
+
+def test_anticipation_avec_reprise():
+    # Pause de 450 ms au milieu de la phrase : envoi anticipé, puis « suite » avec le tout.
+    seg = Segmenteur(silence_fin_ms=700, duree_min_ms=300, anticipation_ms=300)
+    flux = np.concatenate([_bruit(1), _voix(140, 1.0), _bruit(0.45), _voix(140, 0.8), _bruit(1.5)])
+    sortie = _decouper(seg, flux)
+    assert [g for g, _ in sortie] == ["fin", "suite"]
+    assert sortie[1][1].size > sortie[0][1].size + TAUX // 2
+
+
+def test_profils():
+    from souffleur.profil import Profil, lister
+    from souffleur import prompts
+    assert "dalibor" in lister() and "_modele" not in lister()
+    p = Profil.charger("dalibor", "boheme_1403")
+    assert p.nom == "Dalibor" and "1403" in p.cadre and "Suchdol" in p.vocabulaire
+    systeme = prompts.systeme_souffleur(p)
+    assert "{" not in systeme.split("=== FICHE")[0]          # gabarit entièrement rempli
+    assert "Dalibor" in systeme and "anachronisme" in systeme
+
+
+def test_images_pour_replique():
+    from souffleur.config import ConfigVision
+    from souffleur.vision import Image, Oeil
+    import time as _t
+    pytest = __import__("pytest")
+    pytest.importorskip("mss")
+    pytest.importorskip("PIL")
+    oeil = Oeil(ConfigVision(), lambda t: None)
+    maintenant = _t.monotonic()
+    calme = Image(b"a", np.zeros((27, 48), np.float32), maintenant - 4)
+    epee = Image(b"b", np.full((27, 48), 60, np.float32), maintenant - 0.1)
+    oeil.images.extend([calme, epee])
+    oeil._debut_parole = maintenant - 3.9
+    images = oeil.pour_replique()
+    assert [i for _, i in images] == [calme, epee]
+    assert "commencé à parler" in images[0][0]

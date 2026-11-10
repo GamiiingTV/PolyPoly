@@ -11,6 +11,8 @@ def principal() -> int:
     p.add_argument("--simulation", action="store_true",
                    help="sans micro ni écoute : tu écris les répliques entendues dans la fenêtre")
     p.add_argument("--peripheriques", action="store_true", help="liste les périphériques audio et quitte")
+    p.add_argument("--personnage", help="fiche à utiliser (donnees/personnages/<nom>.md)")
+    p.add_argument("--univers", help="guide d'univers à utiliser (donnees/univers/<nom>.md)")
     args = p.parse_args()
 
     if args.peripheriques:
@@ -29,7 +31,15 @@ def principal() -> int:
 
     from .app import Souffleur
     from .config import charger
-    Souffleur(charger(), simulation=args.simulation).demarrer()
+    from .profil import lister
+    cfg = charger()
+    cfg.jeu.personnage = args.personnage or cfg.jeu.personnage
+    cfg.jeu.univers = args.univers or cfg.jeu.univers
+    if cfg.jeu.personnage not in lister():
+        print(f"Personnage « {cfg.jeu.personnage} » introuvable. Disponibles : {', '.join(lister())}",
+              file=sys.stderr)
+        return 1
+    Souffleur(cfg, simulation=args.simulation).demarrer()
     return 0
 
 

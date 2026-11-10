@@ -1,21 +1,22 @@
-"""Chef d'orchestre : capture -> transcription -> mémoire -> conseiller -> interface."""
+"""Chef d'orchestre : son + écran -> transcription -> mémoire -> Claude -> fenêtre."""
 from __future__ import annotations
 
 import queue
 import re
 import threading
+import time
 
 import numpy as np
 
 from .audio import Capture, Segmenteur
-from .config import Config
+from .config import MEMOIRE, Config
 from .conseiller import Choix, Chroniqueur, Conseiller, Regard
 from .interface import Interface
 from .memoire import Memoire, Replique
+from .profil import Profil
 from .vision import Observateur, Oeil, masquer_des_captures
 from .voix import RegistreVoix
 
-NOM_JOUEUR = "Dalibor"
 _RE_NOMMER = re.compile(r"^\s*(voix\s+\S+)\s*=\s*(.*)$", re.IGNORECASE)
 
 
@@ -23,14 +24,16 @@ class Souffleur:
     def __init__(self, cfg: Config, simulation: bool = False):
         self.cfg = cfg
         self.simulation = simulation
-        self.ui = Interface(cfg.interface.largeur, cfg.interface.opacite, cfg.interface.nombre_de_choix)
-        self.memoire = Memoire()
+        self.profil = Profil.charger(cfg.jeu.personnage, cfg.jeu.univers)
+        self.ui = Interface(cfg.interface.largeur, cfg.interface.opacite, cfg.interface.nombre_de_choix,
+                            titre=f"✠ Souffleur · {self.profil.nom}")
+        self.memoire = Memoire(MEMOIRE / self.profil.cle)
         self.voix = RegistreVoix()
         self.oeil: Oeil | None = None
         self.observateur: Observateur | None = None
-        self.conseiller = Conseiller(cfg.claude, self.memoire, cfg.interface.nombre_de_choix,
-                                     self.ui.envoyer, fournir_image=self._image_pour_replique)
-        self.chroniqueur = Chroniqueur(cfg.claude, self.memoire, self.journal)
+        self.conseiller = Conseiller(cfg.claude, self.profil, self.memoire, cfg.interface.nombre_de_choix,
+                                     self.ui.envoyer, fournir_images=self._images_pour_replique)
+        self.chroniqueur = Chroniqueur(cfg.claude, self.profil, self.memoire, self.journal)
         self.captures: list[Capture] = []
         self.a_transcrire: queue.Queue = queue.Queue()
         self.ecoute = True
@@ -46,7 +49,9 @@ class Souffleur:
         self.ui.envoyer("journal", texte)
 
     def demarrer(self) -> None:
+        self.journal(f"Personnage : {self.profil.nom_complet} · univers : {self.cfg.jeu.univers}")
         self._touches()
+        self.conseiller.prechauffer()
         if self.cfg.vision.active:
             if masquer_des_captures(self.ui.racine):
                 self.journal("Vision : la fenêtre du Souffleur est invisible aux captures.")
@@ -63,7 +68,8 @@ class Souffleur:
         try:
             from .transcription import Transcripteur
             t = self.cfg.transcription
-            transcripteur = Transcripteur(t.modele, t.appareil, t.precision, self.journal)
+            transcripteur = Transcripteur(t.modele, t.appareil, t.precision, self.journal,
+                                          vocabulaire=self.profil.vocabulaire)
         except Exception as e:
             self.journal(f"Transcription indisponible : {e}. Tu peux quand même écrire les répliques.")
             return
@@ -71,7 +77,7 @@ class Souffleur:
         a = self.cfg.audio
         sources = [("interlocuteur", a.sortie)] + ([("moi", a.micro)] if a.ecouter_micro else [])
         for source, nom in sources:
-            seg = Segmenteur(a.silence_fin_ms, a.duree_min_ms, a.sensibilite)
+            seg = Segmenteur(a.silence_fin_ms, a.duree_min_ms, a.sensibilite, anticipation_ms=a.anticipation_ms)
             if source == "interlocuteur":
                 seg.au_debut = self._quelquun_parle
             cap = Capture(source, nom, seg, self._segment_recu, self.journal)
@@ -85,21 +91,23 @@ class Souffleur:
         except ImportError:
             self.journal("Vision indisponible : modules « mss » et « Pillow » absents.")
             return
-        self.journal("Vision active : le Souffleur regarde ton écran de jeu.")
+        self.oeil.demarrer()
+        self.journal(f"Vision continue : {v.images_par_seconde:g} image(s) par seconde, {v.largeur_max} px.")
         if v.observateur:
-            regard = Regard(v.modele_observateur, self.memoire, self.ui.envoyer, self.journal)
-            self.observateur = Observateur(self.oeil, regard.decrire, v.intervalle_s)
+            regard = Regard(v.modele_observateur, self.profil, self.memoire, self.ui.envoyer, self.journal)
+            self.observateur = Observateur(self.oeil, regard.decrire, v.intervalle_min_s, v.battement_s)
+            self.oeil.sur_rupture = self.observateur.maintenant
             self.observateur.start()
 
-    def _image_pour_replique(self):
+    def _images_pour_replique(self):
         if self.oeil is None or not self.cfg.vision.joindre_aux_repliques:
-            return None
+            return []
         return self.oeil.pour_replique()
 
     def _quelquun_parle(self) -> None:
-        # On fige l'écran au moment où l'on commence à parler à Dalibor.
+        # On repère dans le film l'instant où l'on commence à parler au personnage.
         if self.oeil is not None and self.ecoute:
-            threading.Thread(target=self.oeil.instantane, daemon=True).start()
+            self.oeil.marquer_debut_parole()
 
     def _touches(self) -> None:
         try:
@@ -118,13 +126,13 @@ class Souffleur:
             self.journal(f"Touches globales indisponibles : {e}")
 
     # ------------------------------------------------------------ audio
-    def _segment_recu(self, source: str, audio: np.ndarray) -> None:
+    def _segment_recu(self, source: str, genre: str, audio: np.ndarray) -> None:
         if self.ecoute:
-            self.a_transcrire.put((source, audio))
+            self.a_transcrire.put((source, genre, audio, time.monotonic()))
 
     def _boucle_transcription(self, transcripteur) -> None:
         while True:
-            source, audio = self.a_transcrire.get()
+            source, genre, audio, t_fin = self.a_transcrire.get()
             try:
                 texte = transcripteur.transcrire(audio)
             except Exception as e:
@@ -132,23 +140,31 @@ class Souffleur:
                 continue
             if not texte:
                 continue
+            if genre == "suite":
+                # La personne a repris après une courte pause : on complète sa réplique.
+                r = self.memoire.remplacer_derniere(source, texte)
+                if r is not None:
+                    self.ui.envoyer("ligne", ("   ↳ " + r.ligne(), "moi" if source == "moi" else ""))
+                    if source != "moi":
+                        self.conseiller.demander(depuis=t_fin)
+                    continue
             if source == "moi":
                 self.dit_par_moi(texte)
             else:
                 qui = self.voix.nom(self.voix.identifier(audio))
-                self.entendu(qui, texte)
+                self.entendu(qui, texte, depuis=t_fin)
 
     # ------------------------------------------------------------ actions
-    def entendu(self, qui: str, texte: str) -> None:
+    def entendu(self, qui: str, texte: str, depuis: float | None = None) -> None:
         r = Replique("interlocuteur", qui, texte)
         self.memoire.ajouter(r)
         self.ui.envoyer("ligne", (r.ligne(), ""))
-        self.conseiller.demander()
+        self.conseiller.demander(depuis=depuis)
         self.chroniqueur.peut_etre()
 
     def dit_par_moi(self, texte: str) -> None:
         self.conseiller.annuler()
-        r = Replique("moi", NOM_JOUEUR, texte)
+        r = Replique("moi", self.profil.nom, texte)
         self.memoire.ajouter(r)
         self.ui.envoyer("ligne", (r.ligne(), "moi"))
         self.chroniqueur.peut_etre()
@@ -173,17 +189,21 @@ class Souffleur:
             self.dit_par_moi(texte[4:].strip())
         elif texte.startswith("!"):
             self.memoire.situation = texte[1:].strip()
-            self.memoire.ajouter(Replique("note", NOM_JOUEUR, self.memoire.situation))
+            self.memoire.ajouter(Replique("note", self.profil.nom, self.memoire.situation))
             self.ui.envoyer("ligne", (f"Situation : {self.memoire.situation}", "note"))
         elif texte.startswith("?"):
             self.conseiller.demander(texte[1:].strip())
         else:
+            if self.oeil is not None:
+                self.oeil.marquer_debut_parole()
             self.entendu("Interlocuteur", texte)
 
     def basculer_pause(self) -> None:
         self.ecoute = not self.ecoute
         for c in self.captures:
             (c.actif.set if self.ecoute else c.actif.clear)()
+        if self.oeil:
+            (self.oeil.actif.set if self.ecoute else self.oeil.actif.clear)()
         if self.observateur:
             (self.observateur.actif.set if self.ecoute else self.observateur.actif.clear)()
         self.ui.envoyer("ecoute", self.ecoute)
