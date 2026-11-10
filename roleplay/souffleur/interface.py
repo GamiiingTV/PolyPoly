@@ -32,7 +32,7 @@ class Interface:
         except tk.TclError:
             pass
         self.racine.overrideredirect(True)
-        self.racine.geometry(f"{largeur}x700+40+60")
+        self.racine.geometry(f"{largeur}x760+40+60")
         self.largeur = largeur
         self.nombre = nombre
         self.file: queue.Queue = queue.Queue()
@@ -77,10 +77,14 @@ class Interface:
             w.bind("<ButtonPress-1>", self._debut_glisser)
             w.bind("<B1-Motion>", self._glisser)
 
+        self.l_scene = tk.Label(r, text="", bg=PANNEAU, fg=GRIS, font=self.f_petit,
+                                wraplength=self.largeur - 24, justify="left", anchor="w", padx=8, pady=3)
+        self.l_scene.pack(fill="x")
         self.l_situation = tk.Label(r, text="", bg=FOND, fg=OR, font=self.f_italique,
                                     wraplength=self.largeur - 24, justify="left", anchor="w")
         self.l_situation.pack(fill="x", padx=12, pady=(8, 0))
-        self.l_qui = tk.Label(r, text="", bg=FOND, fg=GRIS, font=self.f_petit, anchor="w")
+        self.l_qui = tk.Label(r, text="", bg=FOND, fg=GRIS, font=self.f_petit, anchor="w",
+                              wraplength=self.largeur - 24, justify="left")
         self.l_qui.pack(fill="x", padx=12)
 
         self.zone_choix = tk.Frame(r, bg=FOND)
@@ -121,7 +125,8 @@ class Interface:
     # ---------------------------------------------------------- affichage
     def _afficher_proposition(self, prop: Proposition, terminee: bool) -> None:
         self.l_situation.config(text=prop.situation)
-        self.l_qui.config(text=f"Parle : {prop.qui}" if prop.qui else "")
+        lignes = ([f"Parle : {prop.qui}"] if prop.qui else []) + ([f"👁 {prop.vu}"] if prop.vu else [])
+        self.l_qui.config(text="\n".join(lignes))
         for w in self.zone_choix.winfo_children():
             w.destroy()
         for c in prop.choix:
@@ -180,6 +185,10 @@ class Interface:
                     self._ajouter_fil(texte, etiquette)
                     if etiquette == "moi":
                         self._estomper()
+                elif genre == "scene":
+                    s = donnee
+                    morceaux = [m for m in (s.lieu, s.moment, s.tension and f"tension : {s.tension}") if m]
+                    self.l_scene.config(text="👁 " + " · ".join(morceaux))
                 elif genre == "journal":
                     self._ajouter_fil(f"· {donnee}", "journal")
                 elif genre == "ecoute":

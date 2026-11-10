@@ -36,6 +36,19 @@ class ConfigTranscription:
 
 
 @dataclass
+class ConfigVision:
+    active: bool = True
+    titre_fenetre: str = "Kingdom Come"
+    ecran: int = 1
+    largeur_max: int = 1280
+    qualite: int = 70
+    joindre_aux_repliques: bool = True
+    observateur: bool = True
+    intervalle_s: float = 30.0
+    modele_observateur: str = "claude-opus-5-5"
+
+
+@dataclass
 class ConfigInterface:
     nombre_de_choix: int = 4
     opacite: float = 0.93
@@ -50,6 +63,7 @@ class Config:
     claude: ConfigClaude = field(default_factory=ConfigClaude)
     audio: ConfigAudio = field(default_factory=ConfigAudio)
     transcription: ConfigTranscription = field(default_factory=ConfigTranscription)
+    vision: ConfigVision = field(default_factory=ConfigVision)
     interface: ConfigInterface = field(default_factory=ConfigInterface)
 
 
@@ -65,7 +79,7 @@ def charger(chemin: Path | None = None) -> Config:
     if chemin.exists():
         with open(chemin, "rb") as f:
             brut = tomllib.load(f)
-        for section in ("claude", "audio", "transcription", "interface"):
+        for section in ("claude", "audio", "transcription", "vision", "interface"):
             _remplir(getattr(cfg, section), brut.get(section, {}))
     cfg.interface.nombre_de_choix = max(3, min(6, cfg.interface.nombre_de_choix))
     return cfg

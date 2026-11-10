@@ -12,7 +12,8 @@ from pydantic import BaseModel
 
 from . import prompts
 from .config import ConfigClaude
-from .memoire import Memoire, Personne
+from .memoire import Memoire, Personne, Replique
+from .vision import Image
 
 BETA_REPLI = "server-side-fallback-2026-07-01"
 
@@ -30,6 +31,7 @@ class Choix:
 class Proposition:
     situation: str = ""
     qui: str = ""
+    vu: str = ""
     choix: list[Choix] = field(default_factory=list)
     conseil: str = ""
 
@@ -40,7 +42,7 @@ def analyser_ligne(ligne: str, prop: Proposition) -> str | None:
     if not ligne:
         return None
     haut = ligne.upper()
-    for cle, attr in (("SITUATION", "situation"), ("QUI", "qui"), ("CONSEIL", "conseil")):
+    for cle, attr in (("SITUATION", "situation"), ("QUI", "qui"), ("VU", "vu"), ("CONSEIL", "conseil")):
         if haut.startswith(cle) and ":" in ligne[: len(cle) + 3]:
             setattr(prop, attr, ligne.split(":", 1)[1].strip())
             return attr
@@ -68,8 +70,10 @@ class Conseiller:
     """Lance une génération à la fois ; une nouvelle demande annule la précédente."""
 
     def __init__(self, cfg: ConfigClaude, memoire: Memoire, nombre: int,
-                 evenement: Callable[[str, object], None]):
+                 evenement: Callable[[str, object], None],
+                 fournir_image: Callable[[], "Image | None"] | None = None):
         self.cfg = cfg
+        self.fournir_image = fournir_image
         self.memoire = memoire
         self.nombre = nombre
         self.evenement = evenement   # (type, donnée) -> interface
@@ -92,16 +96,19 @@ class Conseiller:
         return gen == self._generation
 
     def _requete(self, consigne: str) -> dict:
+        image = self.fournir_image() if self.fournir_image else None
         demande = prompts.demande_souffleur(
             self.memoire.texte_registre(), self.memoire.situation,
             self.memoire.texte_fil(40), self.nombre, consigne,
+            scene=self.memoire.scene, image=image is not None,
         )
+        contenu = ([image.bloc()] if image else []) + [{"type": "text", "text": demande}]
         params = dict(
             model=self.cfg.modele,
             max_tokens=4000,
             system=[{"type": "text", "text": self.systeme,
                      "cache_control": {"type": "ephemeral", "ttl": "1h"}}],
-            messages=[{"role": "user", "content": demande}],
+            messages=[{"role": "user", "content": contenu}],
             output_config={"effort": self.cfg.effort},
         )
         if self.cfg.rapide and self.cfg.modele == "claude-opus-5-5":
@@ -217,3 +224,64 @@ class Chroniqueur:
             self.journal(f"Chronique non mise à jour : {e}")
         finally:
             self._en_cours.release()
+
+
+# ----------------------------------------------------------------------
+# Regard : décrit la scène vue à l'écran (appelé par l'Observateur)
+# ----------------------------------------------------------------------
+
+class SceneVue(BaseModel):
+    lieu: str
+    moment: str
+    personnes: list[str]
+    tension: str
+    etat_de_dalibor: str
+    details_utiles: str
+    changement_notable: bool
+    resume: str
+
+
+class Regard:
+    def __init__(self, modele: str, memoire: Memoire, evenement: Callable[[str, object], None],
+                 journal: Callable[[str], None]):
+        self.modele = modele
+        self.memoire = memoire
+        self.evenement = evenement
+        self.journal = journal
+        self.client = anthropic.Anthropic(max_retries=1)
+
+    def decrire(self, image: Image) -> None:
+        precedente = self.memoire.scene or "(aucune)"
+        try:
+            reponse = self.client.messages.parse(
+                model=self.modele,
+                max_tokens=4000,
+                system=prompts.CONSIGNES_OBSERVATEUR,
+                messages=[{"role": "user", "content": [
+                    image.bloc(),
+                    {"type": "text", "text": f"Description précédente : {precedente}\n\nDécris la scène actuelle."},
+                ]}],
+                output_format=SceneVue,
+                output_config={"effort": "low"},
+            )
+        except anthropic.APIError as e:
+            self.journal(f"Vision : observation impossible ({e}).")
+            return
+        s = reponse.parsed_output
+        if reponse.stop_reason == "refusal" or s is None:
+            return
+        morceaux = [s.lieu, s.moment]
+        if s.personnes:
+            morceaux.append("présents : " + ", ".join(s.personnes))
+        if s.tension:
+            morceaux.append(f"tension : {s.tension}")
+        if s.etat_de_dalibor:
+            morceaux.append(f"Dalibor : {s.etat_de_dalibor}")
+        if s.details_utiles:
+            morceaux.append(s.details_utiles)
+        self.memoire.scene = " · ".join(m for m in morceaux if m)
+        self.evenement("scene", s)
+        if s.changement_notable and s.resume:
+            r = Replique("vue", "écran", s.resume)
+            self.memoire.ajouter(r)
+            self.evenement("ligne", (r.ligne(), "note"))

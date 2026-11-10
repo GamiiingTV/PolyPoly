@@ -9,3 +9,6 @@ keyboard>=0.13.5
 # Pour Whisper sur carte NVIDIA (CUDA 12) :
 nvidia-cublas-cu12 ; sys_platform == "win32"
 nvidia-cudnn-cu12>=9,<10 ; sys_platform == "win32"
+# Vision (captures d'écran du jeu)
+mss>=9.0
+Pillow>=10.0

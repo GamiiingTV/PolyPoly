@@ -1,6 +1,6 @@
 # ✠ Le Souffleur
 
-Comme le souffleur au théâtre : il **écoute** ce qu'on dit à ton personnage dans le chat vocal du jeu et te **propose des répliques d'époque**, dans une petite fenêtre posée par-dessus le jeu.
+Comme le souffleur au théâtre : il **écoute** ce qu'on dit à ton personnage dans le chat vocal du jeu, **regarde ton écran** comme s'il était à ta place, et te **propose des répliques d'époque** adaptées à ce qui se passe, dans une petite fenêtre posée par-dessus le jeu.
 
 Fait pour **Dalibor Medved, seigneur de Suchdol**, en **Bohême, 1403** (mod multijoueur de *Kingdom Come: Deliverance II*).
 
@@ -11,14 +11,18 @@ Fait pour **Dalibor Medved, seigneur de Suchdol**, en **Bohême, 1403** (mod mul
 ```
 Chat vocal du jeu ──► capture du son du PC ──► découpe en répliques ──► Whisper (sur ta carte graphique)
 Ton micro ────────────► (ce que Dalibor répond) ┘                               │
+Écran du jeu ──► capture au moment où l'on te parle ───────────────────────────┤
+             └─► observateur : lieu, heure, personnes, tension ────────────────┤
                                                                                ▼
-     Fenêtre par-dessus le jeu ◄── 3 à 6 répliques (en flux) ◄── Claude (fiche de Dalibor + guide 1403 + mémoire)
+     Fenêtre par-dessus le jeu ◄── 3 à 6 répliques (en flux) ◄── Claude (fiche de Dalibor + guide 1403 + mémoire + image)
 ```
 
 1. Il écoute **le son qui sort de ton PC**, donc le chat vocal du jeu. Il écoute aussi **ton micro**, pour savoir ce que Dalibor a répondu.
 2. Dès que ton interlocuteur se tait (environ une demi-seconde de silence), la réplique est transcrite **sur ton PC** (Whisper, sur la carte graphique).
 3. Claude propose **4 répliques** de tons différents, adaptées à la scène : marchand, menace, ennemi, clerc, supérieur ou paysan. Les choix apparaissent **un par un**, au fur et à mesure qu'ils sont écrits : tu peux lire le premier pendant que les autres arrivent.
-4. Une **chronique** tourne en arrière-plan. Elle retient les personnes rencontrées, les promesses, les dettes et les menaces, et sert de mémoire d'une session à l'autre (fichier `memoire/registre.json`).
+4. **Il voit ce que tu vois.** Dès que quelqu'un commence à te parler, l'outil fige ton écran de jeu, et Claude reçoit cette image avec la phrase entendue. Il voit qui est en face (rang d'après la mise, arme tirée ou non, nombre de gens, gardes, blasons), où tu es (taverne, route, château…), l'heure, et ton état si l'interface le montre. Il juge alors le ton juste : on ne répond pas pareil à un marchand derrière son étal et à trois hommes armés sur une route au crépuscule. Ce qu'il a remarqué s'affiche sous la ligne « Parle » (👁).
+5. **Un observateur** regarde l'écran en continu (au plus une fois toutes les 30 secondes, et seulement si l'image a changé). Il tient à jour la scène (bande 👁 en haut de la fenêtre) et note dans le fil les changements importants, par exemple « (À l'écran : trois hommes armés barrent la route) ».
+6. Une **chronique** tourne en arrière-plan. Elle retient les personnes rencontrées, les promesses, les dettes et les menaces, et sert de mémoire d'une session à l'autre (fichier `memoire/registre.json`).
 
 ## Installation (Windows)
 
@@ -74,9 +78,11 @@ Par défaut, l'outil écoute **tout** le son du PC : la voix des autres joueurs,
 
 ## Bon à savoir
 
-- **Coût** : chaque série de répliques coûte environ 2 centimes avec Opus, et bien moins avec Haiku. Une soirée de RP animée (environ 200 répliques entendues) revient à quelques euros avec Opus. La chronique ne s'exécute que toutes les 8 répliques.
+- **Coût** : chaque série de répliques coûte environ 2 à 3 centimes avec Opus, image comprise, et bien moins avec Haiku. L'observateur ajoute au plus environ 2 € par heure, et nettement moins quand la scène bouge peu. Une soirée de RP animée revient donc à quelques euros. Pour réduire la note : augmente `intervalle_s`, baisse `largeur_max` (par exemple à 1024), ou mets `modele_observateur = "claude-haiku-5-5"`. La chronique ne s'exécute que toutes les 8 répliques.
 - **Reconnaissance des voix** : elle est approximative. Elle distingue bien des voix différentes, moins bien des voix proches. Nomme les voix (`Voix A = …`) ; Claude devine aussi qui parle d'après le contexte.
-- **Vie privée** : le son ne quitte jamais ton PC. Seul le **texte** transcrit est envoyé à Claude. Les transcriptions de chaque session sont gardées dans `memoire/sessions/`.
+- **Vie privée** : le son ne quitte jamais ton PC ; seul le **texte** transcrit est envoyé à Claude. Les **captures d'écran** sont envoyées à Claude, mais jamais enregistrées sur le disque. L'outil capture **uniquement la fenêtre du jeu** quand il la trouve (titre contenant « Kingdom Come ») ; sinon, il prend l'écran entier : pense alors à ne pas laisser de fenêtre privée par-dessus. La fenêtre du Souffleur, elle, est invisible aux captures (Windows 10 version 2004 ou plus récent). Les transcriptions de chaque session sont gardées dans `memoire/sessions/`.
+- **Il regarde, il ne joue pas** : l'outil n'envoie jamais de touche ni de clic au jeu. C'est toi qui parles et qui agis.
+- **Couper la vue** : `active = false` dans la section `[vision]` de `config.toml`. Pour garder l'image avec les répliques sans l'observateur continu : `observateur = false`. F10 met aussi l'observateur en pause.
 - **Carte graphique** : la transcription fonctionne au mieux avec une carte NVIDIA. Sans elle, l'outil bascule tout seul sur le processeur, en plus lent.
 
 ## Pour les curieux (structure)
@@ -86,7 +92,8 @@ souffleur/
   audio.py          capture WASAPI (son du PC + micro) et découpe en répliques
   transcription.py  Whisper local (faster-whisper)
   voix.py           reconnaissance approximative de qui parle
-  conseiller.py     appels à Claude : répliques en flux + chronique
+  vision.py         captures de la fenêtre du jeu, observateur continu
+  conseiller.py     appels à Claude : répliques en flux, chronique, description de la scène
   prompts.py        consignes données à Claude
   memoire.py        fil de la conversation, registre des personnes et des faits
   interface.py      fenêtre par-dessus le jeu

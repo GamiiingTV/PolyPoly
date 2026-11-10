@@ -12,7 +12,7 @@ from .config import DONNEES, MEMOIRE
 
 @dataclass
 class Replique:
-    source: str          # "interlocuteur" | "moi" | "note"
+    source: str          # "interlocuteur" | "moi" | "note" | "vue"
     qui: str             # "Voix A", "Kuno le forgeron", "Dalibor"...
     texte: str
     heure: str = field(default_factory=lambda: datetime.now().strftime("%H:%M:%S"))
@@ -20,6 +20,8 @@ class Replique:
     def ligne(self) -> str:
         if self.source == "note":
             return f"[{self.heure}] (Note du joueur : {self.texte})"
+        if self.source == "vue":
+            return f"[{self.heure}] (À l'écran : {self.texte})"
         return f"[{self.heure}] {self.qui} : {self.texte}"
 
 
@@ -39,6 +41,7 @@ class Memoire:
         self.chemin_session = dossier / "sessions" / f"{datetime.now():%Y-%m-%d_%Hh%M}.txt"
         self.fil: list[Replique] = []
         self.situation = ""                 # contexte saisi par le joueur
+        self.scene = ""                     # scène décrite par l'observateur (vision)
         self.personnes: dict[str, Personne] = {}
         self.faits: list[str] = []
         self.resume = ""

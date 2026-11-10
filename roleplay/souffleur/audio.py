@@ -60,6 +60,7 @@ class Segmenteur:
         self._silence = 0
         self._candidat = 0
         self._voisees = 0
+        self.au_debut = None          # rappel facultatif : quelqu'un commence à parler
 
     def _est_parole(self, rms: float) -> bool:
         return rms > max(self.plancher, self.bruit * self.sensibilite)
@@ -89,6 +90,8 @@ class Segmenteur:
                 self._trames = list(self._preroll)
                 self._silence = 0
                 self._voisees = self._candidat
+                if self.au_debut:
+                    self.au_debut()
             return None
 
         self._trames.append(trame)

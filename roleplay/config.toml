@@ -40,6 +40,24 @@ modele = "large-v3-turbo"
 appareil = "cuda"
 precision = "float16"
 
+[vision]
+# Le Souffleur regarde ton écran de jeu, comme s'il était assis à côté de toi.
+# Il ne touche jamais ni au clavier ni à la souris.
+active = true
+# Il cherche la fenêtre dont le titre contient ce texte ; sinon il regarde l'écran n° `ecran`.
+titre_fenetre = "Kingdom Come"
+ecran = 1
+# Taille de l'image envoyée (en pixels) et qualité JPEG : plus petit = plus vif et moins cher.
+largeur_max = 1280
+qualite = 70
+# Joindre l'image du moment où l'on te parle à chaque demande de répliques.
+joindre_aux_repliques = true
+# Observateur : décrit la scène en continu (lieu, heure, personnes, tension).
+# Il ne regarde que si l'image a changé, au plus une fois toutes les `intervalle_s` secondes.
+observateur = true
+intervalle_s = 30
+modele_observateur = "claude-opus-5-5"
+
 [interface]
 nombre_de_choix = 4
 opacite = 0.93

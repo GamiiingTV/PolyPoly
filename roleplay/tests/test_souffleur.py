@@ -79,3 +79,28 @@ def test_memoire(tmp_path):
     m2 = Memoire(tmp_path)
     assert "kuno" in m2.personnes and m2.faits == ["Kuno doit 3 groschen."]
     assert "forgeron de Suchdol" in m2.texte_registre()
+
+
+def test_analyse_ligne_vu():
+    p = analyser("SITUATION: Rixe — un ivrogne s'emporte\nVU: il tient une dague, deux gardes au fond\n1. [Calme] Rengainez, l'ami.")
+    assert p.vu.startswith("il tient une dague") and len(p.choix) == 1
+
+
+def test_image_difference():
+    from souffleur.vision import Image
+    a = Image(b"", np.zeros((27, 48), np.float32), 0)
+    b = Image(b"", np.full((27, 48), 40, np.float32), 0)
+    assert a.difference(None) > 100 and a.difference(a) == 0 and a.difference(b) == 40
+
+
+def test_capture_ecran():
+    import os
+    import pytest
+    if not os.environ.get("DISPLAY") and os.name != "nt":
+        pytest.skip("pas d'écran")
+    pytest.importorskip("mss")
+    from souffleur.config import ConfigVision
+    from souffleur.vision import Oeil
+    img = Oeil(ConfigVision(largeur_max=640), print).capturer()
+    assert img is not None and img.jpeg[:2] == b"\xff\xd8"
+    assert img.bloc()["source"]["media_type"] == "image/jpeg"

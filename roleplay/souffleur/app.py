@@ -9,9 +9,10 @@ import numpy as np
 
 from .audio import Capture, Segmenteur
 from .config import Config
-from .conseiller import Choix, Chroniqueur, Conseiller
+from .conseiller import Choix, Chroniqueur, Conseiller, Regard
 from .interface import Interface
 from .memoire import Memoire, Replique
+from .vision import Observateur, Oeil, masquer_des_captures
 from .voix import RegistreVoix
 
 NOM_JOUEUR = "Dalibor"
@@ -25,8 +26,10 @@ class Souffleur:
         self.ui = Interface(cfg.interface.largeur, cfg.interface.opacite, cfg.interface.nombre_de_choix)
         self.memoire = Memoire()
         self.voix = RegistreVoix()
+        self.oeil: Oeil | None = None
+        self.observateur: Observateur | None = None
         self.conseiller = Conseiller(cfg.claude, self.memoire, cfg.interface.nombre_de_choix,
-                                     self.ui.envoyer)
+                                     self.ui.envoyer, fournir_image=self._image_pour_replique)
         self.chroniqueur = Chroniqueur(cfg.claude, self.memoire, self.journal)
         self.captures: list[Capture] = []
         self.a_transcrire: queue.Queue = queue.Queue()
@@ -44,6 +47,10 @@ class Souffleur:
 
     def demarrer(self) -> None:
         self._touches()
+        if self.cfg.vision.active:
+            if masquer_des_captures(self.ui.racine):
+                self.journal("Vision : la fenêtre du Souffleur est invisible aux captures.")
+            threading.Thread(target=self._preparer_vision, daemon=True).start()
         if self.simulation:
             self.journal("Mode simulation : tape dans le champ ce qu'on te dit, puis Entrée.")
         else:
@@ -65,9 +72,34 @@ class Souffleur:
         sources = [("interlocuteur", a.sortie)] + ([("moi", a.micro)] if a.ecouter_micro else [])
         for source, nom in sources:
             seg = Segmenteur(a.silence_fin_ms, a.duree_min_ms, a.sensibilite)
+            if source == "interlocuteur":
+                seg.au_debut = self._quelquun_parle
             cap = Capture(source, nom, seg, self._segment_recu, self.journal)
             cap.start()
             self.captures.append(cap)
+
+    def _preparer_vision(self) -> None:
+        v = self.cfg.vision
+        try:
+            self.oeil = Oeil(v, self.journal)
+        except ImportError:
+            self.journal("Vision indisponible : modules « mss » et « Pillow » absents.")
+            return
+        self.journal("Vision active : le Souffleur regarde ton écran de jeu.")
+        if v.observateur:
+            regard = Regard(v.modele_observateur, self.memoire, self.ui.envoyer, self.journal)
+            self.observateur = Observateur(self.oeil, regard.decrire, v.intervalle_s)
+            self.observateur.start()
+
+    def _image_pour_replique(self):
+        if self.oeil is None or not self.cfg.vision.joindre_aux_repliques:
+            return None
+        return self.oeil.pour_replique()
+
+    def _quelquun_parle(self) -> None:
+        # On fige l'écran au moment où l'on commence à parler à Dalibor.
+        if self.oeil is not None and self.ecoute:
+            threading.Thread(target=self.oeil.instantane, daemon=True).start()
 
     def _touches(self) -> None:
         try:
@@ -152,6 +184,8 @@ class Souffleur:
         self.ecoute = not self.ecoute
         for c in self.captures:
             (c.actif.set if self.ecoute else c.actif.clear)()
+        if self.observateur:
+            (self.observateur.actif.set if self.ecoute else self.observateur.actif.clear)()
         self.ui.envoyer("ecoute", self.ecoute)
 
     def quitter(self) -> None:
