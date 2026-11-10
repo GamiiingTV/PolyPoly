@@ -1,0 +1,50 @@
+# ============================================================
+#  Le Souffleur — configuration
+#  Modifie ce fichier avec le Bloc-notes, puis relance l'outil.
+# ============================================================
+
+[claude]
+# Modèle qui rédige les répliques.
+# "claude-opus-5-5" : la meilleure qualité de langue et de rigueur historique.
+# "claude-haiku-5-5" : plus rapide et bien moins cher, mais un style moins fin.
+modele = "claude-opus-5-5"
+# Effort de réflexion : "low" (le plus vif), "medium", "high".
+effort = "low"
+# Mode rapide d'Opus 5.5 : réponses jusqu'à 2,5x plus rapides, prix doublé.
+rapide = false
+# Modèle qui tient la chronique (mémoire des personnes et des faits), en arrière-plan.
+modele_chroniqueur = "claude-opus-5-5"
+
+[audio]
+# Ce qu'on te dit : le son de sortie du PC (le chat vocal du jeu).
+# Laisse vide pour la sortie par défaut, ou mets une partie du nom du
+# périphérique (ex. "Casque", "CABLE Input"). Lance  lancer.bat --peripheriques
+# pour voir la liste.
+sortie = ""
+# Écouter aussi ton micro, pour que l'outil sache ce que Dalibor a répondu.
+ecouter_micro = true
+micro = ""
+# Silence (en millisecondes) qui marque la fin d'une réplique.
+# Plus bas = plus vif, mais risque de couper les gens qui hésitent.
+silence_fin_ms = 550
+# Une réplique plus courte que ça est ignorée (toux, bruits).
+duree_min_ms = 400
+# Sensibilité : combien de fois plus fort que le bruit de fond il faut parler.
+# Monte à 4 ou 5 si la musique du jeu déclenche l'écoute.
+sensibilite = 3.0
+
+[transcription]
+# Modèle Whisper local. "large-v3-turbo" est le meilleur choix sur une bonne carte graphique.
+modele = "large-v3-turbo"
+# "cuda" (carte NVIDIA) ou "cpu".
+appareil = "cuda"
+precision = "float16"
+
+[interface]
+nombre_de_choix = 4
+opacite = 0.93
+largeur = 520
+# Touches globales (fonctionnent même quand le jeu a le focus).
+touche_afficher = "f8"
+touche_regenerer = "f9"
+touche_pause = "f10"
