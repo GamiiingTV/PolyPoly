@@ -13,6 +13,7 @@ from .config import MEMOIRE, Config
 from .conseiller import Choix, Chroniqueur, Conseiller, Regard
 from .interface import Interface
 from .memoire import Memoire, Replique
+from .moteurs import creer_moteur
 from .profil import Profil
 from .vision import Observateur, Oeil, masquer_des_captures
 from .voix import RegistreVoix
@@ -31,9 +32,10 @@ class Souffleur:
         self.voix = RegistreVoix()
         self.oeil: Oeil | None = None
         self.observateur: Observateur | None = None
-        self.conseiller = Conseiller(cfg.claude, self.profil, self.memoire, cfg.interface.nombre_de_choix,
+        self.moteur = creer_moteur(cfg, self.journal)
+        self.conseiller = Conseiller(self.moteur, self.profil, self.memoire, cfg.interface.nombre_de_choix,
                                      self.ui.envoyer, fournir_images=self._images_pour_replique)
-        self.chroniqueur = Chroniqueur(cfg.claude, self.profil, self.memoire, self.journal)
+        self.chroniqueur = Chroniqueur(self.moteur, self.profil, self.memoire, self.journal)
         self.captures: list[Capture] = []
         self.a_transcrire: queue.Queue = queue.Queue()
         self.ecoute = True
@@ -50,6 +52,8 @@ class Souffleur:
 
     def demarrer(self) -> None:
         self.journal(f"Personnage : {self.profil.nom_complet} · univers : {self.cfg.jeu.univers}")
+        self.journal("Cerveau : " + ("IA locale, gratuite" if self.cfg.ia.moteur == "local"
+                                     else f"Claude ({self.cfg.claude.modele}), payant"))
         self._touches()
         self.conseiller.prechauffer()
         if self.cfg.vision.active:
@@ -94,7 +98,7 @@ class Souffleur:
         self.oeil.demarrer()
         self.journal(f"Vision continue : {v.images_par_seconde:g} image(s) par seconde, {v.largeur_max} px.")
         if v.observateur:
-            regard = Regard(v.modele_observateur, self.profil, self.memoire, self.ui.envoyer, self.journal)
+            regard = Regard(self.moteur, self.profil, self.memoire, self.ui.envoyer, self.journal)
             self.observateur = Observateur(self.oeil, regard.decrire, v.intervalle_min_s, v.battement_s)
             self.oeil.sur_rupture = self.observateur.maintenant
             self.observateur.start()

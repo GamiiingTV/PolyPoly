@@ -17,6 +17,19 @@ class ConfigJeu:
 
 
 @dataclass
+class ConfigIA:
+    moteur: str = "local"          # "local" (gratuit, Ollama) ou "claude" (payant)
+
+
+@dataclass
+class ConfigLocal:
+    adresse: str = "http://localhost:11434"
+    modele: str = "gemma3:12b"
+    contexte: int = 16384
+    garder_en_memoire: str = "30m"
+
+
+@dataclass
 class ConfigClaude:
     modele: str = "claude-opus-5-5"
     effort: str = "low"
@@ -70,6 +83,8 @@ class ConfigInterface:
 @dataclass
 class Config:
     jeu: ConfigJeu = field(default_factory=ConfigJeu)
+    ia: ConfigIA = field(default_factory=ConfigIA)
+    local: ConfigLocal = field(default_factory=ConfigLocal)
     claude: ConfigClaude = field(default_factory=ConfigClaude)
     audio: ConfigAudio = field(default_factory=ConfigAudio)
     transcription: ConfigTranscription = field(default_factory=ConfigTranscription)
@@ -89,7 +104,10 @@ def charger(chemin: Path | None = None) -> Config:
     if chemin.exists():
         with open(chemin, "rb") as f:
             brut = tomllib.load(f)
-        for section in ("jeu", "claude", "audio", "transcription", "vision", "interface"):
+        for section in ("jeu", "ia", "local", "claude", "audio", "transcription", "vision", "interface"):
             _remplir(getattr(cfg, section), brut.get(section, {}))
     cfg.interface.nombre_de_choix = max(3, min(6, cfg.interface.nombre_de_choix))
+    cfg.ia.moteur = cfg.ia.moteur.strip().lower()
+    if cfg.ia.moteur not in ("local", "claude"):
+        cfg.ia.moteur = "local"
     return cfg

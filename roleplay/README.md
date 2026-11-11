@@ -6,6 +6,21 @@ Fait pour **Dalibor Medved, seigneur de Suchdol**, en **Bohême, 1403** (mod mul
 
 ![Aperçu](docs/apercu.png)
 
+## Gratuit ou payant : à toi de choisir
+
+Le Souffleur a deux « cerveaux » au choix (`moteur` dans `config.toml`) :
+
+| | **IA locale** (par défaut) | **Claude** |
+|---|---|---|
+| Prix | **Gratuit** | Payant à l'usage, quelques euros par soirée |
+| Où ça tourne | Sur ton PC (Ollama), rien ne sort de ta machine | Chez Anthropic (Internet) |
+| Qualité du français d'époque et du jugement | Bonne | Excellente |
+| Ce qu'il faut | Une carte graphique avec assez de mémoire pour le jeu **et** l'IA | Une clé API avec du crédit |
+
+La voix (Whisper) et la capture de l'écran sont **toujours gratuites** et restent sur ton PC.
+
+Pour essayer Claude sans rien changer : `lancer.bat --claude`. Pour revenir au gratuit : `lancer.bat --local`.
+
 ## Comment ça marche
 
 ```
@@ -15,23 +30,27 @@ Ton micro ────────────► (ce que Dalibor répond) ┘  
              ├─► images « début de la phrase » + « maintenant » ───────────────┤
              └─► observateur : lieu, heure, personnes, tension, changements ───┤
                                                                                ▼
-     Fenêtre par-dessus le jeu ◄── 3 à 6 répliques (en flux) ◄── Claude (fiche + guide d'univers + mémoire + images)
+     Fenêtre par-dessus le jeu ◄── 3 à 6 répliques (en flux) ◄── l'IA (fiche + guide d'univers + mémoire + images)
 ```
 
 1. Il écoute **le son qui sort de ton PC**, donc le chat vocal du jeu. Il écoute aussi **ton micro**, pour savoir ce que Dalibor a répondu.
 2. Dès que ton interlocuteur marque **0,3 seconde** de silence, sa phrase est transcrite **sur ton PC** (Whisper, sur la carte graphique) et les répliques sont aussitôt demandées. S'il reprend la parole, la phrase est **complétée** (↳ dans le fil) et les répliques refaites.
-3. Claude propose **4 répliques** de tons différents, adaptées à la scène : marchand, menace, ennemi, clerc, supérieur ou paysan. Les choix apparaissent **un par un**, au fur et à mesure qu'ils sont écrits : tu peux lire le premier pendant que les autres arrivent.
-4. **Il voit ce que tu vois, en continu.** Ton écran de jeu est filmé en permanence (2 images par seconde, en haute définition, gardées environ 30 secondes en mémoire vive et jamais sur le disque). Pour chaque réplique, Claude reçoit **l'écran du moment où l'on a commencé à te parler** et **l'écran actuel** s'il a changé : il voit donc aussi ce qui s'est passé pendant la phrase (quelqu'un qui dégaine, s'approche, s'en va). Il voit qui est en face (rang d'après la mise, arme tirée ou non, nombre de gens, gardes, blasons), où tu es (taverne, route, château…), l'heure, et ton état si l'interface le montre. Il juge alors le ton juste : on ne répond pas pareil à un marchand derrière son étal et à trois hommes armés sur une route au crépuscule. Ce qu'il a remarqué s'affiche sous la ligne « Parle » (👁).
-5. **Un observateur** suit la scène en continu. Il fait décrire l'écran dès qu'il change (au plus toutes les 8 secondes), **tout de suite** si l'image bascule brutalement (nouveau lieu, combat, chargement), et au moins toutes les 45 secondes. Il tient à jour la scène (bande 👁 en haut de la fenêtre), garde la **chronologie** des dernières scènes pour Claude, et note dans le fil les changements importants, par exemple « (À l'écran : trois hommes armés barrent la route) ». Il s'aide aussi des derniers échanges pour reconnaître qui est qui.
+3. L'IA propose **4 répliques** de tons différents, adaptées à la scène : marchand, menace, ennemi, clerc, supérieur ou paysan. Les choix apparaissent **un par un**, au fur et à mesure qu'ils sont écrits : tu peux lire le premier pendant que les autres arrivent.
+4. **Il voit ce que tu vois, en continu.** Ton écran de jeu est filmé en permanence (2 images par seconde, en haute définition, gardées environ 30 secondes en mémoire vive et jamais sur le disque). Pour chaque réplique, l'IA reçoit **l'écran du moment où l'on a commencé à te parler** et **l'écran actuel** s'il a changé : il voit donc aussi ce qui s'est passé pendant la phrase (quelqu'un qui dégaine, s'approche, s'en va). Il voit qui est en face (rang d'après la mise, arme tirée ou non, nombre de gens, gardes, blasons), où tu es (taverne, route, château…), l'heure, et ton état si l'interface le montre. Il juge alors le ton juste : on ne répond pas pareil à un marchand derrière son étal et à trois hommes armés sur une route au crépuscule. Ce qu'il a remarqué s'affiche sous la ligne « Parle » (👁).
+5. **Un observateur** suit la scène en continu. Il fait décrire l'écran dès qu'il change (au plus toutes les 15 secondes), **tout de suite** si l'image bascule brutalement (nouveau lieu, combat, chargement), et au moins toutes les minutes. Il tient à jour la scène (bande 👁 en haut de la fenêtre), garde la **chronologie** des dernières scènes pour l'IA, et note dans le fil les changements importants, par exemple « (À l'écran : trois hommes armés barrent la route) ». Il s'aide aussi des derniers échanges pour reconnaître qui est qui.
 6. Une **chronique** tourne en arrière-plan. Elle retient les personnes rencontrées, les promesses, les dettes et les menaces, et sert de mémoire d'une session à l'autre (fichier `memoire/<personnage>/registre.json`).
-7. **Démarrage à chaud** : dès le lancement, les consignes et les fiches sont préchargées chez Claude (cache). La toute première réplique part ainsi aussi vite que les suivantes. Le délai réel, mesuré depuis la fin de la phrase entendue, s'affiche en haut de la fenêtre.
+7. **Démarrage à chaud** : dès le lancement, les consignes et les fiches sont préchargées (sur la carte graphique avec l'IA locale, dans le cache de Claude sinon). La toute première réplique part ainsi aussi vite que les suivantes. Le délai réel, mesuré depuis la fin de la phrase entendue, s'affiche en haut de la fenêtre.
 
 ## Installation (Windows)
 
 1. Installe **Python 3.12** depuis [python.org](https://www.python.org/downloads/) en cochant **« Add python.exe to PATH »**.
-2. Crée une clé API sur [console.anthropic.com](https://console.anthropic.com) (rubrique *API Keys*) et approvisionne quelques euros de crédit.
-3. Double-clique sur **`lancer.bat`**. La première fois, il installe tout (quelques minutes), puis il ouvre le Bloc-notes sur le fichier `.env` : remplace `sk-ant-...` par ta clé, enregistre, ferme, et relance `lancer.bat`.
-4. Au premier lancement, le modèle de transcription (environ 1,6 Go) se télécharge tout seul.
+2. Double-clique sur **`lancer.bat`**. La première fois, il installe tout tout seul (comptes 10 à 20 minutes selon ta connexion) :
+   - les modules Python ;
+   - **Ollama**, le programme gratuit qui fait tourner l'IA sur ton PC (si Windows refuse, `lancer.bat` ouvre la page [ollama.com/download](https://ollama.com/download) : installe-le, puis relance) ;
+   - le modèle d'IA (`gemma3:12b`, environ 8 Go) et le modèle de transcription (environ 1,6 Go). Leur téléchargement s'affiche dans la fenêtre.
+3. C'est tout : **aucun compte, aucune clé, aucun paiement**.
+
+**Seulement si tu choisis Claude** (`moteur = "claude"`) : crée une clé API sur [console.anthropic.com](https://console.anthropic.com) et achète un peu de crédit. Au lancement, `lancer.bat` ouvre le fichier `.env` : colles-y ta clé à la place de `sk-ant-...`. Tu peux fixer une limite de dépense mensuelle dans la console.
 
 > **Important** : mets le jeu en mode **« Fenêtré sans bordure »** (Borderless), sinon la fenêtre du Souffleur ne peut pas s'afficher par-dessus le jeu en plein écran exclusif.
 
@@ -54,7 +73,7 @@ Le **champ en bas** de la fenêtre sert à guider l'outil :
 
 | Tu écris | Effet |
 |---|---|
-| `! Taverne de Kuttenberg, je cherche un forgeron` | Note la **situation** : Claude en tient compte pour toute la scène |
+| `! Taverne de Kuttenberg, je cherche un forgeron` | Note la **situation** : l'IA en tient compte pour toute la scène |
 | `? plus menaçant` / `? en latin` / `? refuse poliment` | Redemande des répliques **dans un autre sens** |
 | `Voix A = Kuno le forgeron` | Donne un **nom** à une voix reconnue |
 | `moi: Je vous en sais gré, messire.` | Note ce que **Dalibor** a dit (si le micro n'est pas écouté) |
@@ -80,13 +99,14 @@ Par défaut, l'outil écoute **tout** le son du PC : la voix des autres joueurs,
 
 ## Bon à savoir
 
-- **Coût** (estimations, avec Opus et des images en 1920 px) :
+- **Choisir le modèle local** (`[local] modele` dans `config.toml`) : il doit tenir dans la mémoire de ta carte graphique **en plus du jeu**, qui en prend déjà beaucoup. Si le jeu saccade ou si les répliques sont lentes, prends un modèle plus petit (`gemma3:4b`). Avec 24 Go ou plus, essaie `mistral-small3.1` (meilleur français) ou `gemma3:27b`. Avec l'IA locale, l'observateur s'efface quand une réplique est en cours, pour que la carte graphique serve d'abord aux répliques.
+- **Coût avec Claude seulement** (estimations, avec Opus et des images en 1920 px) :
   - chaque série de répliques coûte environ 3 à 4 centimes, une ou deux images comprises ;
   - l'observateur coûte environ 2 centimes par regard, soit entre 1,5 € de l'heure (scène calme : un regard toutes les 45 s) et 9 € de l'heure au pire (scène qui change sans cesse : un regard toutes les 8 s).
 
-  Une soirée animée revient donc à quelques euros de l'heure. Pour réduire la note, dans `[vision]` : `intervalle_min_s = 20`, `largeur_max = 1280` (environ deux fois moins de jetons par image), ou `modele_observateur = "claude-haiku-5-5"` (de très loin le levier le plus fort). La chronique ne s'exécute que toutes les 8 lignes.
-- **Reconnaissance des voix** : elle est approximative. Elle distingue bien des voix différentes, moins bien des voix proches. Nomme les voix (`Voix A = …`) ; Claude devine aussi qui parle d'après le contexte.
-- **Vie privée** : le son ne quitte jamais ton PC ; seul le **texte** transcrit est envoyé à Claude. Le film de l'écran reste **en mémoire vive** sur ton PC ; seules les images choisies (réplique, observateur) sont envoyées à Claude, et rien n'est enregistré sur le disque. L'outil capture **uniquement la fenêtre du jeu** quand il la trouve (titre contenant « Kingdom Come ») ; sinon, il prend l'écran entier : pense alors à ne pas laisser de fenêtre privée par-dessus. La fenêtre du Souffleur, elle, est invisible aux captures (Windows 10 version 2004 ou plus récent). Les transcriptions de chaque session sont gardées dans `memoire/sessions/`.
+  Avec Claude, une soirée animée revient donc à quelques euros de l'heure (avec l'IA locale : rien). Pour réduire la note, dans `[vision]` : `intervalle_min_s = 20`, `largeur_max = 1280` (environ deux fois moins de jetons par image), ou `modele_observateur = "claude-haiku-5-5"` (de très loin le levier le plus fort). La chronique ne s'exécute que toutes les 8 lignes.
+- **Reconnaissance des voix** : elle est approximative. Elle distingue bien des voix différentes, moins bien des voix proches. Nomme les voix (`Voix A = …`) ; l'IA devine aussi qui parle d'après le contexte.
+- **Vie privée** : avec l'IA locale, **rien ne sort de ton PC**. Avec Claude, le son reste sur ton PC, mais le **texte** transcrit et les images choisies (réplique, observateur) sont envoyés à Claude. Dans les deux cas, le film de l'écran reste **en mémoire vive** et rien n'est enregistré sur le disque. L'outil capture **uniquement la fenêtre du jeu** quand il la trouve (titre contenant « Kingdom Come ») ; sinon, il prend l'écran entier : pense alors à ne pas laisser de fenêtre privée par-dessus. La fenêtre du Souffleur, elle, est invisible aux captures (Windows 10 version 2004 ou plus récent). Les transcriptions de chaque session sont gardées dans `memoire/sessions/`.
 - **Il regarde, il ne joue pas** : l'outil n'envoie jamais de touche ni de clic au jeu. C'est toi qui parles et qui agis.
 - **Couper la vue** : `active = false` dans la section `[vision]` de `config.toml`. Pour garder les images avec les répliques sans l'observateur continu : `observateur = false`. F10 met en pause l'écoute, le film et l'observateur.
 - **Carte graphique** : la transcription fonctionne au mieux avec une carte NVIDIA. Sans elle, l'outil bascule tout seul sur le processeur, en plus lent.
@@ -110,8 +130,9 @@ souffleur/
   voix.py           reconnaissance approximative de qui parle
   vision.py         film continu de la fenêtre du jeu, observateur
   profil.py         fiches de personnage et guides d'univers interchangeables
-  conseiller.py     appels à Claude : répliques en flux, chronique, description de la scène
-  prompts.py        consignes données à Claude (gabarits remplis par le profil)
+  moteurs.py        les deux cerveaux : IA locale (Ollama, gratuite) ou Claude (payant)
+  conseiller.py     répliques en flux, chronique, description de la scène
+  prompts.py        consignes données à l'IA (gabarits remplis par le profil)
   memoire.py        fil de la conversation, registre des personnes et des faits
   interface.py      fenêtre par-dessus le jeu
   app.py            assemble le tout

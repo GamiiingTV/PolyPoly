@@ -9,7 +9,29 @@
 personnage = "dalibor"
 univers = "boheme_1403"
 
+[ia]
+# Le « cerveau » qui écrit les répliques et regarde l'écran :
+#   "local"  : GRATUIT. Une IA qui tourne sur ton PC (Ollama). Rien ne sort de ta machine.
+#   "claude" : PAYANT (quelques euros par soirée). Meilleure qualité de langue et de jugement.
+moteur = "local"
+
+[local]
+# Modèle Ollama. Il doit savoir lire les images. Selon la mémoire de ta carte graphique
+# (en laissant de la place au jeu) :
+#   "gemma3:4b"           ~ 4 Go   le plus léger
+#   "gemma3:12b"          ~ 9 Go   bon équilibre (conseillé)
+#   "mistral-small3.1"    ~ 16 Go  meilleur français, carte de 24 Go ou plus
+#   "gemma3:27b"          ~ 18 Go  le plus fin, carte de 24 Go ou plus
+modele = "gemma3:12b"
+adresse = "http://localhost:11434"
+# Taille de la mémoire de travail du modèle (en jetons). Ne descends pas sous 12000 :
+# les consignes et le guide de l'univers n'y tiendraient plus.
+contexte = 16384
+# Combien de temps le modèle reste chargé sur la carte graphique sans servir.
+garder_en_memoire = "30m"
+
 [claude]
+# Utilisé seulement si moteur = "claude" (clé API dans le fichier .env).
 # Modèle qui rédige les répliques.
 # "claude-opus-5-5" : la meilleure qualité de langue et de rigueur historique.
 # "claude-haiku-5-5" : plus rapide et bien moins cher, mais un style moins fin.
@@ -68,8 +90,10 @@ joindre_aux_repliques = true
 # Il regarde dès que l'image change (au plus toutes les `intervalle_min_s` s),
 # tout de suite si elle change brutalement, et au moins toutes les `battement_s` s.
 observateur = true
-intervalle_min_s = 8
-battement_s = 45
+# Avec l'IA locale, chaque regard occupe un peu la carte graphique : 15 s est raisonnable.
+intervalle_min_s = 15
+battement_s = 60
+# Modèle de l'observateur, seulement avec moteur = "claude".
 modele_observateur = "claude-opus-5-5"
 
 [interface]

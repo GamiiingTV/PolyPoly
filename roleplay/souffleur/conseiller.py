@@ -1,4 +1,4 @@
-"""Génération des répliques (en flux) et tenue de la chronique, via l'API Claude."""
+"""Génération des répliques (en flux), tenue de la chronique et description de la scène."""
 from __future__ import annotations
 
 import re
@@ -7,16 +7,13 @@ import time
 from dataclasses import dataclass, field
 from typing import Callable
 
-import anthropic
 from pydantic import BaseModel
 
 from . import prompts
-from .config import ConfigClaude
 from .memoire import Memoire, Personne, Replique
+from .moteurs import ErreurMoteur
 from .profil import Profil
 from .vision import Image
-
-BETA_REPLI = "server-side-fallback-2026-07-01"
 
 _RE_CHOIX = re.compile(r"^\s*(\d+)\s*[.)\-:]\s*(?:\[([^\]]+)\]\s*)?(.+?)\s*$")
 
@@ -62,26 +59,19 @@ def analyser(texte: str) -> Proposition:
     return prop
 
 
-def _avec_repli(modele: str) -> bool:
-    # Pas de repli côté serveur pour Haiku.
-    return not modele.startswith("claude-haiku")
-
-
 class Conseiller:
     """Lance une génération à la fois ; une nouvelle demande annule la précédente."""
 
-    def __init__(self, cfg: ConfigClaude, profil: Profil, memoire: Memoire, nombre: int,
+    def __init__(self, moteur, profil: Profil, memoire: Memoire, nombre: int,
                  evenement: Callable[[str, object], None],
                  fournir_images: Callable[[], list[tuple[str, Image]]] | None = None):
-        self.cfg = cfg
+        self.moteur = moteur
         self.profil = profil
         self.fournir_images = fournir_images
         self.memoire = memoire
         self.nombre = nombre
         self.evenement = evenement   # (type, donnée) -> interface
-        self.client = anthropic.Anthropic(max_retries=1)
-        self.systeme = [{"type": "text", "text": prompts.systeme_souffleur(profil),
-                         "cache_control": {"type": "ephemeral", "ttl": "1h"}}]
+        self.systeme = prompts.systeme_souffleur(profil)
         self._generation = 0
         self._verrou = threading.Lock()
 
@@ -100,19 +90,10 @@ class Conseiller:
         return gen == self._generation
 
     def prechauffer(self) -> None:
-        """Charge les consignes dans le cache de Claude avant la première réplique :
-        la première vraie demande part ainsi aussi vite que les suivantes."""
-        def _chauffer():
-            try:
-                extra = {"speed": "fast"} if self.cfg.rapide and self.cfg.modele == "claude-opus-5-5" else {}
-                self.client.messages.create(
-                    model=self.cfg.modele, max_tokens=0, system=self.systeme,
-                    messages=[{"role": "user", "content": "Prêt."}], **extra)
-            except anthropic.APIError:
-                pass   # sans gravité : la première réplique remplira le cache
-        threading.Thread(target=_chauffer, daemon=True).start()
+        """La première vraie demande part ainsi aussi vite que les suivantes."""
+        self.moteur.prechauffer(self.systeme)
 
-    def _requete(self, consigne: str) -> dict:
+    def _contenu(self, consigne: str) -> list[dict]:
         images = self.fournir_images() if self.fournir_images else []
         contenu: list[dict] = []
         legendes = []
@@ -125,19 +106,7 @@ class Conseiller:
             self.memoire.texte_scenes(), self.memoire.texte_fil(40), self.nombre, consigne, legendes,
         )
         contenu.append({"type": "text", "text": demande})
-        params = dict(
-            model=self.cfg.modele,
-            max_tokens=4000,
-            system=self.systeme,
-            messages=[{"role": "user", "content": contenu}],
-            output_config={"effort": self.cfg.effort},
-        )
-        if self.cfg.rapide and self.cfg.modele == "claude-opus-5-5":
-            params["speed"] = "fast"
-        if _avec_repli(self.cfg.modele):
-            params["betas"] = [BETA_REPLI]
-            params["fallbacks"] = "default"
-        return params
+        return contenu
 
     def _generer(self, gen: int, consigne: str, depuis: float | None = None) -> None:
         debut = depuis or time.monotonic()
@@ -145,35 +114,33 @@ class Conseiller:
         prop = Proposition()
         tampon = ""
         premier = None
+        flux = None
         try:
-            with self.client.beta.messages.stream(**self._requete(consigne)) as flux:
-                for morceau in flux.text_stream:
-                    if not self._a_jour(gen):
-                        return                      # une demande plus récente a pris le relais
-                    tampon += morceau
-                    while "\n" in tampon:
-                        ligne, tampon = tampon.split("\n", 1)
-                        if analyser_ligne(ligne, prop):
-                            if premier is None and prop.choix:
-                                premier = time.monotonic() - debut
-                            self.evenement("partiel", prop)
-                if tampon and self._a_jour(gen):
-                    analyser_ligne(tampon, prop)
-                final = flux.get_final_message()
+            flux = self.moteur.flux(self.systeme, self._contenu(consigne))
+            for morceau in flux:
+                if not self._a_jour(gen):
+                    return                      # une demande plus récente a pris le relais
+                tampon += morceau
+                while "\n" in tampon:
+                    ligne, tampon = tampon.split("\n", 1)
+                    if analyser_ligne(ligne, prop):
+                        if premier is None and prop.choix:
+                            premier = time.monotonic() - debut
+                        self.evenement("partiel", prop)
             if not self._a_jour(gen):
                 return
-            if final.stop_reason == "refusal":
-                self.evenement("erreur", "Claude a refusé de proposer une réplique pour cette scène.")
+            if tampon:
+                analyser_ligne(tampon, prop)
+            if not prop.choix:
+                self.evenement("erreur", "Réponse illisible, réessaie (F9).")
                 return
             self.evenement("fini", (prop, premier, time.monotonic() - debut))
-        except anthropic.AuthenticationError:
-            self.evenement("erreur", "Clé API Anthropic invalide ou absente (voir le README).")
-        except anthropic.RateLimitError:
-            self.evenement("erreur", "Trop de demandes d'affilée, réessaie dans un instant (F9).")
-        except anthropic.APIConnectionError:
-            self.evenement("erreur", "Pas de connexion à l'API Claude.")
-        except anthropic.APIStatusError as e:
-            self.evenement("erreur", f"Erreur de l'API Claude ({e.status_code}) : {e.message}")
+        except ErreurMoteur as e:
+            if self._a_jour(gen):
+                self.evenement("erreur", str(e))
+        finally:
+            if flux is not None:
+                flux.close()              # coupe la génération si elle n'est plus utile
 
 
 # ----------------------------------------------------------------------
@@ -194,14 +161,13 @@ class MiseAJour(BaseModel):
 
 
 class Chroniqueur:
-    def __init__(self, cfg: ConfigClaude, profil: Profil, memoire: Memoire,
+    def __init__(self, moteur, profil: Profil, memoire: Memoire,
                  journal: Callable[[str], None], tous_les: int = 8):
-        self.cfg = cfg
+        self.moteur = moteur
         self.systeme = prompts.systeme_chroniqueur(profil)
         self.memoire = memoire
         self.journal = journal
         self.tous_les = tous_les
-        self.client = anthropic.Anthropic(max_retries=2)
         self._index = 0
         self._en_cours = threading.Lock()
 
@@ -226,23 +192,15 @@ class Chroniqueur:
                 f"=== MÉMOIRE ACTUELLE ===\n{self.memoire.texte_registre()}\n\n"
                 f"=== NOUVELLES LIGNES ===\n{nouveau}"
             )
-            params = dict(
-                model=self.cfg.modele_chroniqueur,
-                max_tokens=8000,
-                system=self.systeme,
-                messages=[{"role": "user", "content": contenu}],
-                output_format=MiseAJour,
-                output_config={"effort": "low"},
-            )
-            reponse = self.client.messages.parse(**params)
-            maj = reponse.parsed_output
-            if reponse.stop_reason == "refusal" or maj is None:
+            maj = self.moteur.structure("chronique", self.systeme,
+                                        [{"type": "text", "text": contenu}], MiseAJour)
+            if maj is None:
                 return
             self.memoire.fusionner(
                 [Personne(**p.model_dump()) for p in maj.personnes], maj.faits_nouveaux, maj.resume)
             self._index = fin
             self.journal(f"Chronique mise à jour ({len(self.memoire.personnes)} personnes connues).")
-        except anthropic.APIError as e:
+        except ErreurMoteur as e:
             self.journal(f"Chronique non mise à jour : {e}")
         finally:
             self._en_cours.release()
@@ -264,38 +222,29 @@ class SceneVue(BaseModel):
 
 
 class Regard:
-    def __init__(self, modele: str, profil: Profil, memoire: Memoire,
+    def __init__(self, moteur, profil: Profil, memoire: Memoire,
                  evenement: Callable[[str, object], None], journal: Callable[[str], None]):
-        self.modele = modele
+        self.moteur = moteur
         self.profil = profil
         self.systeme = prompts.systeme_observateur(profil)
         self.memoire = memoire
         self.evenement = evenement
         self.journal = journal
-        self.client = anthropic.Anthropic(max_retries=1)
 
     def decrire(self, image: Image) -> None:
         precedente = self.memoire.scene or "(aucune)"
         try:
-            reponse = self.client.messages.parse(
-                model=self.modele,
-                max_tokens=4000,
-                system=self.systeme,
-                messages=[{"role": "user", "content": [
-                    image.bloc(),
-                    {"type": "text", "text": (
-                        f"Description précédente : {precedente}\n\n"
-                        f"Derniers échanges entendus (pour reconnaître qui est qui) :\n"
-                        f"{self.memoire.texte_fil(6)}\n\nDécris la scène actuelle.")},
-                ]}],
-                output_format=SceneVue,
-                output_config={"effort": "low"},
-            )
-        except anthropic.APIError as e:
+            s = self.moteur.structure("regard", self.systeme, [
+                image.bloc(),
+                {"type": "text", "text": (
+                    f"Description précédente : {precedente}\n\n"
+                    f"Derniers échanges entendus (pour reconnaître qui est qui) :\n"
+                    f"{self.memoire.texte_fil(6)}\n\nDécris la scène actuelle.")},
+            ], SceneVue)
+        except ErreurMoteur as e:
             self.journal(f"Vision : observation impossible ({e}).")
             return
-        s = reponse.parsed_output
-        if reponse.stop_reason == "refusal" or s is None:
+        if s is None:
             return
         morceaux = [s.lieu, s.moment]
         if s.personnes:
