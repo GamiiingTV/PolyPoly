@@ -119,3 +119,13 @@ def test_conseiller_avec_moteur_local(serveur):
     assert ev[-1][0] == "fini"
     prop = ev[-1][1][0]
     assert prop.situation.startswith("Taverne") and [ch.ton for ch in prop.choix] == ["Calme", "Ferme"]
+
+
+def test_choix_automatique_du_modele():
+    from souffleur.moteurs import choisir_modele
+    assert choisir_modele(32, 9) == "mistral-small3.1"     # RTX 5090
+    assert choisir_modele(24, 9) == "gemma3:12b"           # RTX 4090 / 3090
+    assert choisir_modele(16, 9) == "gemma3:4b"            # RTX 4080 / 4070 Ti Super
+    assert choisir_modele(8, 9) == "gemma3:4b"
+    assert choisir_modele(None, 9) == "gemma3:12b"
+    assert choisir_modele(24, 4) == "mistral-small3.1"     # jeu en qualité réduite

@@ -16,13 +16,17 @@ univers = "boheme_1403"
 moteur = "local"
 
 [local]
-# Modèle Ollama. Il doit savoir lire les images. Selon la mémoire de ta carte graphique
-# (en laissant de la place au jeu) :
+# Modèle Ollama (il doit savoir lire les images).
+# "auto" : le Souffleur mesure la mémoire de ta carte graphique et prend le meilleur
+# modèle qui tient À CÔTÉ du jeu et de la transcription. Sinon, choisis toi-même :
 #   "gemma3:4b"           ~ 4 Go   le plus léger
-#   "gemma3:12b"          ~ 9 Go   bon équilibre (conseillé)
-#   "mistral-small3.1"    ~ 16 Go  meilleur français, carte de 24 Go ou plus
-#   "gemma3:27b"          ~ 18 Go  le plus fin, carte de 24 Go ou plus
-modele = "gemma3:12b"
+#   "gemma3:12b"          ~ 9 Go   bon équilibre
+#   "mistral-small3.1"    ~ 16 Go  meilleur français
+#   "gemma3:27b"          ~ 18 Go  le plus fin
+modele = "auto"
+# Mémoire de la carte graphique (Go) laissée au jeu en mode "auto".
+# Baisse-la si tu joues en qualité moyenne, monte-la si le jeu saccade.
+reserve_jeu_go = 9
 adresse = "http://localhost:11434"
 # Taille de la mémoire de travail du modèle (en jetons). Ne descends pas sous 12000 :
 # les consignes et le guide de l'univers n'y tiendraient plus.

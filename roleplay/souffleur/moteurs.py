@@ -31,12 +31,48 @@ class ErreurMoteur(Exception):
 # Moteur local (Ollama) — gratuit
 # ======================================================================
 
+# Modèles capables de lire les images, du meilleur au plus léger, avec la mémoire
+# de carte graphique (Go) qu'ils occupent, contexte compris.
+CATALOGUE = [("mistral-small3.1", 17.0), ("gemma3:12b", 10.0), ("gemma3:4b", 5.0)]
+MEMOIRE_TRANSCRIPTION_GO = 2.0
+
+
+def memoire_carte_go() -> float | None:
+    """Mémoire totale de la carte graphique NVIDIA, en Go (None si inconnue)."""
+    import shutil
+    import subprocess
+    if not shutil.which("nvidia-smi"):
+        return None
+    try:
+        sortie = subprocess.run(
+            ["nvidia-smi", "--query-gpu=memory.total", "--format=csv,noheader,nounits"],
+            capture_output=True, text=True, timeout=10).stdout
+        return max(float(l) for l in sortie.split() if l.strip()) / 1024
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return None
+
+
+def choisir_modele(memoire_go: float | None, reserve_jeu_go: float) -> str:
+    if memoire_go is None:
+        return "gemma3:12b"
+    disponible = memoire_go - reserve_jeu_go - MEMOIRE_TRANSCRIPTION_GO
+    for modele, besoin in CATALOGUE:
+        if disponible >= besoin:
+            return modele
+    return CATALOGUE[-1][0]
+
+
 class MoteurLocal:
     nom = "IA locale"
 
     def __init__(self, cfg: ConfigLocal, journal: Callable[[str], None]):
         self.cfg = cfg
         self.journal = journal
+        if cfg.modele.strip().lower() == "auto":
+            memoire = memoire_carte_go()
+            cfg.modele = choisir_modele(memoire, cfg.reserve_jeu_go)
+            quoi = f"carte graphique de {memoire:.0f} Go" if memoire else "carte graphique non détectée"
+            journal(f"IA locale : {quoi}, {cfg.reserve_jeu_go:g} Go laissés au jeu → modèle « {cfg.modele} ».")
         self.adresse = cfg.adresse.rstrip("/")
         self._repliques_en_cours = 0
         self._verrou = threading.Lock()

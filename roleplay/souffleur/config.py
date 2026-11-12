@@ -24,7 +24,8 @@ class ConfigIA:
 @dataclass
 class ConfigLocal:
     adresse: str = "http://localhost:11434"
-    modele: str = "gemma3:12b"
+    modele: str = "auto"
+    reserve_jeu_go: float = 9.0
     contexte: int = 16384
     garder_en_memoire: str = "30m"
 

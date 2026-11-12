@@ -47,7 +47,7 @@ Ton micro ────────────► (ce que Dalibor répond) ┘  
 2. Double-clique sur **`lancer.bat`**. La première fois, il installe tout tout seul (comptes 10 à 20 minutes selon ta connexion) :
    - les modules Python ;
    - **Ollama**, le programme gratuit qui fait tourner l'IA sur ton PC (si Windows refuse, `lancer.bat` ouvre la page [ollama.com/download](https://ollama.com/download) : installe-le, puis relance) ;
-   - le modèle d'IA (`gemma3:12b`, environ 8 Go) et le modèle de transcription (environ 1,6 Go). Leur téléchargement s'affiche dans la fenêtre.
+   - le modèle d'IA, **choisi automatiquement** selon la mémoire de ta carte graphique (de 3 à 15 Go à télécharger), et le modèle de transcription (environ 1,6 Go). Leur téléchargement s'affiche dans la fenêtre.
 3. C'est tout : **aucun compte, aucune clé, aucun paiement**.
 
 **Seulement si tu choisis Claude** (`moteur = "claude"`) : crée une clé API sur [console.anthropic.com](https://console.anthropic.com) et achète un peu de crédit. Au lancement, `lancer.bat` ouvre le fichier `.env` : colles-y ta clé à la place de `sk-ant-...`. Tu peux fixer une limite de dépense mensuelle dans la console.
@@ -99,7 +99,7 @@ Par défaut, l'outil écoute **tout** le son du PC : la voix des autres joueurs,
 
 ## Bon à savoir
 
-- **Choisir le modèle local** (`[local] modele` dans `config.toml`) : il doit tenir dans la mémoire de ta carte graphique **en plus du jeu**, qui en prend déjà beaucoup. Si le jeu saccade ou si les répliques sont lentes, prends un modèle plus petit (`gemma3:4b`). Avec 24 Go ou plus, essaie `mistral-small3.1` (meilleur français) ou `gemma3:27b`. Avec l'IA locale, l'observateur s'efface quand une réplique est en cours, pour que la carte graphique serve d'abord aux répliques.
+- **Choisir le modèle local** (`[local] modele` dans `config.toml`) : par défaut (`"auto"`), le Souffleur mesure ta carte graphique NVIDIA, laisse 9 Go au jeu (`reserve_jeu_go`) et 2 Go à la transcription, puis prend le meilleur modèle qui tient dans le reste. Le choix s'affiche au démarrage. Si le jeu saccade, monte `reserve_jeu_go` ; si tu joues en qualité moyenne, baisse-la pour avoir un modèle plus fin. Tu peux aussi imposer un modèle (`gemma3:4b`, `gemma3:12b`, `mistral-small3.1`, `gemma3:27b`). Avec l'IA locale, l'observateur s'efface quand une réplique est en cours, pour que la carte graphique serve d'abord aux répliques.
 - **Coût avec Claude seulement** (estimations, avec Opus et des images en 1920 px) :
   - chaque série de répliques coûte environ 3 à 4 centimes, une ou deux images comprises ;
   - l'observateur coûte environ 2 centimes par regard, soit entre 1,5 € de l'heure (scène calme : un regard toutes les 45 s) et 9 € de l'heure au pire (scène qui change sans cesse : un regard toutes les 8 s).
